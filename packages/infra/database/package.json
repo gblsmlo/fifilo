@@ -17,6 +17,7 @@
   "exports": {
     ".": "./src/index.ts",
     "./client": "./src/client.ts",
+    "./postgres-errors": "./src/postgres-errors.ts",
     "./schemas/users": "./src/schemas/users.ts",
     "./schema": "./src/schema.ts",
     "./tenant-policy": "./src/tenant-policy.ts",

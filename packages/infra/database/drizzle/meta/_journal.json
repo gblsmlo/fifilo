@@ -15,6 +15,20 @@
       "when": 1788684241460,
       "tag": "0001_overjoyed_the_watchers",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1788687687726,
+      "tag": "0002_skinny_enchantress",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1788688745741,
+      "tag": "0003_dapper_ultimo",
+      "breakpoints": true
     }
   ]
 }

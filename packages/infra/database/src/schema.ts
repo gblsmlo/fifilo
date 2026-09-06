@@ -1,4 +1,4 @@
-import { relations, sql } from 'drizzle-orm'
+import { desc, relations, sql } from 'drizzle-orm'
 import {
   bigint,
   boolean,
@@ -178,6 +178,29 @@ export const notificationOutbox = pgTable(
 )
 
 /**
+ * Backs `apps/api/src/libs/idempotency.ts` (operation.md § `idempotency_key`
+ * on commands). `(organization_id, key)` is the primary key itself, not a
+ * separate unique index on a surrogate id: it is the only way this table is
+ * ever looked up. Retention is 90 days (security.md); nothing prunes it yet.
+ */
+export const idempotencyRecords = pgTable(
+  'idempotency_records',
+  {
+    organizationId: text('organization_id')
+      .notNull()
+      .references(() => organizations.id, { onDelete: 'cascade' }),
+    key: text('key').notNull(),
+    requestHash: text('request_hash').notNull(),
+    responseBody: jsonb('response_body').$type<unknown>(),
+    status: text('status').notNull().default('pending'),
+    expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [primaryKey({ columns: [table.organizationId, table.key] })],
+)
+
+/**
  * The first tenant-owned table (Fase 01). Composite primary key and every
  * foreign key between tenant tables carry `organization_id` (Decision 019):
  * referential-integrity checks bypass row security, so a simple key would
@@ -218,12 +241,92 @@ export const financialAccounts = pgTable(
 )
 
 /**
- * The perna (leg) of any money movement (Fase 01 § Modelagem). No
- * `to_account_id` on a `transactions` row: a transfer is a pair of entries
- * summing to zero, a balance is `sum(amount_minor)` with no special case, and
- * a card statement is a query over entries, not a second model. `transaction_id`
- * has no foreign key yet - `transactions` is Fase 02's table; the column
- * exists now so this table needs no shape migration when it arrives.
+ * One level of subcategory, kind fixed and inherited by any child (Decision
+ * 022). `parent_id` self-references composite; MATCH SIMPLE (Postgres'
+ * default) skips the check when `parent_id` is null, which is every
+ * top-level category.
+ */
+export const categories = pgTable(
+  'categories',
+  {
+    organizationId: text('organization_id')
+      .notNull()
+      .references(() => organizations.id, { onDelete: 'cascade' }),
+    id: text('id').notNull(),
+    parentId: text('parent_id'),
+    kind: text('kind').notNull(),
+    name: text('name').notNull(),
+    color: text('color'),
+    icon: text('icon'),
+    archivedAt: timestamp('archived_at', { withTimezone: true }),
+    version: integer('version').notNull().default(1),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.organizationId, table.id] }),
+    foreignKey({
+      columns: [table.organizationId, table.parentId],
+      foreignColumns: [table.organizationId, table.id],
+    }),
+    // Name collides only within the same parent and kind (Decision 022):
+    // `coalesce` folds the top level to '' so there is no null to special-case.
+    uniqueIndex('categories_org_parent_kind_name_unique')
+      .on(
+        table.organizationId,
+        sql`coalesce(${table.parentId}, '')`,
+        table.kind,
+        sql`lower(${table.name})`,
+      )
+      .where(sql`${table.archivedAt} is null`),
+  ],
+)
+
+/**
+ * Groups the entries of one money movement (Decision 021); it never holds
+ * the amount itself. `category_id` is null for a transfer (Decision 023).
+ */
+export const transactions = pgTable(
+  'transactions',
+  {
+    organizationId: text('organization_id')
+      .notNull()
+      .references(() => organizations.id, { onDelete: 'cascade' }),
+    id: text('id').notNull(),
+    kind: text('kind').notNull(),
+    description: text('description').notNull(),
+    notes: text('notes'),
+    occurredOn: date('occurred_on').notNull(),
+    categoryId: text('category_id'),
+    createdBy: text('created_by')
+      .notNull()
+      .references(() => users.id),
+    version: integer('version').notNull().default(1),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.organizationId, table.id] }),
+    foreignKey({
+      columns: [table.organizationId, table.categoryId],
+      foreignColumns: [categories.organizationId, categories.id],
+    }),
+    index('transactions_org_occurred_idx').on(table.organizationId, desc(table.occurredOn)),
+    index('transactions_org_category_occurred_idx').on(
+      table.organizationId,
+      table.categoryId,
+      table.occurredOn,
+    ),
+  ],
+)
+
+/**
+ * The perna (leg) of any money movement (Decision 021). No `to_account_id`
+ * on a `transactions` row: a transfer is a pair of entries summing to zero, a
+ * balance is `sum(amount_minor)` with no special case, and a card statement
+ * is a query over entries, not a second model. `transaction_id` had no
+ * foreign key in Fase 01, since `transactions` did not exist yet; Fase 02
+ * adds it as an expand step (operation.md).
  */
 export const entries = pgTable(
   'entries',
@@ -245,6 +348,12 @@ export const entries = pgTable(
       columns: [table.organizationId, table.accountId],
       foreignColumns: [financialAccounts.organizationId, financialAccounts.id],
     }),
+    // Added in Fase 02: entries.transaction_id had no FK yet in Fase 01,
+    // because `transactions` did not exist (an expand step, operation.md).
+    foreignKey({
+      columns: [table.organizationId, table.transactionId],
+      foreignColumns: [transactions.organizationId, transactions.id],
+    }),
     index('entries_org_account_occurred_idx').on(
       table.organizationId,
       table.accountId,
@@ -262,6 +371,28 @@ export const entriesRelations = relations(entries, ({ one }) => ({
     fields: [entries.organizationId, entries.accountId],
     references: [financialAccounts.organizationId, financialAccounts.id],
   }),
+  transaction: one(transactions, {
+    fields: [entries.organizationId, entries.transactionId],
+    references: [transactions.organizationId, transactions.id],
+  }),
+}))
+
+export const categoriesRelations = relations(categories, ({ many, one }) => ({
+  children: many(categories, { relationName: 'category_parent' }),
+  parent: one(categories, {
+    fields: [categories.organizationId, categories.parentId],
+    references: [categories.organizationId, categories.id],
+    relationName: 'category_parent',
+  }),
+  transactions: many(transactions),
+}))
+
+export const transactionsRelations = relations(transactions, ({ many, one }) => ({
+  category: one(categories, {
+    fields: [transactions.organizationId, transactions.categoryId],
+    references: [categories.organizationId, categories.id],
+  }),
+  entries: many(entries),
 }))
 
 export const usersRelations = relations(users, ({ many }) => ({
@@ -291,7 +422,10 @@ export const authSchema = {
 
 export const databaseSchema = {
   ...authSchema,
+  categories,
   entries,
   financialAccounts,
+  idempotencyRecords,
   notificationOutbox,
+  transactions,
 }

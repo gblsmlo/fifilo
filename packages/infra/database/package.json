@@ -3,6 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "db:bootstrap-roles": "bun --env-file=../../../.env src/bootstrap-roles.ts",
     "db:generate": "bun --env-file=../../../.env drizzle-kit generate --config drizzle.config.ts",
     "db:migrate": "bun --env-file=../../../.env drizzle-kit migrate --config drizzle.config.ts",
     "db:push": "bun --env-file=../../../.env drizzle-kit push --config drizzle.config.ts",
@@ -10,6 +11,7 @@
     "db:studio": "bun --env-file=../../../.env drizzle-kit studio --config drizzle.config.ts --host 0.0.0.0",
     "dev": "docker compose up -d --wait postgres",
     "dev:db:down": "docker compose stop postgres",
+    "test": "bun test --env-file=../../../.env",
     "typecheck": "tsc -p tsconfig.json"
   },
   "exports": {
@@ -17,6 +19,7 @@
     "./client": "./src/client.ts",
     "./schemas/users": "./src/schemas/users.ts",
     "./schema": "./src/schema.ts",
+    "./tenant-policy": "./src/tenant-policy.ts",
     "./workspace": "./src/workspace.ts"
   },
   "dependencies": {

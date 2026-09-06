@@ -117,6 +117,7 @@ cp .env.example .env
 bun install
 
 docker compose up -d --wait postgres
+bun run db:bootstrap-roles
 bun run db:migrate
 bun run db:seed
 bun run dev
@@ -154,6 +155,7 @@ through `VITE_*`.
 | `bun run dev` | Start development workspaces |
 | `bun run dev:web`, `bun run dev:api` | Start one application |
 | `bun run storybook` | Start Storybook |
+| `bun run db:bootstrap-roles` | Create the non-superuser role the app runs as |
 | `bun run db:generate` | Generate a Drizzle migration |
 | `bun run db:migrate` | Apply pending migrations |
 | `bun run db:seed` | Create local development data |

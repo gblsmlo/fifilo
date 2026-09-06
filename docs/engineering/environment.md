@@ -35,13 +35,14 @@ environment.
 | Variable | Read by | Purpose |
 | --- | --- | --- |
 | `NODE_ENV` | server | `development`, `test` or `production` |
-| `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD` | Compose | credentials the `postgres` service initializes its data directory with; must match the ones inside `DATABASE_URL` |
+| `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD` | Compose | credentials the `postgres` service initializes its data directory with; `POSTGRES_USER` owns the schema and is always a superuser in the official image |
+| `POSTGRES_APP_USER`, `POSTGRES_APP_PASSWORD` | migration | the non-superuser role `bun run db:bootstrap-roles` creates and `DATABASE_URL` connects as (Decision 020) |
 | `API_PORT` | server, web-server | where the API listens; the web SSR process reaches it there |
 | `API_BASE_URL` | web-server | optional origin of the API when it is not on `127.0.0.1:API_PORT`, such as inside Compose |
 | `APP_NAME` | server | server-side product name |
 | `APP_URL` | server | public origin of the web application |
-| `DATABASE_URL` | server | application connection |
-| `DATABASE_MIGRATION_URL` | migration | migration connection; a dedicated credential in deployed environments |
+| `DATABASE_URL` | server | application connection, on `POSTGRES_APP_USER` — never `POSTGRES_USER` |
+| `DATABASE_MIGRATION_URL` | migration | migration connection, on `POSTGRES_USER`; a dedicated credential in deployed environments |
 | `DATABASE_POOL_MAX` | server | connections per process |
 | `BETTER_AUTH_SECRET` | server | at least 32 characters |
 | `BETTER_AUTH_URL` | server | public origin the auth server signs against |
@@ -72,6 +73,13 @@ so no backend URL is published in the bundle; the browser calls `/api`.
 - The `postgres` service reads the same `POSTGRES_*` variables the connection
   URLs are built from. They apply only when the data volume is created, so a
   credential change after the first start needs `docker compose down -v`.
+- `bun run db:bootstrap-roles` runs once per database, right after
+  `docker compose up -d --wait postgres` and before the first `db:migrate`: it
+  is idempotent, safe to run again after a password rotation. Skipping it does
+  not fail loudly — every query keeps working, because `POSTGRES_USER` is a
+  superuser and every `FORCE ROW LEVEL SECURITY` policy stays inert for it
+  (Decision 020). CI runs it as its own step, before `db:migrate`, in every job
+  that touches the database.
 
 ## Reusable schema pieces
 

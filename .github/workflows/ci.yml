@@ -65,6 +65,9 @@ jobs:
       - name: Write Environment File
         run: sh scripts/ci-env.sh
 
+      - name: Bootstrap Database Roles
+        run: bun run db:bootstrap-roles
+
       - name: Migrate Database
         run: bun run db:migrate
 
@@ -172,6 +175,9 @@ jobs:
 
       - name: Write Environment File
         run: sh scripts/ci-env.sh
+
+      - name: Bootstrap Database Roles
+        run: bun run db:bootstrap-roles
 
       - name: Migrate Database
         run: bun run db:migrate

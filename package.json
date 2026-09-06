@@ -23,6 +23,7 @@
     "build:api": "bun --filter @fifilo/api build",
     "build:web": "bun --filter @fifilo/web build",
     "commit": "cz",
+    "db:bootstrap-roles": "bun --filter @fifilo/infra-database db:bootstrap-roles",
     "db:generate": "bun --filter @fifilo/infra-database db:generate",
     "db:migrate": "bun --filter @fifilo/infra-database db:migrate",
     "db:push": "bun --filter @fifilo/infra-database db:push",

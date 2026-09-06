@@ -39,6 +39,10 @@ the successor exists; the successor adds its own row here.
 | 014 | [the id is an opaque string](014-id-is-an-opaque-string.md) | active |
 | 015 | [documentation is addressed by index; superseded decisions move to `archive/`](015-docs-addressed-by-index.md) | active |
 | 016 | [a parent issue exists only when there are two or more independent deliveries](016-decomposition-gate.md) | active |
+| 017 | [money is an integer in minor units](017-money-is-an-integer-in-minor-units.md) | active |
+| 018 | [the financial fact is a civil date](018-the-financial-fact-is-a-civil-date.md) | active |
+| 019 | [the composite key `(organization_id, id)` is the tenant proof](019-composite-key-is-the-tenant-proof.md) | active |
+| 020 | [row-level security with `FORCE`, and five negative proofs before exposure](020-row-level-security-with-force.md) | active |
 
 ## Historical
 

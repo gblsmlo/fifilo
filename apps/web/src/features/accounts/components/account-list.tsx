@@ -6,9 +6,8 @@ import { StateSurface } from '@fifilo/patterns/state-surface'
 import { Badge } from '@fifilo/ui/components/badge'
 import { Button } from '@fifilo/ui/components/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@fifilo/ui/components/card'
+import { formatMoney } from '@libs/format-money'
 import { useState } from 'react'
-
-import { formatMoney } from '../format-money'
 
 type AccountBalance = { amountMinor: number; currency: CurrencyCode }
 

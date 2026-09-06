@@ -1,10 +1,9 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@fifilo/ui/components/card'
 import { Spinner } from '@fifilo/ui/components/spinner'
+import { formatMoney } from '@libs/format-money'
 import { useQuery } from '@tanstack/react-query'
-
 import { AccountList } from '../components/account-list'
 import { AccountForm } from '../components/forms/account-form'
-import { formatMoney } from '../format-money'
 import { useArchiveAccount } from '../hooks/use-archive-account'
 import { AccountRequestError } from '../http/errors'
 import { accountBalancesQueryOptions, accountsQueryOptions } from '../query-options'

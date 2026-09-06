@@ -24,13 +24,13 @@ jobs:
       postgres:
         image: postgres:17
         env:
-          POSTGRES_DB: twincam
-          POSTGRES_USER: twincam
-          POSTGRES_PASSWORD: twincam
+          POSTGRES_DB: fifilo
+          POSTGRES_USER: fifilo
+          POSTGRES_PASSWORD: fifilo
         ports:
           - 5432:5432
         options: >-
-          --health-cmd "pg_isready -U twincam -d twincam"
+          --health-cmd "pg_isready -U fifilo -d fifilo"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
@@ -141,13 +141,13 @@ jobs:
       postgres:
         image: postgres:17
         env:
-          POSTGRES_DB: twincam
-          POSTGRES_USER: twincam
-          POSTGRES_PASSWORD: twincam
+          POSTGRES_DB: fifilo
+          POSTGRES_USER: fifilo
+          POSTGRES_PASSWORD: fifilo
         ports:
           - 5432:5432
         options: >-
-          --health-cmd "pg_isready -U twincam -d twincam"
+          --health-cmd "pg_isready -U fifilo -d fifilo"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5

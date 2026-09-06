@@ -1,4 +1,4 @@
-import { migrationEnv } from '@twincam/infra-env/migration'
+import { migrationEnv } from '@fifilo/infra-env/migration'
 import { defineConfig } from 'drizzle-kit'
 
 export default defineConfig({

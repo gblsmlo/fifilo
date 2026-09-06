@@ -1,5 +1,5 @@
 {
-  "name": "@twincam/observability",
+  "name": "@fifilo/observability",
   "private": true,
   "type": "module",
   "exports": {

@@ -1,7 +1,7 @@
 ---
 name: engineering-refactor
-description: Auditar e refatorar uma vertical do twincam ponta a ponta — Core, persistência, API e Web — contra as fronteiras que as decisões fixaram e a forma modelo da feature, sem tocar em comportamento. Use quando a pergunta for "esta vertical segue a arquitetura", "onde as camadas dela vazam", "esta feature está na forma modelo" ou quando uma entrega passada deixou dívida de estrutura. Não use para mudar comportamento, que é decisão do produto construído sobre este starter, para revisar o diff de um PR, que é engineering-review, para só rodar os checks, que é engineering-validation, nem para construir capacidade nova, que é a escada engineering-contract → engineering-persistence → engineering-api → engineering-web.
-scope: twincam
+description: Auditar e refatorar uma vertical do fifilo ponta a ponta — Core, persistência, API e Web — contra as fronteiras que as decisões fixaram e a forma modelo da feature, sem tocar em comportamento. Use quando a pergunta for "esta vertical segue a arquitetura", "onde as camadas dela vazam", "esta feature está na forma modelo" ou quando uma entrega passada deixou dívida de estrutura. Não use para mudar comportamento, que é decisão do produto construído sobre este starter, para revisar o diff de um PR, que é engineering-review, para só rodar os checks, que é engineering-validation, nem para construir capacidade nova, que é a escada engineering-contract → engineering-persistence → engineering-api → engineering-web.
+scope: fifilo
 fonte: "docs/00-architecture-map.md"
 ---
 
@@ -47,7 +47,7 @@ Escreva, em uma linha cada, antes de tocar em qualquer coisa:
 2. **Que camadas ela tem hoje.** Nem toda vertical tem as quatro; a ausência é
    dado, não defeito. `auth` tem API (`apps/api/src/features/{auth,users}`),
    Web (`apps/web/src/features/auth`, `apps/web/src/features/users`), contratos
-   em `packages/core/src/contracts/{auth,users}.ts` e o pacote `@twincam/auth`.
+   em `packages/core/src/contracts/{auth,users}.ts` e o pacote `@fifilo/auth`.
 3. **O que esta refatoração não vai mudar:** comportamento, contrato público,
    estado semântico, permissão, status HTTP.
 
@@ -65,7 +65,7 @@ construção com entrega própria.
 ## Passo 1 — Medir antes de ler código
 
 Este repositório não tem script dedicado de arquitetura: as fronteiras são
-impostas pelos `exports` de cada pacote, pela ausência de `@twincam/*` nos
+impostas pelos `exports` de cada pacote, pela ausência de `@fifilo/*` nos
 `paths` de `tsconfig.base.json`, por testes de fronteira dentro dos pacotes
 onde a regra é barata de afirmar, e por revisão. Rode primeiro o que existe; o
 que acusa é achado com endereço, e o que passa você não precisa procurar à mão.
@@ -86,11 +86,11 @@ arquivo compara contra o que existia antes de ela começar. Em `apps/web`,
 
 | Fronteira | Fonte | Onde é provada |
 | --- | --- | --- |
-| Pacote resolve outro só por subpath publicado; sem import de caminho interno | Decisão 001 | `exports` de cada `package.json`; `tsconfig.base.json` sem `paths` para `@twincam/*` |
+| Pacote resolve outro só por subpath publicado; sem import de caminho interno | Decisão 001 | `exports` de cada `package.json`; `tsconfig.base.json` sem `paths` para `@fifilo/*` |
 | `packages/core` sem Elysia, Drizzle, Better Auth ou pacote de infra | Decisão 001 | revisão (checklist Boundaries do PR) |
 | Barrel raiz não inicializa runtime: env, database, auth e logger por subpath explícito | Decisão 001 | revisão |
-| `@twincam/api` declara todo pacote que importa diretamente | Decisão 001 | `apps/api/src/dependency-contract.test.ts` |
-| `@twincam/patterns` não importa feature, core, router nem API; publica por subpath; runtimes como peer | Decisão 006 | `packages/patterns/src/package-boundaries.test.ts` |
+| `@fifilo/api` declara todo pacote que importa diretamente | Decisão 001 | `apps/api/src/dependency-contract.test.ts` |
+| `@fifilo/patterns` não importa feature, core, router nem API; publica por subpath; runtimes como peer | Decisão 006 | `packages/patterns/src/package-boundaries.test.ts` |
 | `ui` → `patterns` → `layouts` → `features`, nunca o inverso | Decisão 006 | revisão, [`design-system`](../design-system/SKILL.md) |
 | Web importa outra feature só pelo `index.ts` dela | Decisão 007 | revisão |
 | Guarda de rota autenticada redireciona só na ausência de sessão | skill `auth` | `apps/web/src/routes/(authenticated)/-route.test.ts` |
@@ -212,7 +212,7 @@ vazamento entre módulos.
 
 **Camada 5.** Um medidor de força de senha desenhado dentro do formulário de
 cadastro: a moldura não sabe o que carrega, é shell, e o destino é
-`@twincam/patterns/password-strength`; a lista de requisitos fica em
+`@fifilo/patterns/password-strength`; a lista de requisitos fica em
 `apps/web/src/features/auth/password-requirements.ts`. Encaminha para
 [`design-system`](../design-system/SKILL.md).
 
@@ -223,7 +223,7 @@ tocar naquela regra.
 
 **Passo 4.** `git mv` numa leva; consumidores, `mock.module` por alias e o
 literal de caminho em `-route.test.ts` na mesma leva.
-`bun --filter @twincam/web test` comparado com a baseline do Passo 1: mesmas
+`bun --filter @fifilo/web test` comparado com a baseline do Passo 1: mesmas
 falhas, nenhuma nova.
 
 ---

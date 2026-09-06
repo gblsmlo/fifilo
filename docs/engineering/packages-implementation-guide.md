@@ -30,13 +30,13 @@ import its own code uses.
 
 A package with an initializable runtime does no work in its root barrel. Env,
 auth, database and observability publish explicit subpaths:
-`@twincam/infra-env/server`, `@twincam/auth/server`,
-`@twincam/infra-database/client`, `@twincam/observability/runtime`. The root
+`@fifilo/infra-env/server`, `@fifilo/auth/server`,
+`@fifilo/infra-database/client`, `@fifilo/observability/runtime`. The root
 import must not construct Pino, read the environment, open a connection or
 configure auth. Types and pure context may live in runtime-free subpaths.
 
 `packages/ui` has no root barrel: every component is a subpath
-(`@twincam/ui/components/button`), and `./components/*.test` is closed in
+(`@fifilo/ui/components/button`), and `./components/*.test` is closed in
 `exports`. `packages/patterns` publishes one subpath per composition.
 
 ## Dependency discipline
@@ -47,7 +47,7 @@ configure auth. Types and pure context may live in runtime-free subpaths.
 - Shared versions come from the root `workspaces.catalog` as `catalog:`.
 - Never fix a missing dependency by adding it only to the root. A test in
   `apps/api` asserts that every package the source imports is declared.
-- Inside a package, import own modules by relative path. `@twincam/<package>`
+- Inside a package, import own modules by relative path. `@fifilo/<package>`
   is for external consumers only; `packages/ui` and `packages/patterns` assert
   this in a boundary test.
 - Verify that each export is necessary and leaks no database schema, server

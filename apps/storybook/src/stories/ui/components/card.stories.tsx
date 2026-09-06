@@ -1,5 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react-vite'
-import { Button } from '@twincam/ui/components/button'
+import { Button } from '@fifilo/ui/components/button'
 import {
   Card,
   CardAction,
@@ -13,7 +12,8 @@ import {
   CardHeader,
   CardPanel,
   CardTitle,
-} from '@twincam/ui/components/card'
+} from '@fifilo/ui/components/card'
+import type { Meta, StoryObj } from '@storybook/react-vite'
 import { MoreHorizontalIcon } from 'lucide-react'
 
 const meta = {

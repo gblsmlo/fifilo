@@ -1,6 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react-vite'
-
-import { Button } from '@twincam/ui/components/button'
+import { Button } from '@fifilo/ui/components/button'
 import {
   Popover,
   PopoverClose,
@@ -8,7 +6,8 @@ import {
   PopoverPopup,
   PopoverTitle,
   PopoverTrigger,
-} from '@twincam/ui/components/popover'
+} from '@fifilo/ui/components/popover'
+import type { Meta, StoryObj } from '@storybook/react-vite'
 
 const meta = {
   component: Popover,

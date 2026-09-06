@@ -7,12 +7,12 @@ set -e
 cat > .env <<'ENVFILE'
 NODE_ENV=test
 API_PORT=3001
-APP_NAME=Twincam
+APP_NAME=Fifilo
 APP_URL=http://localhost:3000
 VITE_APP_ENV=development
-VITE_APP_NAME=Twincam
-DATABASE_URL=postgresql://twincam:twincam@localhost:5432/twincam
-DATABASE_MIGRATION_URL=postgresql://twincam:twincam@localhost:5432/twincam
+VITE_APP_NAME=Fifilo
+DATABASE_URL=postgresql://fifilo:fifilo@localhost:5432/fifilo
+DATABASE_MIGRATION_URL=postgresql://fifilo:fifilo@localhost:5432/fifilo
 DATABASE_POOL_MAX=5
 BETTER_AUTH_SECRET=local-development-secret-change-me-123456
 BETTER_AUTH_URL=http://localhost:3001

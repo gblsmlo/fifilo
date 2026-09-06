@@ -62,7 +62,7 @@ export const NarrowViewport: Story = {
 }
 
 export const LongProductName: Story = {
-  args: { appName: 'Twincam Plataforma de Operações' },
+  args: { appName: 'Fifilo Plataforma de Operações' },
   parameters: {
     docs: {
       description: {

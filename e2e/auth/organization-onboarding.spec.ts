@@ -9,7 +9,7 @@ import { expect, test } from '../helpers/app-test'
  */
 test.use({ storageState: { cookies: [], origins: [] } })
 
-const uniqueEmail = (scenario: string) => `${scenario}-${crypto.randomUUID()}@twincam.test`
+const uniqueEmail = (scenario: string) => `${scenario}-${crypto.randomUUID()}@fifilo.test`
 const PASSWORD = 'onboarding-e2e-2026'
 
 async function signUpAndSignIn(page: Page, email: string) {

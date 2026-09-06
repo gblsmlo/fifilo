@@ -1,9 +1,9 @@
+import { authClient } from '@fifilo/auth/client'
+import { Button } from '@fifilo/ui/components/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@fifilo/ui/components/card'
+import { Field, FieldDescription, FieldError, FieldLabel } from '@fifilo/ui/components/field'
+import { Input } from '@fifilo/ui/components/input'
 import { useRouter } from '@tanstack/react-router'
-import { authClient } from '@twincam/auth/client'
-import { Button } from '@twincam/ui/components/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@twincam/ui/components/card'
-import { Field, FieldDescription, FieldError, FieldLabel } from '@twincam/ui/components/field'
-import { Input } from '@twincam/ui/components/input'
 import { type FormEvent, useState } from 'react'
 
 const slugify = (value: string) =>

@@ -7,7 +7,7 @@ Active. Adapted on 2026-09-06 from the reference product's decisions 072 and 024
 ## Context
 
 `apps/storybook` is easy to describe as a catalog: a browsable showcase of what
-`@twincam/ui`, `@twincam/patterns` and the web features render. That description
+`@fifilo/ui`, `@fifilo/patterns` and the web features render. That description
 hides what the app actually does in this repository.
 
 The runner is `@storybook/addon-vitest` with `@vitest/browser-playwright`. Every

@@ -58,7 +58,7 @@ Adopt option 3.
 - Operations that must share one transaction stay in the same module, even
   when they perform more than one write. File separation never breaks
   atomicity. The transaction handle is the `WorkspaceTx` delivered by
-  `withWorkspaceTransaction` from `@twincam/infra-database/workspace`.
+  `withWorkspaceTransaction` from `@fifilo/infra-database/workspace`.
 - Intermediate `*Row` types describe the real Drizzle shape, with identifiers
   as `string`. Conversion to Core types happens in the mapper or in a small
   named function at the persistence boundary (Decision 014).

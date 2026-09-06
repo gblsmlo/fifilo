@@ -30,7 +30,7 @@ contrato, o adapter e o client `http/` já existem.
 | Query Drizzle, transação de workspace e adapter | [`engineering-persistence`](../engineering-persistence/SKILL.md) |
 | Rota Elysia, mapeamento para HTTP e o client `http/` da feature | [`engineering-api`](../engineering-api/SKILL.md) |
 | Onde o componente mora — `ui`, `patterns`, `layouts` ou feature; shell × vitrine; story obrigatória | [`design-system`](../design-system/SKILL.md) |
-| Escrever o componente com os primitivos de `@twincam/ui` | `coss` |
+| Escrever o componente com os primitivos de `@fifilo/ui` | `coss` |
 | Escrever a story da superfície, ou o teste de interação dentro dela | `storybook-story` · `storybook-test` |
 | Escrever componente ou Hook novo, e decidir quem é dono do estado | `react-developer` |
 | Revisar componente que já existe contra as Rules of React | `react-review` |
@@ -164,7 +164,7 @@ Escrever o arquivo é `storybook-story`; o `play` dentro dele é `storybook-test
 
 ## Passo 5 — Onde o componente mora
 
-A escada é `@twincam/ui` → `@twincam/patterns` → `apps/web/src/layouts` →
+A escada é `@fifilo/ui` → `@fifilo/patterns` → `apps/web/src/layouts` →
 `apps/web/src/features/<feature>` (Decisão 006). Esta skill só precisa da régua
 para não errar de lado:
 
@@ -172,7 +172,7 @@ para não errar de lado:
   na primeira utilização, sem esperar segundo consumidor.
 - **Vitrine** — sabe quais campos, qual cópia, qual mutação — fica na feature e
   compõe shells; não redesenha quadro nem redeclara estado. O vocabulário de
-  estado é `@twincam/patterns/state-kinds`.
+  estado é `@fifilo/patterns/state-kinds`.
 - `apps/web/src/components` é estrutura de página do app (`page.tsx`,
   `password-field.tsx`), não uma segunda biblioteca de UI.
 - Nunca copiar, renomear ou embrulhar um componente neutro sem responsabilidade
@@ -235,7 +235,7 @@ atravessa sessão e persistência → `e2e/auth/`. `register.stories.tsx` cobre 
 página.
 
 **Passo 5 — onde mora.** `PasswordStrength` não sabe de cadastro → shell em
-`@twincam/patterns/password-strength`. `PasswordField` conhece o toggle do app →
+`@fifilo/patterns/password-strength`. `PasswordField` conhece o toggle do app →
 `apps/web/src/components`. O formulário sabe os campos e a cópia → feature.
 
 **O que as decisões evitaram:**

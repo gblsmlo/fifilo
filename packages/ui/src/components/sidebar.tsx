@@ -15,7 +15,7 @@ import { Sheet, SheetDescription, SheetHeader, SheetPopup, SheetTitle } from './
 import { Skeleton } from './skeleton'
 import { Tooltip, TooltipPopup, TooltipTrigger } from './tooltip'
 
-const SIDEBAR_COOKIE_NAME: string = '@twincam:sidebar_state'
+const SIDEBAR_COOKIE_NAME: string = '@fifilo:sidebar_state'
 const SIDEBAR_COOKIE_MAX_AGE: number = 60 * 60 * 24 * 7
 const SIDEBAR_WIDTH: string = '16rem'
 const SIDEBAR_WIDTH_MOBILE: string = '18rem'

@@ -1,7 +1,7 @@
 'use client'
 
-import { Button } from '@twincam/ui/components/button'
-import { DialogClose } from '@twincam/ui/components/dialog'
+import { Button } from '@fifilo/ui/components/button'
+import { DialogClose } from '@fifilo/ui/components/dialog'
 import { LoaderCircleIcon } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { Dialog } from './dialog'

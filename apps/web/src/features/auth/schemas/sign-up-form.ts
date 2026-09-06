@@ -1,4 +1,4 @@
-import { signUpRequestSchema } from '@twincam/core/contracts/auth'
+import { signUpRequestSchema } from '@fifilo/core/contracts/auth'
 import { z } from 'zod'
 
 export const signUpFormSchema = signUpRequestSchema

@@ -1,4 +1,3 @@
-import type { Meta, StoryObj } from '@storybook/react-vite'
 import {
   Sidebar,
   SidebarContent,
@@ -14,7 +13,8 @@ import {
   SidebarMenuItem,
   SidebarProvider,
   SidebarTrigger,
-} from '@twincam/ui/components/sidebar'
+} from '@fifilo/ui/components/sidebar'
+import type { Meta, StoryObj } from '@storybook/react-vite'
 import { CircleHelpIcon, LayoutDashboardIcon, SettingsIcon, SparklesIcon } from 'lucide-react'
 
 function SidebarExample({ collapsible }: Readonly<{ collapsible: 'icon' | 'none' | 'offcanvas' }>) {
@@ -24,9 +24,9 @@ function SidebarExample({ collapsible }: Readonly<{ collapsible: 'icon' | 'none'
         <SidebarHeader>
           <SidebarMenu>
             <SidebarMenuItem>
-              <SidebarMenuButton isActive size='lg' tooltip='Twincam'>
+              <SidebarMenuButton isActive size='lg' tooltip='Fifilo'>
                 <SparklesIcon />
-                <span className='font-semibold'>Twincam</span>
+                <span className='font-semibold'>Fifilo</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>

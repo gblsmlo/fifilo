@@ -1,7 +1,7 @@
 ---
 name: engineering-review
-description: twincam review criteria for PR audits and follow-up fixes — canonical sources to read first, identifier-boundary and contract rules, and what counts as a finding. Use when reviewing a twincam pull request or auditing a follow-up fix.
-scope: twincam
+description: fifilo review criteria for PR audits and follow-up fixes — canonical sources to read first, identifier-boundary and contract rules, and what counts as a finding. Use when reviewing a fifilo pull request or auditing a follow-up fix.
+scope: fifilo
 source: project-local
 ---
 
@@ -27,7 +27,7 @@ open questions, not into the findings list.
 
 ## Use this skill when
 
-- Reviewing twincam pull requests.
+- Reviewing fifilo pull requests.
 - Auditing follow-up fixes that must stay aligned with the repo's active sources.
 - Checking package boundaries, identifier boundaries, contract consumption and
   PR traceability.
@@ -72,8 +72,8 @@ Decisions are cited by number and resolved through the
   internal path of `packages/*` is a finding.
 - `packages/core` stays free of Elysia, Drizzle, Better Auth and infra packages.
 - A root barrel initializes no runtime: env, database, auth and logger come
-  through explicit subpaths (`@twincam/infra-env/server`,
-  `@twincam/infra-database/client`, `@twincam/auth/server`).
+  through explicit subpaths (`@fifilo/infra-env/server`,
+  `@fifilo/infra-database/client`, `@fifilo/auth/server`).
 - Component direction is `ui` → `patterns` → `layouts` → `features`; a neutral
   component born in `apps/web/src/features/<x>` or in `apps/web/src/components`
   is a finding. Route the details to [`design-system`](../design-system/SKILL.md).

@@ -1,7 +1,7 @@
 ---
 name: design-system
-description: Decidir onde um componente do twincam mora e quem pode importá-lo — a régua shell × vitrine, a escada `packages/ui` → `packages/patterns` → `apps/web/src/layouts` → `features/<x>`, a forma container + `*FormFields` de um formulário, e a obrigação de story como teste — citando as Decisões 006, 007, 009, 010 e 011. Use quando a pergunta for "isto vira pattern ou fica na feature", "posso envolver este componente do @twincam/ui", "onde entra a story", "este shell já existe" ou "como separar o formulário da superfície que a story monta". Não use para escrever o componente com os primitivos Base UI, que é coss, para a story em si, que é storybook-story, nem para o formulário com validação, que é react-hook-form.
-scope: twincam
+description: Decidir onde um componente do fifilo mora e quem pode importá-lo — a régua shell × vitrine, a escada `packages/ui` → `packages/patterns` → `apps/web/src/layouts` → `features/<x>`, a forma container + `*FormFields` de um formulário, e a obrigação de story como teste — citando as Decisões 006, 007, 009, 010 e 011. Use quando a pergunta for "isto vira pattern ou fica na feature", "posso envolver este componente do @fifilo/ui", "onde entra a story", "este shell já existe" ou "como separar o formulário da superfície que a story monta". Não use para escrever o componente com os primitivos Base UI, que é coss, para a story em si, que é storybook-story, nem para o formulário com validação, que é react-hook-form.
+scope: fifilo
 fonte: "Decisão 006"
 ---
 
@@ -27,7 +27,7 @@ e **quem pode importá-lo**.
 
 | Situação | Onde ir |
 | --- | --- |
-| Escrever o componente com os primitivos Base UI de `@twincam/ui` | `coss` · `react-developer` |
+| Escrever o componente com os primitivos Base UI de `@fifilo/ui` | `coss` · `react-developer` |
 | Escrever ou revisar a story, ou o teste dentro dela | `storybook-story` · `storybook-test` · `storybook-setup` |
 | Escrever o schema Zod e o hook do formulário em si | `react-hook-form` · `zod-validation-expert` |
 | Rota fina, loader, search params, page provider | [`engineering-web`](../engineering-web/SKILL.md) |
@@ -88,8 +88,8 @@ neutro que aparece ali é achado: ou sobe para o package, ou ganha uma
 responsabilidade da aplicação que justifique ficar.
 
 **Todo componente de `packages/*` é consumido por export público explícito**:
-`@twincam/ui/components/<name>`, `@twincam/ui/lib/utils`,
-`@twincam/patterns/<subpath>`. `packages/ui` não tem barrel raiz. Import por
+`@fifilo/ui/components/<name>`, `@fifilo/ui/lib/utils`,
+`@fifilo/patterns/<subpath>`. `packages/ui` não tem barrel raiz. Import por
 caminho interno é achado, e `packages/patterns/src/package-boundaries.test.ts`
 prova a direção da escada.
 
@@ -97,7 +97,7 @@ prova a direção da escada.
 
 ## Passo 3 — O que o Web nunca faz
 
-- **Não copia** componente neutro do `@twincam/ui`.
+- **Não copia** componente neutro do `@fifilo/ui`.
 - **Não cria alias visual** que só renomeia.
 - **Não envolve** em wrapper sem acrescentar responsabilidade da aplicação —
   integração com router, sessão, autorização, dados ou regra de apresentação do
@@ -110,7 +110,7 @@ prova a direção da escada.
 ## Passo 4 — Estado não se redeclara
 
 O vocabulário de estado de superfície é `StateSurfaceKind` / `SurfaceGuardState`
-em `@twincam/patterns/state-kinds`
+em `@fifilo/patterns/state-kinds`
 ([`packages/patterns/src/state-kinds.ts`](../../../packages/patterns/src/state-kinds.ts)):
 `loading` e `data` como estados do guard, e os kinds de superfície (`empty`,
 `error`, `permission`, …). `errorCodeToSurfaceKind` traduz código de erro em
@@ -185,10 +185,10 @@ superfícies já existem no arquivo do formulário; um terceiro arquivo é a
 duplicação que a Decisão 007 fecha.
 
 **Toda peça da família Dialog vem de Patterns.** `Dialog` e `DialogClose` de
-`@twincam/patterns/dialog`, `ConfirmDialog` de
-`@twincam/patterns/confirm-dialog`, `DestructiveDialog` de
-`@twincam/patterns/destructive-dialog`. Import de
-`@twincam/ui/components/dialog` numa feature é achado quando Patterns já
+`@fifilo/patterns/dialog`, `ConfirmDialog` de
+`@fifilo/patterns/confirm-dialog`, `DestructiveDialog` de
+`@fifilo/patterns/destructive-dialog`. Import de
+`@fifilo/ui/components/dialog` numa feature é achado quando Patterns já
 publica a peça equivalente. Um diálogo da feature mora em
 `components/dialogs/` só quando há duas peças reais (Decisão 007).
 
@@ -201,16 +201,16 @@ publica a peça equivalente. Um diálogo da feature mora em
 | 1 | Shell não conhece rota, mutação, cache, autorização nem vocabulário de domínio | 006 |
 | 2 | Vitrine compõe shell; não redesenha moldura | 006 |
 | 3 | A camada escolhida bate com a tabela de ownership | 006 |
-| 4 | Nenhuma cópia, alias ou wrapper que só renomeia componente do `@twincam/ui` | 006 |
-| 5 | Consumo por subpath público (`@twincam/ui/components/<name>`, `@twincam/patterns/<subpath>`), não por caminho interno | 001, 006 |
-| 6 | Estado de superfície usa `@twincam/patterns/state-kinds`, sem redeclaração | 006 |
+| 4 | Nenhuma cópia, alias ou wrapper que só renomeia componente do `@fifilo/ui` | 006 |
+| 5 | Consumo por subpath público (`@fifilo/ui/components/<name>`, `@fifilo/patterns/<subpath>`), não por caminho interno | 001, 006 |
+| 6 | Estado de superfície usa `@fifilo/patterns/state-kinds`, sem redeclaração | 006 |
 | 7 | Componente novo em `packages/*` tem story em `apps/storybook/src/stories/<camada>`, e ela afirma alguma coisa | 006, 009 |
 | 8 | O `title:` guarda só a folha; o grupo vem do diretório | 010 |
 | 9 | Controle declarado por `argTypes`; descrição no JSDoc da prop | 011 |
 | 10 | `apps/web/src/components` não ganhou componente neutro | 006 |
 | 11 | Formulário publica container + `*FormFields` no mesmo arquivo; a story monta `*FormFields` | 007 |
 | 12 | Fixture da story em `storybook/` da feature, não na árvore de produção | 007 |
-| 13 | Família Dialog vem de `@twincam/patterns/{dialog,confirm-dialog,destructive-dialog}`, não de `@twincam/ui/components/dialog` | 006 |
+| 13 | Família Dialog vem de `@fifilo/patterns/{dialog,confirm-dialog,destructive-dialog}`, não de `@fifilo/ui/components/dialog` | 006 |
 | 14 | Nenhuma afirmação repetida entre `.test.tsx` e story com `play` | 008, 009 |
 
 ---
@@ -227,7 +227,7 @@ carrega. **É shell.**
 
 **Passo 2 — a camada.** Composição reutilizável, neutra, com contrato de
 interação estável → `packages/patterns`, exportado como
-`@twincam/patterns/password-strength`. Recebe `requirements: readonly
+`@fifilo/patterns/password-strength`. Recebe `requirements: readonly
 PasswordRequirement[]` (`label`, `met`) e `ariaLabel`. Não é primitivo (compõe
 outros), e não é da feature (não tem vocabulário de domínio).
 
@@ -255,7 +255,7 @@ story do pattern, a extração não está entregue.
 | --- | --- | --- |
 | Shell em `packages/patterns` | um medidor local em `features/auth`, copiado depois para a próxima feature | 006 |
 | Feature fornece a lista de requisitos | shell recebendo a regra de senha por prop | 006 |
-| Export público `@twincam/patterns/password-strength` | import por caminho interno | 001 |
+| Export público `@fifilo/patterns/password-strength` | import por caminho interno | 001 |
 | Story junto da extração | pattern publicado sem teste de componente | 009 |
 | Regra em `bun test`, interação na story | a mesma afirmação nas duas camadas | 008 |
 
@@ -267,7 +267,7 @@ story do pattern, a extração não está entregue.
 | --- | --- |
 | Componente neutro nascendo em `apps/web/src/features/<x>` | 006 |
 | `apps/web/src/components` virando segunda biblioteca de UI | 006 |
-| Cópia, alias ou wrapper que só renomeia componente do `@twincam/ui` | 006 |
+| Cópia, alias ou wrapper que só renomeia componente do `@fifilo/ui` | 006 |
 | Import por caminho interno de `packages/*` | 001 |
 | Shell recebendo regra de domínio, rota, mutação ou permissão | 006 |
 | Vitrine redesenhando moldura em vez de compor shell | 006 |

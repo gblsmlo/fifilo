@@ -12,7 +12,7 @@ can resolve a module it never declared and still work inside this checkout.
 That convenience hides four classes of defect:
 
 - a root barrel that initializes runtime on import, so a type-only import of
-  `@twincam/observability` would start a Pino logger;
+  `@fifilo/observability` would start a Pino logger;
 - a package cycle, such as the database package importing the auth server
   configuration for a seed while Auth already depends on Database;
 - a tool used by a package's scripts (`drizzle-kit`) without a manifest entry;
@@ -48,11 +48,11 @@ Adopt option 3.
 - Versions shared by more than one package (`react`, `react-dom`,
   `@base-ui/react`, `lucide-react`, `class-variance-authority`) come from the
   root `workspaces.catalog`. The catalog is the single owner of the version.
-- `@twincam/core` stays independent of Infra, Auth, Elysia, Drizzle and runtime
+- `@fifilo/core` stays independent of Infra, Auth, Elysia, Drizzle and runtime
   observability. It depends on `zod` and nothing else.
-- `@twincam/auth` may consume `@twincam/infra-env`, `@twincam/infra-database`
-  and `@twincam/observability`. `@twincam/infra-database` never imports
-  `@twincam/auth`.
+- `@fifilo/auth` may consume `@fifilo/infra-env`, `@fifilo/infra-database`
+  and `@fifilo/observability`. `@fifilo/infra-database` never imports
+  `@fifilo/auth`.
 - Seeds, migrations and spikes belong to the database package. They may use a
   library such as `better-auth/crypto` directly, but never the configured auth
   server. A capability they need is injected or kept in tooling with no reverse
@@ -64,16 +64,16 @@ Adopt option 3.
 
 ### Exports and imports
 
-- The root barrel of `@twincam/infra-env`, `@twincam/auth`,
-  `@twincam/infra-database` and `@twincam/observability` is pure. Server,
-  client and tooling contexts are explicit subpaths: `@twincam/auth/server`,
-  `@twincam/auth/client`, `@twincam/observability/runtime`,
-  `@twincam/infra-env/server`, `@twincam/infra-database/workspace`.
-- `@twincam/core` has no runtime barrel at all. Consumers import
-  `@twincam/core/contracts/<name>`, `@twincam/core/result`,
-  `@twincam/core/errors` or `@twincam/core/primitives`.
-- `@twincam/ui` and `@twincam/patterns` publish only subpaths
-  (`@twincam/ui/components/button`, `@twincam/patterns/confirm-dialog`).
+- The root barrel of `@fifilo/infra-env`, `@fifilo/auth`,
+  `@fifilo/infra-database` and `@fifilo/observability` is pure. Server,
+  client and tooling contexts are explicit subpaths: `@fifilo/auth/server`,
+  `@fifilo/auth/client`, `@fifilo/observability/runtime`,
+  `@fifilo/infra-env/server`, `@fifilo/infra-database/workspace`.
+- `@fifilo/core` has no runtime barrel at all. Consumers import
+  `@fifilo/core/contracts/<name>`, `@fifilo/core/result`,
+  `@fifilo/core/errors` or `@fifilo/core/primitives`.
+- `@fifilo/ui` and `@fifilo/patterns` publish only subpaths
+  (`@fifilo/ui/components/button`, `@fifilo/patterns/confirm-dialog`).
 - Inside a package, own modules are imported by relative path
   (`../lib/utils`), never by the package's published name.
 - A consumer in another workspace uses only what the `exports` map publishes.
@@ -102,7 +102,7 @@ Adopt option 3.
 - Manifests and imports get more verbose. A package that starts consuming a new
   capability needs a manifest change and a review.
 - The boundary is enforced by the `exports` maps, by `tsconfig` and by review.
-  `@twincam/ui` and `@twincam/patterns` also pin their own rules in
+  `@fifilo/ui` and `@fifilo/patterns` also pin their own rules in
   `src/package-boundaries.test.ts`. A deep import or an undeclared dependency
   is a review finding.
 

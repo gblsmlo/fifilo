@@ -1,7 +1,7 @@
 'use client'
 
-import { Progress, ProgressIndicator, ProgressTrack } from '@twincam/ui/components/progress'
-import { cn } from '@twincam/ui/lib/utils'
+import { Progress, ProgressIndicator, ProgressTrack } from '@fifilo/ui/components/progress'
+import { cn } from '@fifilo/ui/lib/utils'
 import { CheckIcon, CircleIcon } from 'lucide-react'
 import type React from 'react'
 

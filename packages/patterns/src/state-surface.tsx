@@ -1,6 +1,6 @@
 'use client'
 
-import { Button } from '@twincam/ui/components/button'
+import { Button } from '@fifilo/ui/components/button'
 import {
   Empty,
   EmptyContent,
@@ -8,9 +8,9 @@ import {
   EmptyHeader,
   EmptyMedia,
   EmptyTitle,
-} from '@twincam/ui/components/empty'
-import { Spinner } from '@twincam/ui/components/spinner'
-import { cn } from '@twincam/ui/lib/utils'
+} from '@fifilo/ui/components/empty'
+import { Spinner } from '@fifilo/ui/components/spinner'
+import { cn } from '@fifilo/ui/lib/utils'
 import {
   AlertTriangleIcon,
   InboxIcon,

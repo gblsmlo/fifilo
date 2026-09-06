@@ -1,4 +1,4 @@
-import { ToastProvider } from '@twincam/ui/components/toast'
+import { ToastProvider } from '@fifilo/ui/components/toast'
 import type { ComponentType } from 'react'
 
 /**

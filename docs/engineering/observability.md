@@ -2,7 +2,7 @@
 
 Context, logs, traces and technical audit belong to `packages/observability`.
 The root barrel exports types and the request context only; it builds no Pino
-and reads no environment. Runtime comes through `@twincam/observability/runtime`.
+and reads no environment. Runtime comes through `@fifilo/observability/runtime`.
 
 ## Surface
 
@@ -38,13 +38,13 @@ initializes no logger and that `./runtime` initializes exactly one.
 ## Usage
 
 ```ts
-import { traceHttpRequest } from '@twincam/observability/runtime'
+import { traceHttpRequest } from '@fifilo/observability/runtime'
 
 app.get('/health', ({ request }) => traceHttpRequest(request, () => createHealthResponse()))
 ```
 
 ```ts
-import { auditEvent } from '@twincam/observability/runtime'
+import { auditEvent } from '@fifilo/observability/runtime'
 
 auditEvent({
   action: 'organization.member.removed',
@@ -58,5 +58,5 @@ auditEvent({
 A type-only consumer imports from the root:
 
 ```ts
-import type { LogEvent } from '@twincam/observability'
+import type { LogEvent } from '@fifilo/observability'
 ```

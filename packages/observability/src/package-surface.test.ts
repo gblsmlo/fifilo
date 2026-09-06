@@ -1,6 +1,6 @@
 import { describe, expect, mock, test } from 'bun:test'
 
-describe('@twincam/observability package surface', () => {
+describe('@fifilo/observability package surface', () => {
   test('declares the development formatter in the owning package', async () => {
     const manifest = (await Bun.file(new URL('../package.json', import.meta.url)).json()) as {
       dependencies?: Record<string, string>

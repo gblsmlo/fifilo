@@ -1,3 +1,3 @@
 // Intentionally empty: import env modules through explicit subpaths.
-// Examples: @twincam/infra-env/server, @twincam/infra-env/client.
+// Examples: @fifilo/infra-env/server, @fifilo/infra-env/client.
 export {}

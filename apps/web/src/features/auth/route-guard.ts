@@ -1,6 +1,6 @@
 import { CurrentUserUnauthenticatedError, fetchCurrentUser } from '@features/users/current-user'
+import type { CurrentUserResponse } from '@fifilo/core/contracts/users'
 import { redirect } from '@tanstack/react-router'
-import type { CurrentUserResponse } from '@twincam/core/contracts/users'
 
 import { encodeAuthRedirect } from './utils/redirect'
 

@@ -1,5 +1,5 @@
+import { PasswordStrength } from '@fifilo/patterns/password-strength'
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { PasswordStrength } from '@twincam/patterns/password-strength'
 import { expect, within } from 'storybook/test'
 
 const requirements = [

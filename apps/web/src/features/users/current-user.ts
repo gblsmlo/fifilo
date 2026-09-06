@@ -1,5 +1,5 @@
+import type { CurrentUserResponse } from '@fifilo/core/contracts/users'
 import { api, edenStatus } from '@libs/api-client'
-import type { CurrentUserResponse } from '@twincam/core/contracts/users'
 
 export class CurrentUserUnauthenticatedError extends Error {
   constructor() {

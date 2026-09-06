@@ -49,8 +49,8 @@ Adopt option 3.
 
 | Atomic Design level | Group here | Source package |
 | --- | --- | --- |
-| Atoms / Molecules | `UI` | `@twincam/ui` |
-| Neutral organisms, no domain vocabulary | `Patterns` | `@twincam/patterns` |
+| Atoms / Molecules | `UI` | `@fifilo/ui` |
+| Neutral organisms, no domain vocabulary | `Patterns` | `@fifilo/patterns` |
 | Domain organisms | `Features` | `apps/web/src/features/<capability>` |
 | Templates: page structure, placeholder content | `Layout` | `apps/web` layouts |
 | Pages: the template filled with real content and route state | `Pages` | `apps/web` pages |

@@ -5,7 +5,7 @@
  */
 export const authStoryFixtures = {
   conflictMessage: 'Ja existe uma conta com este e-mail.',
-  email: 'ana.souza@twincam.test',
+  email: 'ana.souza@fifilo.test',
   expiredTokenMessage: 'O link de redefinicao expirou. Solicite um novo.',
   invalidCredentialsMessage: 'E-mail ou senha invalidos.',
   invalidTotpMessage: 'Codigo invalido ou ja utilizado.',

@@ -37,7 +37,7 @@ const collectDirectImports = async () => {
   return imports
 }
 
-describe('@twincam/api dependency contract', () => {
+describe('@fifilo/api dependency contract', () => {
   test('declares every package its source imports directly', async () => {
     const manifest = (await Bun.file(
       `${import.meta.dir}/../package.json`,

@@ -1,4 +1,4 @@
-import { Button } from '@twincam/ui/components/button'
+import { Button } from '@fifilo/ui/components/button'
 import { type ReactNode, useState } from 'react'
 import { expect, userEvent, waitFor, within } from 'storybook/test'
 

@@ -94,7 +94,7 @@ capability.
   `response:` with the kernel schemas. The handler receives the parsed type and
   does not re-parse.
 - Web adapters in `apps/web/src/features/<capability>/http/` import the type
-  from `@twincam/core/contracts/<name>`. They do not restate the shape.
+  from `@fifilo/core/contracts/<name>`. They do not restate the shape.
 - When the second capability arrives, its private contract goes to
   `packages/core/src/<capability>/schemas.ts` on day one, not to the kernel.
   The kernel is not the default landing place.

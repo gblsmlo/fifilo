@@ -1,7 +1,7 @@
+import { clientEnv } from '@fifilo/infra-env/client'
+import { AnchoredToastProvider, ToastProvider } from '@fifilo/ui/components/toast'
 import type { QueryClient } from '@tanstack/react-query'
 import { HeadContent, Link, Scripts, createRootRouteWithContext } from '@tanstack/react-router'
-import { clientEnv } from '@twincam/infra-env/client'
-import { AnchoredToastProvider, ToastProvider } from '@twincam/ui/components/toast'
 import type { ReactNode } from 'react'
 
 import appCss from '../styles/global.css?url'
@@ -17,7 +17,7 @@ export const Route = createRootRouteWithContext<{
       { title: clientEnv.VITE_APP_NAME },
       {
         name: 'description',
-        content: 'Twincam product foundation built with Bun and TanStack Start.',
+        content: 'Fifilo product foundation built with Bun and TanStack Start.',
       },
     ],
   }),

@@ -1,4 +1,4 @@
-import type { PasswordRequirement } from '@twincam/patterns/password-strength'
+import type { PasswordRequirement } from '@fifilo/patterns/password-strength'
 
 export const PASSWORD_MIN_LENGTH = 12
 

@@ -1,6 +1,5 @@
+import { ScrollArea } from '@fifilo/ui/components/scroll-area'
 import type { Meta, StoryObj } from '@storybook/react-vite'
-
-import { ScrollArea } from '@twincam/ui/components/scroll-area'
 
 const activities = [
   'Workspace criado.',

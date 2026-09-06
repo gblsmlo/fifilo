@@ -43,19 +43,19 @@ Adopt option 3.
 ### The ladder
 
 ```text
-@twincam/ui  →  @twincam/patterns  →  apps/web/src/layouts  →  apps/web/src/features/<feature>
+@fifilo/ui  →  @fifilo/patterns  →  apps/web/src/layouts  →  apps/web/src/features/<feature>
 ```
 
 - `packages/ui/src/components` owns domain-neutral visual primitives, kept in
   the copy-and-own model over `@base-ui/react`. Published only by subpath:
-  `@twincam/ui/components/*`, `@twincam/ui/hooks/*`, `@twincam/ui/lib/*`.
+  `@fifilo/ui/components/*`, `@fifilo/ui/hooks/*`, `@fifilo/ui/lib/*`.
 - `packages/patterns/src` owns reusable compositions with a stable visual or
   interaction contract and no rule, vocabulary or dependency of a feature.
-  Published by subpath: `@twincam/patterns/confirm-dialog`,
+  Published by subpath: `@fifilo/patterns/confirm-dialog`,
   `destructive-dialog`, `dialog`, `password-strength`, `settings`,
   `state-kinds`, `state-surface`.
 - A pattern imports from `ui`. A feature imports from `patterns`. Never the
-  reverse. A pattern **never** imports `@features/*`, `@twincam/core` or
+  reverse. A pattern **never** imports `@features/*`, `@fifilo/core` or
   `@tanstack/react-router`. Each package pins this in its own
   `src/package-boundaries.test.ts`.
 - `apps/web/src/layouts` owns the global shell coupled to router, session and
@@ -80,7 +80,7 @@ Adopt option 3.
   which copy, which mutation, which permission. A showcase composes shells; it
   never redraws a frame or redeclares state.
 - State is not redeclared. The surface state vocabulary is `StateSurfaceKind`
-  and `SurfaceGuardState` from `@twincam/patterns/state-kinds`. A feature
+  and `SurfaceGuardState` from `@fifilo/patterns/state-kinds`. A feature
   carries the data of each state (`{ kind: 'ready', data }`), never a parallel
   set of state names.
 - A shell moves to `packages/patterns` when it is domain-neutral, without

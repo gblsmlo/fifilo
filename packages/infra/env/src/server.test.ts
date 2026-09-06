@@ -4,7 +4,7 @@ const validRuntimeEnv = {
   APP_URL: 'http://localhost:3000',
   BETTER_AUTH_SECRET: 'test-secret-with-at-least-thirty-two-chars',
   BETTER_AUTH_URL: 'http://localhost:3000',
-  DATABASE_URL: 'postgresql://twincam:twincam@localhost:5432/twincam',
+  DATABASE_URL: 'postgresql://fifilo:fifilo@localhost:5432/fifilo',
   VITE_APP_ENV: 'development',
 }
 

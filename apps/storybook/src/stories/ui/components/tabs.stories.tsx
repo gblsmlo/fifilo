@@ -1,5 +1,5 @@
+import { Tabs, TabsList, TabsPanel, TabsTab } from '@fifilo/ui/components/tabs'
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { Tabs, TabsList, TabsPanel, TabsTab } from '@twincam/ui/components/tabs'
 import { CalendarIcon, FileTextIcon, ListTodoIcon } from 'lucide-react'
 
 function TabPanels() {

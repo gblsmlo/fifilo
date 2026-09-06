@@ -1,5 +1,5 @@
+import { clientEnv } from '@fifilo/infra-env/client'
 import { Outlet, createFileRoute } from '@tanstack/react-router'
-import { clientEnv } from '@twincam/infra-env/client'
 import { AppAuthLayout } from '../../layouts/app-auth-layout'
 
 export const Route = createFileRoute('/(auth)')({

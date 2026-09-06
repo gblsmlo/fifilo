@@ -1,7 +1,7 @@
+import { SettingsRow, SettingsSection } from '@fifilo/patterns/settings'
+import { Button } from '@fifilo/ui/components/button'
+import { Switch } from '@fifilo/ui/components/switch'
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { SettingsRow, SettingsSection } from '@twincam/patterns/settings'
-import { Button } from '@twincam/ui/components/button'
-import { Switch } from '@twincam/ui/components/switch'
 import { expect } from 'storybook/test'
 
 const meta = {

@@ -152,8 +152,8 @@ export const signUp = async (
 
 ## Passo 4 — `Result` para falha esperada, exceção para o resto
 
-Falha esperada é `Result` (`@twincam/core/result`); o adapter mapeia para HTTP.
-Os cinco `kind` de `DomainError` (`@twincam/core/errors`) são o vocabulário
+Falha esperada é `Result` (`@fifilo/core/result`); o adapter mapeia para HTTP.
+Os cinco `kind` de `DomainError` (`@fifilo/core/errors`) são o vocabulário
 fechado, e o mapa para status vive na API (`apps/api/src/libs/domain-error-status.ts`):
 
 | `DomainErrorKind` | Construtor | Status | Quando |
@@ -206,8 +206,8 @@ concordariam até o dia em que o contrato mudasse.
 
 ## Passo 6 — O que o Core nunca faz
 
-- **Não importa** Elysia, Better Auth, Drizzle, `@twincam/infra-database`,
-  `@twincam/infra-env` nem `@twincam/observability`. O `package.json` do Core
+- **Não importa** Elysia, Better Auth, Drizzle, `@fifilo/infra-database`,
+  `@fifilo/infra-env` nem `@fifilo/observability`. O `package.json` do Core
   declara só `zod`.
 - **Não conhece** tabela, coluna, `tx` nem nome de constraint.
 - **Não faz** trabalho no barrel raiz — `packages/core/src/index.ts` é vazio de
@@ -217,10 +217,10 @@ concordariam até o dia em que o contrato mudasse.
 - **Não tipa** o id além de string opaca: `EntityId` é brand, não formato
   (Decisão 014).
 
-Consumo sempre por subpath público (`@twincam/core/contracts/auth`,
-`@twincam/core/result`, `@twincam/core/<capability>`), nunca por caminho
+Consumo sempre por subpath público (`@fifilo/core/contracts/auth`,
+`@fifilo/core/result`, `@fifilo/core/<capability>`), nunca por caminho
 interno de outro workspace. A fronteira é imposta pelo mapa `exports` de cada
-package, pela ausência de `@twincam/*` nos paths do `tsconfig.base.json` e por
+package, pela ausência de `@fifilo/*` nos paths do `tsconfig.base.json` e por
 teste de fronteira no package quando a regra é barata de afirmar (Decisão 001).
 
 ---

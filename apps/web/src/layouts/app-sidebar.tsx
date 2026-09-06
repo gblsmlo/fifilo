@@ -1,4 +1,3 @@
-import { Link } from '@tanstack/react-router'
 import {
   Sidebar,
   SidebarContent,
@@ -6,7 +5,8 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from '@twincam/ui/components/sidebar'
+} from '@fifilo/ui/components/sidebar'
+import { Link } from '@tanstack/react-router'
 import { Sparkles } from 'lucide-react'
 import type { ComponentProps } from 'react'
 
@@ -31,7 +31,7 @@ export function AppSidebar({ organizationName, userName, ...props }: Readonly<Ap
               size='lg'
             >
               <Sparkles className='size-5!' />
-              <span className='text-base font-semibold'>Twincam</span>
+              <span className='text-base font-semibold'>Fifilo</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>

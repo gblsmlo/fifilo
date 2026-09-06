@@ -4,7 +4,7 @@ import type { RuntimeEnv } from './runtime'
 
 export const clientEnvSchema = z.object({
   VITE_APP_ENV: z.enum(['development', 'staging', 'production']),
-  VITE_APP_NAME: z.string().min(1).default('Twincam'),
+  VITE_APP_NAME: z.string().min(1).default('Fifilo'),
 })
 
 export const createClientEnv = (runtimeEnv: RuntimeEnv = import.meta.env as RuntimeEnv) =>

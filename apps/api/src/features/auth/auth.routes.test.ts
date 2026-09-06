@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test'
-import type { LogEvent } from '@twincam/observability'
+import type { LogEvent } from '@fifilo/observability'
 import { Elysia } from 'elysia'
 
 import { createAuthRoutes } from './auth.routes'

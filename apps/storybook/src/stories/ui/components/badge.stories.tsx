@@ -1,6 +1,5 @@
+import { Badge } from '@fifilo/ui/components/badge'
 import type { Meta, StoryObj } from '@storybook/react-vite'
-
-import { Badge } from '@twincam/ui/components/badge'
 
 const variants = [
   ['Default', 'default'],

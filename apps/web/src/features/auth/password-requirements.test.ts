@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test'
-import { signUpRequestSchema } from '@twincam/core/contracts/auth'
+import { signUpRequestSchema } from '@fifilo/core/contracts/auth'
 import { PASSWORD_MIN_LENGTH, passwordRequirements } from './password-requirements'
 
 const met = (password: string) =>

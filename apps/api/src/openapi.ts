@@ -1,5 +1,5 @@
 import { openapi } from '@elysia/openapi'
-import { serverEnv } from '@twincam/infra-env/server'
+import { serverEnv } from '@fifilo/infra-env/server'
 import { z } from 'zod'
 
 export const OPENAPI_REFERENCE_PATH = '/openapi'

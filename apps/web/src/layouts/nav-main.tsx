@@ -1,4 +1,3 @@
-import { Link, useMatchRoute } from '@tanstack/react-router'
 import {
   SidebarGroup,
   SidebarGroupContent,
@@ -7,7 +6,8 @@ import {
   SidebarMenuBadge,
   SidebarMenuButton,
   SidebarMenuItem,
-} from '@twincam/ui/components/sidebar'
+} from '@fifilo/ui/components/sidebar'
+import { Link, useMatchRoute } from '@tanstack/react-router'
 
 import type { AppNavGroup, AppNavItem } from './app-nav'
 

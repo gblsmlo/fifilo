@@ -1,6 +1,5 @@
+import { Text } from '@fifilo/ui/components/text'
 import type { Meta, StoryObj } from '@storybook/react-vite'
-
-import { Text } from '@twincam/ui/components/text'
 
 const sizes = [
   'xs',

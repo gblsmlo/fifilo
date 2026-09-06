@@ -1,4 +1,4 @@
-import type { HealthResponse } from '@twincam/core/contracts/health'
+import type { HealthResponse } from '@fifilo/core/contracts/health'
 
 export const createHealthResponse = (): HealthResponse => ({
   status: 'ok',

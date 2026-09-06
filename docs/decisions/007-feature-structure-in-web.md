@@ -58,7 +58,7 @@ apps/web/src/features/<feature>/
   pages/                route wiring and page compositions (auth: sign-in-page.tsx, ...)
   components/           visual blocks with no knowledge of the router
     forms/              the forms (auth: sign-in-form.tsx, sign-up-form.tsx, ...)
-    dialogs/            feature dialogs, wiring over @twincam/patterns shells
+    dialogs/            feature dialogs, wiring over @fifilo/patterns shells
     <clear group>/      other groups only when 2+ pieces of one family exist
     (root)              what has no clear group stays at the root
   storybook/            fixtures consumed by the catalog and tests, outside production

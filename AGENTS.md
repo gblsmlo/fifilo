@@ -133,7 +133,7 @@ carries the operational detail.
   tooling uses the shared runtime helper, not `Bun.env`.
 - A root `index.ts` never initializes env parsing, database connections, auth
   server setup or any other runtime side effect.
-- `packages/infra/database` never imports `@twincam/auth`.
+- `packages/infra/database` never imports `@fifilo/auth`.
 
 ### Docker
 

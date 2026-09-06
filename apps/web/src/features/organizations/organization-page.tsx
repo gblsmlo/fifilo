@@ -1,11 +1,11 @@
+import { authClient } from '@fifilo/auth/client'
+import type { PublicOrganization } from '@fifilo/core/contracts/users'
+import { Badge } from '@fifilo/ui/components/badge'
+import { Button } from '@fifilo/ui/components/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@fifilo/ui/components/card'
+import { Field, FieldDescription, FieldError, FieldLabel } from '@fifilo/ui/components/field'
+import { Input } from '@fifilo/ui/components/input'
 import { useRouter } from '@tanstack/react-router'
-import { authClient } from '@twincam/auth/client'
-import type { PublicOrganization } from '@twincam/core/contracts/users'
-import { Badge } from '@twincam/ui/components/badge'
-import { Button } from '@twincam/ui/components/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@twincam/ui/components/card'
-import { Field, FieldDescription, FieldError, FieldLabel } from '@twincam/ui/components/field'
-import { Input } from '@twincam/ui/components/input'
 import { type FormEvent, useEffect, useState } from 'react'
 
 interface OrganizationPageProps {

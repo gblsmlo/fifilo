@@ -1,5 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react-vite'
-import { Field, FieldError, FieldLabel } from '@twincam/ui/components/field'
+import { Field, FieldError, FieldLabel } from '@fifilo/ui/components/field'
 import {
   Select,
   SelectGroup,
@@ -10,7 +9,8 @@ import {
   SelectSeparator,
   SelectTrigger,
   SelectValue,
-} from '@twincam/ui/components/select'
+} from '@fifilo/ui/components/select'
+import type { Meta, StoryObj } from '@storybook/react-vite'
 import { MoreHorizontalIcon, SignalHighIcon, SignalLowIcon } from 'lucide-react'
 
 const meta = {

@@ -44,7 +44,7 @@ Adopt option 3.
 
 `apiFetch('/api/...')` in production code is a finding. Consumption is
 `api.<resource>`, derived from `App`. The only edge from `apps/web` to
-`apps/api` is `import type { App } from '@twincam/api/server'` in
+`apps/api` is `import type { App } from '@fifilo/api/server'` in
 `apps/web/src/libs/api-client.ts`. It is type-only and erased by
 `verbatimModuleSyntax`; `apps/api/package.json` exports only `./server`.
 

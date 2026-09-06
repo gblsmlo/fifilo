@@ -1,5 +1,5 @@
+import { DestructiveDialog } from '@fifilo/patterns/destructive-dialog'
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { DestructiveDialog } from '@twincam/patterns/destructive-dialog'
 import { expect, waitFor, within } from 'storybook/test'
 import {
   DialogTriggerHarness,

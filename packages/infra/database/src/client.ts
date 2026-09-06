@@ -1,4 +1,4 @@
-import { serverEnv } from '@twincam/infra-env/server'
+import { serverEnv } from '@fifilo/infra-env/server'
 import { SQL } from 'bun'
 import { drizzle } from 'drizzle-orm/bun-sql'
 

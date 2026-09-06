@@ -197,7 +197,7 @@ new Elysia({ prefix: '/api/<capability>' })
   `/api/auth/*`; não é tipado nem deve ser.
 
 Uma fatia importa outra **pelo barrel** (`../auth`), nunca por caminho interno.
-`@twincam/core/...` e `@twincam/infra-database/...` entram por subpath público,
+`@fifilo/core/...` e `@fifilo/infra-database/...` entram por subpath público,
 com a dependência declarada no `package.json` do workspace que importa
 (Decisão 001). `apps/api/package.json` publica só `./server`, para que o Web
 importe `type App`.
@@ -209,7 +209,7 @@ importe `type App`.
 O Web consome **o mesmo contrato executável**, pelo Eden treaty sobre `App`
 (Decisão 013): `api.<recurso>` de `@libs/api-client`, nunca um literal
 `'/api/...'` em código de produção. Tráfego do Better Auth vai pelo
-`authClient` de `@twincam/auth/client`. O adapter mora em
+`authClient` de `@fifilo/auth/client`. O adapter mora em
 `apps/web/src/features/<x>/http/` — **`http/`, nunca `api/`**: "API" é
 reservado para `apps/api`.
 
@@ -281,7 +281,7 @@ de `provisionUser` que hoje vive no handler desaparece.
 
 **Passo 2 — a fronteira.** `body: signUpRequestSchema` e
 `response: { 201: signUpResponseSchema, ...errorStatuses }`, ambos de
-`@twincam/core/contracts/auth`. O Eden e o OpenAPI documentam `min(12)` da
+`@fifilo/core/contracts/auth`. O Eden e o OpenAPI documentam `min(12)` da
 senha em vez de `string`.
 
 **Passo 3 — os erros.** E-mail em uso → `conflictError` → 409. Body malformado →

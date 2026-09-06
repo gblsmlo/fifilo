@@ -1,6 +1,5 @@
+import { Input } from '@fifilo/ui/components/input'
 import type { Meta, StoryObj } from '@storybook/react-vite'
-
-import { Input } from '@twincam/ui/components/input'
 
 const meta = {
   args: {

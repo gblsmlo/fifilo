@@ -1,5 +1,5 @@
+import { ConfirmDialog } from '@fifilo/patterns/confirm-dialog'
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { ConfirmDialog } from '@twincam/patterns/confirm-dialog'
 import { expect, waitFor, within } from 'storybook/test'
 import {
   DialogTriggerHarness,

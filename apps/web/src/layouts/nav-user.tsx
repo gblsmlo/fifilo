@@ -4,7 +4,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from '@twincam/ui/components/sidebar'
+} from '@fifilo/ui/components/sidebar'
 import { LogOut } from 'lucide-react'
 
 interface NavUserProps {

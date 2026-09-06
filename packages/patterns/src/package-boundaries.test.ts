@@ -13,15 +13,15 @@ const sourceFiles = () =>
     cwd: new URL('./', import.meta.url).pathname,
   })
 
-describe('@twincam/patterns package boundaries', () => {
+describe('@fifilo/patterns package boundaries', () => {
   test('never imports a feature, the core, the router or the API', async () => {
     const violations: string[] = []
     const forbidden = [
       "from '@features/",
       "from '@web/",
-      "from '@twincam/core",
+      "from '@fifilo/core",
       "from '@tanstack/",
-      "from '@twincam/api",
+      "from '@fifilo/api",
     ]
 
     for await (const sourceFile of sourceFiles()) {
@@ -41,7 +41,7 @@ describe('@twincam/patterns package boundaries', () => {
     for await (const sourceFile of sourceFiles()) {
       if (/\.test\.tsx?$/.test(sourceFile)) continue
       const source = await Bun.file(sourceFile).text()
-      if (source.includes("from '@twincam/patterns")) selfImports.push(sourceFile)
+      if (source.includes("from '@fifilo/patterns")) selfImports.push(sourceFile)
     }
 
     expect(selfImports).toEqual([])
@@ -58,6 +58,6 @@ describe('@twincam/patterns package boundaries', () => {
       '@base-ui/react': 'catalog:',
       react: 'catalog:',
     })
-    expect(manifest.dependencies?.['@twincam/ui']).toBe('workspace:*')
+    expect(manifest.dependencies?.['@fifilo/ui']).toBe('workspace:*')
   })
 })

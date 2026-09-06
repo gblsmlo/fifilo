@@ -4,7 +4,7 @@ import { type Result, err, ok } from './result'
  * Branded identifiers and value primitives shared by core subdomains.
  *
  * `EntityId` keeps the exact same structural brand as the legacy
- * `@twincam/domain/domain-primitives` definition, so a core `EntityId` and a
+ * `@fifilo/domain/domain-primitives` definition, so a core `EntityId` and a
  * domain `EntityId` are interchangeable during the migration.
  */
 export type EntityId = string & { readonly __brand: 'EntityId' }

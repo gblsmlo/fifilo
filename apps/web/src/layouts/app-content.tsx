@@ -1,4 +1,4 @@
-import { cn } from '@twincam/ui/lib/utils'
+import { cn } from '@fifilo/ui/lib/utils'
 import type { ReactNode } from 'react'
 
 interface AppContentProps {

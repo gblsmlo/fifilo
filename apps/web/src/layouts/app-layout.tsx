@@ -1,4 +1,4 @@
-import { SidebarInset, SidebarProvider } from '@twincam/ui/components/sidebar'
+import { SidebarInset, SidebarProvider } from '@fifilo/ui/components/sidebar'
 import type { CSSProperties, ReactNode } from 'react'
 
 import { AppContent } from './app-content'

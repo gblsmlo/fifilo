@@ -53,14 +53,14 @@ Web → public Zod contract → HTTP adapter → use case in Core
 - The HTTP adapter validates input and output and converts expected Core
   failures into HTTP responses (`apps/api/src/libs/http-errors.ts`,
   `domain-error-status.ts`).
-- Core validates invariants and returns `Result` from `@twincam/core/result`
+- Core validates invariants and returns `Result` from `@fifilo/core/result`
   for expected failures.
 - Internal persistence schemas derive from Drizzle where applicable. They are
   never public contracts.
 - Constraints and RLS protect integrity and tenant isolation, which cannot rest
   on application code alone.
-- Web imports public contracts (`@twincam/core/contracts/users`), never
-  `@twincam/infra-database/schema` or any adapter.
+- Web imports public contracts (`@fifilo/core/contracts/users`), never
+  `@fifilo/infra-database/schema` or any adapter.
 
 ### What each layer validates
 
@@ -101,7 +101,7 @@ None of the three is optional. None replaces another.
 - There is mapping work between public, domain and database representations.
   That work is the price of one owner per fact.
 - Imports enforce part of the boundary: Web has no path to Drizzle because
-  `@twincam/infra-database` is not in `apps/web/package.json`.
+  `@fifilo/infra-database` is not in `apps/web/package.json`.
 - Validation inside a handler is a review finding. If a route truly needs it,
   the reason is recorded here, not solved case by case.
 

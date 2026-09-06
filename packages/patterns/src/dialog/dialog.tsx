@@ -7,7 +7,7 @@ import {
   AlertDialogPopup,
   AlertDialog as AlertDialogRoot,
   AlertDialogTitle,
-} from '@twincam/ui/components/alert-dialog'
+} from '@fifilo/ui/components/alert-dialog'
 import {
   DialogDescription,
   DialogFooter,
@@ -16,8 +16,8 @@ import {
   DialogPopup,
   Dialog as DialogRoot,
   DialogTitle,
-} from '@twincam/ui/components/dialog'
-import { cn } from '@twincam/ui/lib/utils'
+} from '@fifilo/ui/components/dialog'
+import { cn } from '@fifilo/ui/lib/utils'
 import type { ReactNode } from 'react'
 import { StateGuard, type StateSurfaceProps, type SurfaceGuardState } from '../state-surface'
 

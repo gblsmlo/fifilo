@@ -1,16 +1,15 @@
-# Twincam Monorepo
+# Fifilo Monorepo
 
 [![Bun](https://img.shields.io/badge/Bun-1.3.14-f9f1e1?logo=bun&logoColor=000)](https://bun.sh)
 [![Node.js](https://img.shields.io/badge/Node.js-24.18.0-339933?logo=nodedotjs&logoColor=fff)](https://nodejs.org)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-A production-minded, domain-neutral foundation for building tenant-aware SaaS
-products without recreating the monorepo, authentication and organization
-boilerplate.
-
-Twincam provides the reusable platform layer. A product adds its own business
+Fifilo is personal and shared financial management, AI-first at the
+destination and core-first along the way. It started from a production-minded,
+domain-neutral starter that supplies the monorepo, authentication and
+organization boilerplate, so the product could add its own business
 capabilities as vertical slices, following the delivery flow the repository
-documents.
+documents. The roadmap lives in [docs/plans/fifilo](docs/plans/fifilo/README.md).
 
 ## What is included
 
@@ -112,8 +111,8 @@ activates the pinned Node through `fnm` or `nvm`.
 ## Quick start
 
 ```bash
-git clone git@github.com:gblsmlo/twincam-monorepo.git
-cd twincam-monorepo
+git clone git@github.com:gblsmlo/fifilo.git
+cd fifilo
 cp .env.example .env
 bun install
 
@@ -134,7 +133,7 @@ bun run dev
 The development seed creates:
 
 ```text
-Email:    owner@twincam.local
+Email:    owner@fifilo.local
 Password: change-this-owner-password
 ```
 

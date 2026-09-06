@@ -1,12 +1,12 @@
-import type { PublicOrganization, PublicUser } from '@twincam/core/contracts/users'
-import { Badge } from '@twincam/ui/components/badge'
+import type { PublicOrganization, PublicUser } from '@fifilo/core/contracts/users'
+import { Badge } from '@fifilo/ui/components/badge'
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@twincam/ui/components/card'
+} from '@fifilo/ui/components/card'
 
 interface DashboardPageProps {
   organization: PublicOrganization

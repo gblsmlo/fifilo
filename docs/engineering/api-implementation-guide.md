@@ -21,7 +21,7 @@ HTTP request
 | Layer | Must | Must not |
 | --- | --- | --- |
 | Elysia route | declare the schema in `options`, get the context, call the use case, map the response | build a business workflow, touch Drizzle, call auth internals without a boundary, `safeParse` inside the handler |
-| Core | commands, rules, use cases, ports, `Result` | import Elysia, Better Auth, Drizzle or `@twincam/infra-database` |
+| Core | commands, rules, use cases, ports, `Result` | import Elysia, Better Auth, Drizzle or `@fifilo/infra-database` |
 | API adapter | implement ports, map persistence shapes | redefine the contract, put SQL in the composition root |
 | `repository.ts` | compose adapter operations | contain SQL, `*Row` types, mappers or persistence rules |
 | Infra database | schema, client, workspace transaction, RLS | expose persistence details to Web |

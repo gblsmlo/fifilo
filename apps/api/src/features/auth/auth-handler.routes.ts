@@ -1,5 +1,5 @@
-import { auth } from '@twincam/auth/server'
-import { traceHttpRequest } from '@twincam/observability/runtime'
+import { auth } from '@fifilo/auth/server'
+import { traceHttpRequest } from '@fifilo/observability/runtime'
 import { Elysia } from 'elysia'
 
 /**

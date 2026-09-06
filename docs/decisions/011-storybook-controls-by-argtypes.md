@@ -13,7 +13,7 @@ nothing and suggests the component has no state the panel can drive.
 
 The first hypothesis blamed the docgen: `react-docgen`, the default, supposedly
 "does not cross the package boundary" to resolve types re-exported from
-`@twincam/ui` or `@twincam/patterns`, and the structural fix would be
+`@fifilo/ui` or `@fifilo/patterns`, and the structural fix would be
 `typescript.reactDocgen: 'react-docgen-typescript'` in
 `apps/storybook/.storybook/main.ts`, at the cost of a slower build.
 

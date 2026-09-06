@@ -1,12 +1,12 @@
 ---
 name: auth
 description: Use when implementing, maintaining, reviewing, or debugging authentication and session flows across monorepo applications and shared packages.
-scope: twincam
+scope: fifilo
 compatibility: TypeScript monorepos with server-validated cookie sessions, including React SSR clients and HTTP APIs.
 metadata:
   category: discipline
   triggers: authentication, authorization, session, cookie, login, protected route, refresh, reload, monorepo auth
-  author: twincam
+  author: fifilo
   version: 1.0.0
 ---
 
@@ -30,10 +30,10 @@ Keep dependencies directional:
 
 | Layer | May depend on | Must not depend on |
 | --- | --- | --- |
-| Web route/feature (`apps/web/src/routes/(auth)`, `apps/web/src/routes/(authenticated)`, `apps/web/src/features/auth`, `apps/web/src/features/users/current-user.ts`) | `@twincam/core/contracts/*`, `@twincam/auth/client`, `@libs/api-client` | `@twincam/infra-database`, `@twincam/auth/server` |
-| API adapter (`apps/api/src/features/auth`, `apps/api/src/features/users`) | `@twincam/auth/server`, use cases, `@twincam/core/contracts/*` | client-only modules (`@twincam/auth/client`, `apps/web`) |
-| Core/domain (`packages/core`) | `@twincam/core/primitives`, public contracts | `@twincam/auth/server`, `@twincam/infra-database` |
-| Auth package (`packages/auth`) | `@twincam/infra-env/server`, `@twincam/infra-database` adapters, Better Auth with the organization plugin | `apps/web` features |
+| Web route/feature (`apps/web/src/routes/(auth)`, `apps/web/src/routes/(authenticated)`, `apps/web/src/features/auth`, `apps/web/src/features/users/current-user.ts`) | `@fifilo/core/contracts/*`, `@fifilo/auth/client`, `@libs/api-client` | `@fifilo/infra-database`, `@fifilo/auth/server` |
+| API adapter (`apps/api/src/features/auth`, `apps/api/src/features/users`) | `@fifilo/auth/server`, use cases, `@fifilo/core/contracts/*` | client-only modules (`@fifilo/auth/client`, `apps/web`) |
+| Core/domain (`packages/core`) | `@fifilo/core/primitives`, public contracts | `@fifilo/auth/server`, `@fifilo/infra-database` |
+| Auth package (`packages/auth`) | `@fifilo/infra-env/server`, `@fifilo/infra-database` adapters, Better Auth with the organization plugin | `apps/web` features |
 | Infrastructure (`packages/infra/*`) | configuration and persistence | `apps/*` |
 
 ## Session bootstrap

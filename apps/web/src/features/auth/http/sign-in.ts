@@ -1,4 +1,4 @@
-import { authClient } from '@twincam/auth/client'
+import { authClient } from '@fifilo/auth/client'
 
 import { unwrapAuthResult } from './errors'
 

@@ -6,9 +6,9 @@ import type {
 } from '@features/auth/hooks/use-two-factor-form'
 import { twoFactorFormSchema } from '@features/auth/schemas/two-factor-form'
 import { authStoryFixtures } from '@features/auth/storybook/auth-story-fixtures'
+import { toastManager } from '@fifilo/ui/components/toast'
 import { zodResolver } from '@hookform/resolvers/zod'
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { toastManager } from '@twincam/ui/components/toast'
 import { FormProvider, useForm } from 'react-hook-form'
 import { expect, userEvent, waitFor, within } from 'storybook/test'
 

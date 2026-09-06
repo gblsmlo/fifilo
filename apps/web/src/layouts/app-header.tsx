@@ -1,13 +1,13 @@
-import { useRouterState } from '@tanstack/react-router'
-import { clientEnv } from '@twincam/infra-env/client'
+import { clientEnv } from '@fifilo/infra-env/client'
 import {
   Breadcrumb,
   BreadcrumbItem,
   BreadcrumbList,
   BreadcrumbPage,
-} from '@twincam/ui/components/breadcrumb'
-import { Separator } from '@twincam/ui/components/separator'
-import { SidebarTrigger } from '@twincam/ui/components/sidebar'
+} from '@fifilo/ui/components/breadcrumb'
+import { Separator } from '@fifilo/ui/components/separator'
+import { SidebarTrigger } from '@fifilo/ui/components/sidebar'
+import { useRouterState } from '@tanstack/react-router'
 
 const TOP_LEVEL_BREADCRUMBS = [
   { label: 'Dashboard', path: '/dashboard' },
@@ -20,7 +20,7 @@ function resolveTopLevelBreadcrumb(pathname: string): string {
   return (
     TOP_LEVEL_BREADCRUMBS.find(
       (item) => pathname === item.path || pathname.startsWith(`${item.path}/`),
-    )?.label ?? 'Twincam'
+    )?.label ?? 'Fifilo'
   )
 }
 

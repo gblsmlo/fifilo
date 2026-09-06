@@ -2,8 +2,8 @@ import {
   signUpErrorResponseSchema,
   signUpRequestSchema,
   signUpResponseSchema,
-} from '@twincam/core/contracts/auth'
-import { logEvent } from '@twincam/observability/runtime'
+} from '@fifilo/core/contracts/auth'
+import { logEvent } from '@fifilo/observability/runtime'
 import { Elysia } from 'elysia'
 
 import { mapValidationError } from '../../libs/http-errors'
@@ -70,7 +70,7 @@ const isDuplicateUserError = (error: unknown) => {
 
 const defaultDependencies: AuthRouteDependencies = {
   async findUserByEmail(email) {
-    const { auth } = await import('@twincam/auth/server')
+    const { auth } = await import('@fifilo/auth/server')
     const ctx = await auth.$context
     const existingUser = await ctx.internalAdapter.findUserByEmail(email)
     return existingUser?.user ?? null

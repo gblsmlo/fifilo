@@ -61,7 +61,7 @@ export default defineConfig({
           url: `${apiURL}/health`,
         },
         {
-          command: `bun --env-file=${envFileArgument} --filter @twincam/web dev`,
+          command: `bun --env-file=${envFileArgument} --filter @fifilo/web dev`,
           env: {
             API_PORT: String(apiPort),
             NODE_ENV: 'test',

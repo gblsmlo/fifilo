@@ -100,7 +100,7 @@ aplicação.
 ## Passo 2 — A transação de workspace
 
 Toda operação em tabela tenant-aware entra por `withWorkspaceTransaction` ou
-`withActorWorkspaceTransaction`, de `@twincam/infra-database/workspace`. O
+`withActorWorkspaceTransaction`, de `@fifilo/infra-database/workspace`. O
 helper aplica `set_config('app.workspace_id', <id>, true)` **dentro** da
 transação e confere que foi aplicado; o `tx` entregue é o `WorkspaceTx` com o
 builder completo, não um executor só de SQL.
@@ -225,7 +225,7 @@ de lock e idempotência. Migration nova se valida em banco limpo antes do merge.
 ## Passo 6 — A lista de exceções
 
 O guardrail é a revisão contra o `README.md` do módulo de persistência e o mapa
-`exports` de `@twincam/infra-database`, que publica `./client`, `./schema`,
+`exports` de `@fifilo/infra-database`, que publica `./client`, `./schema`,
 `./schemas/users` e `./workspace` — nunca um executor de SQL cru (baseline §
 Decision matrix).
 
@@ -343,7 +343,7 @@ entrada.
 | Tabela tenant-owned criada sem policy RLS e sem suíte de isolamento no mesmo PR | baseline |
 | Migration de índice embutida numa migração sintática, sem evidência própria | 004 |
 | `EXPLAIN` pulado antes de otimizar | 004 |
-| `packages/infra/database` importando `@twincam/auth` | AGENTS.md |
+| `packages/infra/database` importando `@fifilo/auth` | AGENTS.md |
 
 ---
 

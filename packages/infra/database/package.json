@@ -1,5 +1,5 @@
 {
-  "name": "@twincam/infra-database",
+  "name": "@fifilo/infra-database",
   "private": true,
   "type": "module",
   "scripts": {
@@ -20,8 +20,8 @@
     "./workspace": "./src/workspace.ts"
   },
   "dependencies": {
-    "@twincam/infra-env": "workspace:*",
-    "@twincam/observability": "workspace:*",
+    "@fifilo/infra-env": "workspace:*",
+    "@fifilo/observability": "workspace:*",
     "better-auth": "^1.6.0",
     "drizzle-orm": "^0.44.4",
     "drizzle-zod": "^0.8.3",

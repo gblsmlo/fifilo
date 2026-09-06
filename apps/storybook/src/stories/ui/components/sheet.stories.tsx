@@ -1,6 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react-vite'
-
-import { Button } from '@twincam/ui/components/button'
+import { Button } from '@fifilo/ui/components/button'
 import {
   Sheet,
   SheetDescription,
@@ -10,7 +8,8 @@ import {
   SheetPopup,
   SheetTitle,
   SheetTrigger,
-} from '@twincam/ui/components/sheet'
+} from '@fifilo/ui/components/sheet'
+import type { Meta, StoryObj } from '@storybook/react-vite'
 
 function SheetContent() {
   return (

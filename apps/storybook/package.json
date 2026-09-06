@@ -1,5 +1,5 @@
 {
-  "name": "@twincam/storybook",
+  "name": "@fifilo/storybook",
   "private": true,
   "type": "module",
   "scripts": {
@@ -10,8 +10,8 @@
   },
   "dependencies": {
     "@base-ui/react": "catalog:",
-    "@twincam/patterns": "workspace:*",
-    "@twincam/ui": "workspace:*",
+    "@fifilo/patterns": "workspace:*",
+    "@fifilo/ui": "workspace:*",
     "react": "catalog:",
     "react-dom": "catalog:"
   },

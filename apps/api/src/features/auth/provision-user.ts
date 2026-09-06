@@ -1,4 +1,4 @@
-import { auth } from '@twincam/auth/server'
+import { auth } from '@fifilo/auth/server'
 
 export interface ProvisionVerifiedUserInput {
   email: string

@@ -1,7 +1,6 @@
+import { Button } from '@fifilo/ui/components/button'
+import { type ToastPosition, ToastProvider, toastManager } from '@fifilo/ui/components/toast'
 import type { Meta, StoryObj } from '@storybook/react-vite'
-
-import { Button } from '@twincam/ui/components/button'
-import { type ToastPosition, ToastProvider, toastManager } from '@twincam/ui/components/toast'
 
 const toastDetails = {
   error: {

@@ -1,9 +1,9 @@
-import { ToastProvider } from '@twincam/ui/components/toast'
+import { ToastProvider } from '@fifilo/ui/components/toast'
 import type { ComponentType } from 'react'
 
 import { AppAuthLayout } from '../../../web/src/layouts/app-auth-layout'
 
-export const AUTH_STORY_APP_NAME = 'Twincam'
+export const AUTH_STORY_APP_NAME = 'Fifilo'
 
 /**
  * Frame of the page stories: the real access layout, not a replica. The

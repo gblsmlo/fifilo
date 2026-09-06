@@ -1,7 +1,7 @@
 'use client'
 
-import { Text } from '@twincam/ui/components/text'
-import { cn } from '@twincam/ui/lib/utils'
+import { Text } from '@fifilo/ui/components/text'
+import { cn } from '@fifilo/ui/lib/utils'
 import type { ComponentPropsWithoutRef, ReactNode } from 'react'
 
 export interface SettingsRowProps extends Omit<ComponentPropsWithoutRef<'div'>, 'title'> {

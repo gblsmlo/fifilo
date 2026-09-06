@@ -1,5 +1,5 @@
+import { StateGuard, StateSurface } from '@fifilo/patterns/state-surface'
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { StateGuard, StateSurface } from '@twincam/patterns/state-surface'
 import { expect, within } from 'storybook/test'
 import { stateSurfaceKindArgType } from '../../test-utils/story-arg-types'
 

@@ -28,7 +28,7 @@ A **showcase** belongs to `apps/web/src/features/<feature>`: it knows which
 fields, which copy, which mutation, which permission. It composes shells; it
 never redraws a frame and never redeclares a state. The surface state
 vocabulary (`loading`, `empty`, `error`, `permission`, `ready`) lives once in
-`@twincam/patterns/state-kinds`.
+`@fifilo/patterns/state-kinds`.
 
 A domain-neutral shell goes to `packages/patterns` without waiting for a second
 consumer. What requires a second consumer is generalizing a shell's API, not

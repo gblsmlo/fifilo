@@ -1,4 +1,4 @@
-import type { DomainError, DomainErrorKind } from '@twincam/core/errors'
+import type { DomainError, DomainErrorKind } from '@fifilo/core/errors'
 
 export type HttpErrorResponse = {
   body: {

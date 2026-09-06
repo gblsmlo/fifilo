@@ -1,6 +1,5 @@
+import { Skeleton } from '@fifilo/ui/components/skeleton'
 import type { Meta, StoryObj } from '@storybook/react-vite'
-
-import { Skeleton } from '@twincam/ui/components/skeleton'
 
 const meta = {
   component: Skeleton,

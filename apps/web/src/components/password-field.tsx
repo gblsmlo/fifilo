@@ -1,5 +1,5 @@
-import { Button } from '@twincam/ui/components/button'
-import { InputGroup, InputGroupAddon, InputGroupInput } from '@twincam/ui/components/input-group'
+import { Button } from '@fifilo/ui/components/button'
+import { InputGroup, InputGroupAddon, InputGroupInput } from '@fifilo/ui/components/input-group'
 import { EyeIcon, EyeOffIcon } from 'lucide-react'
 import { type ComponentProps, useId, useState } from 'react'
 

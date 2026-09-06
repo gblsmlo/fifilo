@@ -1,5 +1,5 @@
 {
-  "name": "@twincam/api",
+  "name": "@fifilo/api",
   "private": true,
   "type": "module",
   "exports": {
@@ -13,11 +13,11 @@
   },
   "dependencies": {
     "@elysia/openapi": "^1.4.15",
-    "@twincam/auth": "workspace:*",
-    "@twincam/core": "workspace:*",
-    "@twincam/infra-database": "workspace:*",
-    "@twincam/infra-env": "workspace:*",
-    "@twincam/observability": "workspace:*",
+    "@fifilo/auth": "workspace:*",
+    "@fifilo/core": "workspace:*",
+    "@fifilo/infra-database": "workspace:*",
+    "@fifilo/infra-env": "workspace:*",
+    "@fifilo/observability": "workspace:*",
     "better-auth": "^1.6.0",
     "drizzle-orm": "^0.44.4",
     "elysia": "^1.4.23",

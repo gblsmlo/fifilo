@@ -88,13 +88,13 @@ compose a page; the feature holds `http/`, `hooks/`, `pages/`, `components/`,
 
 ```text
 Web
-  -> public contract in @twincam/core/contracts/<capability>
+  -> public contract in @fifilo/core/contracts/<capability>
   -> Eden client in apps/web/src/libs/api-client.ts
   -> thin route in apps/api/src/features/<capability>
-  -> use case in @twincam/core/<capability>
+  -> use case in @fifilo/core/<capability>
   -> Core port
   -> adapter in the same slice
-  -> workspace transaction in @twincam/infra-database
+  -> workspace transaction in @fifilo/infra-database
 ```
 
 ### Frontend
@@ -132,7 +132,7 @@ capability exists only when it has its own language, rules and use cases.
 ## Enforcement
 
 Boundaries are enforced by the `exports` maps of each package, by the absence
-of `@twincam/*` entries in `tsconfig.base.json` paths, by per-package boundary
+of `@fifilo/*` entries in `tsconfig.base.json` paths, by per-package boundary
 tests where the rule is cheap to assert, and by review. No dedicated
 architecture script exists; adding one is a decision to revisit when a cycle
 between packages or a conditional rule per export appears.

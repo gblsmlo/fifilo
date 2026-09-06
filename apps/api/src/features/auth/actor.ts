@@ -1,6 +1,6 @@
-import { auth } from '@twincam/auth/server'
-import { db } from '@twincam/infra-database/client'
-import { members, organizations, sessions } from '@twincam/infra-database/schema'
+import { auth } from '@fifilo/auth/server'
+import { db } from '@fifilo/infra-database/client'
+import { members, organizations, sessions } from '@fifilo/infra-database/schema'
 import { and, eq } from 'drizzle-orm'
 
 export type ActorContext = {

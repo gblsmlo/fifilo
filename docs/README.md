@@ -1,4 +1,4 @@
-# Twincam documentation
+# Fifilo documentation
 
 The entry point to understand the starter without reconstructing its history.
 A document holds only what only it holds: when a rule lives in a decision or a

@@ -1,4 +1,4 @@
-import { logEvent } from '@twincam/observability/runtime'
+import { logEvent } from '@fifilo/observability/runtime'
 import { hashPassword } from 'better-auth/crypto'
 import { sql } from 'drizzle-orm'
 
@@ -6,17 +6,17 @@ import { db } from './client'
 
 const ORGANIZATION_ID = 'seed_organization'
 const USER_ID = 'seed_owner'
-const OWNER_EMAIL = 'owner@twincam.local'
+const OWNER_EMAIL = 'owner@fifilo.local'
 const OWNER_PASSWORD = 'change-this-owner-password'
 
 // `better-auth/crypto` produces the same hash the auth server verifies, without
-// pulling `@twincam/auth/server` into this package: the database never depends
+// pulling `@fifilo/auth/server` into this package: the database never depends
 // on auth, otherwise auth -> database -> auth becomes a cycle.
 const password = await hashPassword(OWNER_PASSWORD)
 
 await db.execute(sql`
   insert into organizations (id, name, slug, created_at)
-  values (${ORGANIZATION_ID}, 'Twincam Demo', 'twincam-demo', now())
+  values (${ORGANIZATION_ID}, 'Fifilo Demo', 'fifilo-demo', now())
   on conflict (id) do update set name = excluded.name, slug = excluded.slug
 `)
 

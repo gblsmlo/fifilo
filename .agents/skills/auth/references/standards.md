@@ -26,6 +26,6 @@ Use these primary references when designing or reviewing authentication:
 - Prefer RFCs for interoperable protocol requirements.
 - Prefer NIST for identity assurance and lifecycle decisions.
 
-The starter uses Better Auth (`@twincam/auth`) with the organization plugin.
+The starter uses Better Auth (`@fifilo/auth`) with the organization plugin.
 Consult the vendor documentation in addition to these sources, but do not
 replace protocol and browser requirements with vendor defaults.

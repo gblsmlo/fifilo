@@ -1,9 +1,9 @@
 import { treaty } from '@elysia/eden'
+import type { App } from '@fifilo/api/server'
 // Through the alias, not a relative path: `@libs/api-fetch` is the module the
 // Storybook swaps for a browser stub. A relative import bypasses that swap and
 // drags `@tanstack/react-start` into every story that reaches this module.
 import { cookieAwareFetch } from '@libs/api-fetch'
-import type { App } from '@twincam/api/server'
 
 /**
  * Eden builds the URL by concatenation and hands the finished string to the

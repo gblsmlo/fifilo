@@ -10,7 +10,7 @@ The starter ships identity tables only (`users`, `organizations`, `members`,
 `invitations`, `notification_outbox` and friends). Examples that touch a
 tenant-owned business table use an illustrative `records` table with
 `organization_id`; the first real one follows the same shape. The transaction
-helper is `withWorkspaceTransaction` from `@twincam/infra-database/workspace`.
+helper is `withWorkspaceTransaction` from `@fifilo/infra-database/workspace`.
 Official references: [select](https://orm.drizzle.team/docs/select),
 [insert and upsert](https://orm.drizzle.team/docs/insert),
 [update and CTE](https://orm.drizzle.team/docs/update).
@@ -31,7 +31,7 @@ typing and no loss of atomicity.
 Full SQL at runtime is a documented exception with an owner, a justification
 and a proportional test. The exception list lives in the persistence module's
 README and is reviewed with the module. The rule holds by review and by the
-package `exports` map of `@twincam/infra-database`, which exposes the
+package `exports` map of `@fifilo/infra-database`, which exposes the
 transaction helpers and the schema, not a raw SQL executor.
 
 ## Reads
@@ -132,7 +132,7 @@ idempotent contract.
 ### Constraint violations
 
 Handle expected constraint violations at the persistence boundary and convert
-them to a `Result` from `@twincam/core/result`, which the route maps to the
+them to a `Result` from `@fifilo/core/result`, which the route maps to the
 planned HTTP status. Never expose the PostgreSQL message, the constraint name
 or the row as a contract.
 

@@ -1,5 +1,3 @@
-import type { Meta, StoryObj } from '@storybook/react-vite'
-
 import {
   Breadcrumb,
   BreadcrumbEllipsis,
@@ -8,7 +6,8 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
-} from '@twincam/ui/components/breadcrumb'
+} from '@fifilo/ui/components/breadcrumb'
+import type { Meta, StoryObj } from '@storybook/react-vite'
 
 const meta = {
   component: Breadcrumb,

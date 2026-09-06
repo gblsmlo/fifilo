@@ -1,5 +1,5 @@
 {
-  "name": "@twincam/infra-env",
+  "name": "@fifilo/infra-env",
   "private": true,
   "type": "module",
   "scripts": {

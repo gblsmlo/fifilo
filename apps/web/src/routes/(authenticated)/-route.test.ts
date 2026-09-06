@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'bun:test'
 import { loadAuthenticatedRoute } from '@features/auth/route-guard'
 import { CurrentUserUnauthenticatedError } from '@features/users/current-user'
-import type { CurrentUserResponse } from '@twincam/core/contracts/users'
+import type { CurrentUserResponse } from '@fifilo/core/contracts/users'
 
 const currentUser: CurrentUserResponse = {
   organization: {

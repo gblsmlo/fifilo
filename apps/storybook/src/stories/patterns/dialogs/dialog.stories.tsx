@@ -1,6 +1,6 @@
+import { Dialog } from '@fifilo/patterns/dialog'
+import { Button } from '@fifilo/ui/components/button'
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { Dialog } from '@twincam/patterns/dialog'
-import { Button } from '@twincam/ui/components/button'
 import { MaximizeIcon } from 'lucide-react'
 import { expect, waitFor, within } from 'storybook/test'
 import {

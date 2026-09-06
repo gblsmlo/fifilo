@@ -15,9 +15,9 @@ Assign each responsibility to one layer:
 | --- | --- |
 | Login forms and protected navigation | `apps/web/src/features/auth` and the `(auth)` / `(authenticated)` route groups |
 | HTTP status translation | `apps/web/src/features/users/current-user.ts` (Web) and `apps/api/src/features/users` (API) |
-| Public current-user shape | `@twincam/core/contracts/users` (`currentUserResponseSchema`) |
-| Session verification | `@twincam/auth/server` (Better Auth with the organization plugin) |
-| Identity persistence and organization scoping | `@twincam/infra-database` behind the API guard in `apps/api/src/features/auth/actor-context.ts` |
+| Public current-user shape | `@fifilo/core/contracts/users` (`currentUserResponseSchema`) |
+| Session verification | `@fifilo/auth/server` (Better Auth with the organization plugin) |
+| Identity persistence and organization scoping | `@fifilo/infra-database` behind the API guard in `apps/api/src/features/auth/actor-context.ts` |
 | Business authorization | Core use case plus API enforcement through `requireActorContext` |
 
 Routes coordinate. They must not parse cookies, query the database, or recreate
@@ -33,7 +33,7 @@ browser reload
   -> fetchCurrentUser in apps/web/src/features/users/current-user.ts
   -> api.me.get() through @libs/api-client, cookie forwarded by cookieAwareFetch
   -> GET /api/me in apps/api/src/features/users/users.routes.ts
-  -> @twincam/auth/server validates the session; the actor context resolves the organization
+  -> @fifilo/auth/server validates the session; the actor context resolves the organization
   -> currentUserResponseSchema (user, organization, role)
   -> route context and protected page inside AppLayout
 ```

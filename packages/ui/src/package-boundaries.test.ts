@@ -8,7 +8,7 @@ type PackageManifest = {
   scripts?: Record<string, string>
 }
 
-describe('@twincam/ui package boundaries', () => {
+describe('@fifilo/ui package boundaries', () => {
   test('uses relative imports inside the package source', async () => {
     const selfImports: string[] = []
     const sourceFiles = new Bun.Glob('**/*.{ts,tsx}').scan({
@@ -19,7 +19,7 @@ describe('@twincam/ui package boundaries', () => {
     for await (const sourceFile of sourceFiles) {
       if (/\.test\.tsx?$/.test(sourceFile)) continue
       const source = await Bun.file(sourceFile).text()
-      if (source.includes("from '@twincam/ui")) selfImports.push(sourceFile)
+      if (source.includes("from '@fifilo/ui")) selfImports.push(sourceFile)
     }
 
     expect(selfImports).toEqual([])

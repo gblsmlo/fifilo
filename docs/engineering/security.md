@@ -230,7 +230,7 @@ Audit:
 
 Audit events carry references and permitted diffs. They never duplicate
 messages, documents, secrets or complete sensitive records. Security and audit
-events are emitted through `@twincam/observability`.
+events are emitted through `@fifilo/observability`.
 
 ## Gate before real data
 

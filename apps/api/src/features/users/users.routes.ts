@@ -1,5 +1,5 @@
-import { auth } from '@twincam/auth/server'
-import { currentUserResponseSchema } from '@twincam/core/contracts/users'
+import { auth } from '@fifilo/auth/server'
+import { currentUserResponseSchema } from '@fifilo/core/contracts/users'
 import { Elysia } from 'elysia'
 
 import { errorEnvelopeSchema } from '../../libs/http-errors'

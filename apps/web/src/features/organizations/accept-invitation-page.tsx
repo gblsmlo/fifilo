@@ -1,7 +1,7 @@
+import { authClient } from '@fifilo/auth/client'
+import { Button } from '@fifilo/ui/components/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@fifilo/ui/components/card'
 import { useRouter } from '@tanstack/react-router'
-import { authClient } from '@twincam/auth/client'
-import { Button } from '@twincam/ui/components/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@twincam/ui/components/card'
 import { useState } from 'react'
 
 export function AcceptInvitationPage({ invitationId }: Readonly<{ invitationId: string }>) {

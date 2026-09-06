@@ -1,5 +1,5 @@
+import { Button } from '@fifilo/ui/components/button'
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { Button } from '@twincam/ui/components/button'
 import { ArrowRightIcon, PlusIcon, Trash2Icon } from 'lucide-react'
 
 const variants = [

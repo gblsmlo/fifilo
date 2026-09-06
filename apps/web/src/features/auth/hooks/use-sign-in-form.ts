@@ -1,6 +1,6 @@
+import { toastManager } from '@fifilo/ui/components/toast'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useNavigate } from '@tanstack/react-router'
-import { toastManager } from '@twincam/ui/components/toast'
 import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { authFeedback } from '../feedback'

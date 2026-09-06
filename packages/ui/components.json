@@ -1,11 +1,11 @@
 {
   "$schema": "https://ui.shadcn.com/schema.json",
   "aliases": {
-    "components": "@twincam/ui/components",
-    "hooks": "@twincam/ui/hooks",
-    "lib": "@twincam/ui/lib",
-    "ui": "@twincam/ui/components",
-    "utils": "@twincam/ui/lib/utils"
+    "components": "@fifilo/ui/components",
+    "hooks": "@fifilo/ui/hooks",
+    "lib": "@fifilo/ui/lib",
+    "ui": "@fifilo/ui/components",
+    "utils": "@fifilo/ui/lib/utils"
   },
   "iconLibrary": "lucide",
   "registries": {

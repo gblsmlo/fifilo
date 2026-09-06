@@ -1,14 +1,14 @@
 ---
 name: engineering-validation
-description: Validate code changes in the twincam repository with the correct Bun/Biome toolchain, running focused checks first then repository checks proportionally, and reporting environmental blockers honestly. Use after every code change before committing or opening a PR.
-scope: twincam
+description: Validate code changes in the fifilo repository with the correct Bun/Biome toolchain, running focused checks first then repository checks proportionally, and reporting environmental blockers honestly. Use after every code change before committing or opening a PR.
+scope: fifilo
 source: project-local
 date_added: "2026-09-06"
 ---
 
 # engineering-validation
 
-Use this skill after every code change in the twincam repository, before
+Use this skill after every code change in the fifilo repository, before
 committing or opening a PR. It keeps validation proportional to the change and
 honest about what actually ran.
 
@@ -48,13 +48,13 @@ wrong-version runtime causes many validation failures; check it first.
 - Lint and fix a single file: `bunx biome check --write path/to/file`
 - Format a single file: `bunx biome format --write path/to/file`
 - Typecheck: `bun run typecheck`
-- Unit/integration tests: `bun run test` (fans out to every `@twincam/*`
+- Unit/integration tests: `bun run test` (fans out to every `@fifilo/*`
   workspace that declares a `test` script)
-- One workspace only: `bun --filter @twincam/web test`
+- One workspace only: `bun --filter @fifilo/web test`
 - Whitespace hygiene in the working tree: `git diff --check`
 
 Use the exact commands above. Do not substitute `npm run ...` or `npx tsc`
-for the twincam toolchain: the package manager is Bun and the linter/formatter
+for the fifilo toolchain: the package manager is Bun and the linter/formatter
 is Biome.
 
 ### Runner flags per workspace

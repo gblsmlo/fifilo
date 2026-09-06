@@ -1,10 +1,10 @@
-import { api, edenCreated, edenStatus } from '@libs/api-client'
 import {
   type SignUpRequest,
   type SignUpResponse,
   signUpErrorResponseSchema,
   signUpResponseSchema,
-} from '@twincam/core/contracts/auth'
+} from '@fifilo/core/contracts/auth'
+import { api, edenCreated, edenStatus } from '@libs/api-client'
 
 import { AuthRequestError } from './errors'
 

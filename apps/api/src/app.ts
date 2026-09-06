@@ -4,6 +4,8 @@ import { Elysia } from 'elysia'
 
 import type { AccountRouteDependencies } from './features/accounts'
 import { createAccountRoutes } from './features/accounts'
+import type { AnalyticsRouteDependencies } from './features/analytics'
+import { createAnalyticsRoutes } from './features/analytics'
 import { createAuthHandlerRoutes, createAuthRoutes } from './features/auth'
 import type { CategoryRouteDependencies } from './features/categories'
 import { createCategoryRoutes } from './features/categories'
@@ -24,6 +26,7 @@ import { mapValidationError } from './libs/http-errors'
  */
 export type CreateAppDependencies = {
   accounts?: AccountRouteDependencies
+  analytics?: AnalyticsRouteDependencies
   categories?: CategoryRouteDependencies
   creditCards?: CreditCardRouteDependencies
   transactions?: TransactionRouteDependencies
@@ -47,5 +50,6 @@ export const createApp = (dependencies: CreateAppDependencies = {}) =>
     .use(createCategoryRoutes(dependencies.categories))
     .use(createTransactionRoutes(dependencies.transactions))
     .use(createCreditCardRoutes(dependencies.creditCards))
+    .use(createAnalyticsRoutes(dependencies.analytics))
 
 export type App = ReturnType<typeof createApp>

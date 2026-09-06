@@ -8,9 +8,12 @@
   },
   "dependencies": {
     "@fifilo/ui": "workspace:*",
-    "lucide-react": "catalog:"
+    "lucide-react": "catalog:",
+    "recharts": "^3.10.1"
   },
   "exports": {
+    "./charts/ranked-bar-chart": "./src/charts/ranked-bar-chart.tsx",
+    "./charts/trend-line-chart": "./src/charts/trend-line-chart.tsx",
     "./confirm-dialog": "./src/confirm-dialog.tsx",
     "./destructive-dialog": "./src/destructive-dialog.tsx",
     "./dialog": "./src/dialog/index.ts",

@@ -6,8 +6,6 @@ import { Badge } from '@fifilo/ui/components/badge'
 import { Button } from '@fifilo/ui/components/button'
 import { Card, CardHeader, CardTitle } from '@fifilo/ui/components/card'
 import { useState } from 'react'
-import { useReassignCategory } from '../hooks/use-reassign-category'
-import { CategoryRequestError } from '../http/errors'
 
 const CATEGORY_KIND_LABELS: Record<CategoryResponse['kind'], string> = {
   expense: 'Despesa',
@@ -20,26 +18,45 @@ export interface CategoryListError {
   onRetry?: () => void
 }
 
+export interface ReassignCategoryInput {
+  id: string
+  targetCategoryId?: string
+}
+
 interface CategoryListProps {
   categories: readonly CategoryResponse[]
   error?: CategoryListError | null
+  isReassigning?: boolean
+  /** `undefined` clears the error state; set after a failed reassign attempt. */
+  reassignErrorCode?: string | null
+  onReassign: (input: ReassignCategoryInput, onSuccess: () => void) => void
+  onReassignReset: () => void
 }
 
-export function CategoryList({ categories, error = null }: Readonly<CategoryListProps>) {
+/**
+ * Network and mutation state live in the page, this stays presentational
+ * (the same split `account-list.tsx` uses): the dialog only reads what it is
+ * given and calls back out, so it renders and tests without a QueryClient.
+ */
+export function CategoryList({
+  categories,
+  error = null,
+  isReassigning = false,
+  onReassign,
+  onReassignReset,
+  reassignErrorCode = null,
+}: Readonly<CategoryListProps>) {
   const [pendingId, setPendingId] = useState<string | null>(null)
   const [targetCategoryId, setTargetCategoryId] = useState('')
-  const reassign = useReassignCategory()
   const pending = categories.find((category) => category.id === pendingId) ?? null
 
-  const needsTarget =
-    reassign.isError &&
-    reassign.error instanceof CategoryRequestError &&
-    reassign.error.code === 'target_category_required'
+  const needsTarget = reassignErrorCode === 'target_category_required'
+  const hasOtherError = reassignErrorCode !== null && !needsTarget
 
   const closeDialog = () => {
     setPendingId(null)
     setTargetCategoryId('')
-    reassign.reset()
+    onReassignReset()
   }
 
   if (error) {
@@ -95,17 +112,15 @@ export function CategoryList({ categories, error = null }: Readonly<CategoryList
       ))}
 
       <Dialog
-        errorMessage={
-          reassign.isError && !needsTarget ? 'Não foi possível reatribuir a categoria.' : undefined
-        }
+        errorMessage={hasOtherError ? 'Não foi possível reatribuir a categoria.' : undefined}
         footer={
           <Button
             disabled={needsTarget && targetCategoryId === ''}
-            loading={reassign.isPending}
+            loading={isReassigning}
             onClick={() =>
-              reassign.mutate(
+              onReassign(
                 { id: pending?.id ?? '', targetCategoryId: targetCategoryId || undefined },
-                { onSuccess: closeDialog },
+                closeDialog,
               )
             }
             type='button'

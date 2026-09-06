@@ -1,5 +1,5 @@
 import { Button } from '@fifilo/ui/components/button'
-import { Field, FieldError, FieldLabel } from '@fifilo/ui/components/field'
+import { Field, FieldControl, FieldError, FieldLabel } from '@fifilo/ui/components/field'
 import { Form } from '@fifilo/ui/components/form'
 import { Input } from '@fifilo/ui/components/input'
 import { MoneyInput } from '@fifilo/ui/components/money-input'
@@ -61,27 +61,35 @@ export function IncomeExpenseFormFields({
 
       <Field invalid={Boolean(errors.accountId)} name='accountId'>
         <FieldLabel>Conta</FieldLabel>
-        <select {...register('accountId')} className={selectClassName}>
-          <option value=''>Selecione uma conta</option>
-          {accountOptions.map((account) => (
-            <option key={account.id} value={account.id}>
-              {account.name}
-            </option>
-          ))}
-        </select>
+        <FieldControl
+          render={
+            <select {...register('accountId')} className={selectClassName}>
+              <option value=''>Selecione uma conta</option>
+              {accountOptions.map((account) => (
+                <option key={account.id} value={account.id}>
+                  {account.name}
+                </option>
+              ))}
+            </select>
+          }
+        />
         <FieldError>{errors.accountId?.message}</FieldError>
       </Field>
 
       <Field invalid={Boolean(errors.categoryId)} name='categoryId'>
         <FieldLabel>Categoria</FieldLabel>
-        <select {...register('categoryId')} className={selectClassName}>
-          <option value=''>Selecione uma categoria</option>
-          {categoryOptions.map((category) => (
-            <option key={category.id} value={category.id}>
-              {category.name}
-            </option>
-          ))}
-        </select>
+        <FieldControl
+          render={
+            <select {...register('categoryId')} className={selectClassName}>
+              <option value=''>Selecione uma categoria</option>
+              {categoryOptions.map((category) => (
+                <option key={category.id} value={category.id}>
+                  {category.name}
+                </option>
+              ))}
+            </select>
+          }
+        />
         <FieldError>{errors.categoryId?.message}</FieldError>
       </Field>
 
@@ -134,27 +142,35 @@ export function TransferFormFields({ accountOptions, onSubmit }: Readonly<Transf
 
       <Field invalid={Boolean(errors.fromAccountId)} name='fromAccountId'>
         <FieldLabel>Conta de origem</FieldLabel>
-        <select {...register('fromAccountId')} className={selectClassName}>
-          <option value=''>Selecione uma conta</option>
-          {accountOptions.map((account) => (
-            <option key={account.id} value={account.id}>
-              {account.name}
-            </option>
-          ))}
-        </select>
+        <FieldControl
+          render={
+            <select {...register('fromAccountId')} className={selectClassName}>
+              <option value=''>Selecione uma conta</option>
+              {accountOptions.map((account) => (
+                <option key={account.id} value={account.id}>
+                  {account.name}
+                </option>
+              ))}
+            </select>
+          }
+        />
         <FieldError>{errors.fromAccountId?.message}</FieldError>
       </Field>
 
       <Field invalid={Boolean(errors.toAccountId)} name='toAccountId'>
         <FieldLabel>Conta de destino</FieldLabel>
-        <select {...register('toAccountId')} className={selectClassName}>
-          <option value=''>Selecione uma conta</option>
-          {accountOptions.map((account) => (
-            <option key={account.id} value={account.id}>
-              {account.name}
-            </option>
-          ))}
-        </select>
+        <FieldControl
+          render={
+            <select {...register('toAccountId')} className={selectClassName}>
+              <option value=''>Selecione uma conta</option>
+              {accountOptions.map((account) => (
+                <option key={account.id} value={account.id}>
+                  {account.name}
+                </option>
+              ))}
+            </select>
+          }
+        />
         <FieldError>{errors.toAccountId?.message}</FieldError>
       </Field>
 

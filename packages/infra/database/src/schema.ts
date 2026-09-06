@@ -1,10 +1,15 @@
-import { relations } from 'drizzle-orm'
+import { relations, sql } from 'drizzle-orm'
 import {
+  bigint,
   boolean,
+  char,
+  date,
+  foreignKey,
   index,
   integer,
   jsonb,
   pgTable,
+  primaryKey,
   text,
   timestamp,
   uniqueIndex,
@@ -172,6 +177,93 @@ export const notificationOutbox = pgTable(
   ],
 )
 
+/**
+ * The first tenant-owned table (Fase 01). Composite primary key and every
+ * foreign key between tenant tables carry `organization_id` (Decision 019):
+ * referential-integrity checks bypass row security, so a simple key would
+ * only prove a row exists, not that it belongs to this workspace. RLS itself
+ * (Decision 020) is applied by hand in the migration this table ships in —
+ * `enable`, `force` and the policy have no Drizzle Kit builder.
+ */
+export const financialAccounts = pgTable(
+  'financial_accounts',
+  {
+    organizationId: text('organization_id')
+      .notNull()
+      .references(() => organizations.id, { onDelete: 'cascade' }),
+    id: text('id').notNull(),
+    kind: text('kind').notNull(),
+    name: text('name').notNull(),
+    institution: text('institution'),
+    currency: char('currency', { length: 3 }).notNull(),
+    color: text('color'),
+    icon: text('icon'),
+    archivedAt: timestamp('archived_at', { withTimezone: true }),
+    version: integer('version').notNull().default(1),
+    createdBy: text('created_by')
+      .notNull()
+      .references(() => users.id),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.organizationId, table.id] }),
+    // Archiving and recreating an account under the same name must work
+    // (Fase 01 § Riscos): a total unique index would forbid it, so only an
+    // active row competes for the name.
+    uniqueIndex('financial_accounts_org_name_unique')
+      .on(table.organizationId, sql`lower(${table.name})`)
+      .where(sql`${table.archivedAt} is null`),
+  ],
+)
+
+/**
+ * The perna (leg) of any money movement (Fase 01 § Modelagem). No
+ * `to_account_id` on a `transactions` row: a transfer is a pair of entries
+ * summing to zero, a balance is `sum(amount_minor)` with no special case, and
+ * a card statement is a query over entries, not a second model. `transaction_id`
+ * has no foreign key yet - `transactions` is Fase 02's table; the column
+ * exists now so this table needs no shape migration when it arrives.
+ */
+export const entries = pgTable(
+  'entries',
+  {
+    organizationId: text('organization_id')
+      .notNull()
+      .references(() => organizations.id, { onDelete: 'cascade' }),
+    id: text('id').notNull(),
+    transactionId: text('transaction_id'),
+    accountId: text('account_id').notNull(),
+    amountMinor: bigint('amount_minor', { mode: 'number' }).notNull(),
+    currency: char('currency', { length: 3 }).notNull(),
+    occurredOn: date('occurred_on').notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.organizationId, table.id] }),
+    foreignKey({
+      columns: [table.organizationId, table.accountId],
+      foreignColumns: [financialAccounts.organizationId, financialAccounts.id],
+    }),
+    index('entries_org_account_occurred_idx').on(
+      table.organizationId,
+      table.accountId,
+      table.occurredOn,
+    ),
+  ],
+)
+
+export const financialAccountsRelations = relations(financialAccounts, ({ many }) => ({
+  entries: many(entries),
+}))
+
+export const entriesRelations = relations(entries, ({ one }) => ({
+  account: one(financialAccounts, {
+    fields: [entries.organizationId, entries.accountId],
+    references: [financialAccounts.organizationId, financialAccounts.id],
+  }),
+}))
+
 export const usersRelations = relations(users, ({ many }) => ({
   accounts: many(accounts),
   invitations: many(invitations),
@@ -199,5 +291,7 @@ export const authSchema = {
 
 export const databaseSchema = {
   ...authSchema,
+  entries,
+  financialAccounts,
   notificationOutbox,
 }

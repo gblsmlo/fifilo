@@ -68,4 +68,20 @@ describe('GET /api/me', () => {
       user: { email: 'ana@example.com', id: 'user_1', image: null, name: 'ana@example.com' },
     })
   })
+
+  test('exposes viewer once the access-control policy declares it (Fase 04 § Critério de conclusão)', async () => {
+    const response = await me(
+      createUserRoutes({
+        resolveActor: async () => ({
+          ...withWorkspace,
+          context: { ...withWorkspace.context, role: 'viewer' },
+        }),
+        resolveSession: async () => user,
+      }),
+    )
+
+    expect(response.status).toBe(200)
+    const body = (await response.json()) as { role: string | null }
+    expect(body.role).toBe('viewer')
+  })
 })

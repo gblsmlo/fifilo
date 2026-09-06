@@ -52,7 +52,7 @@ produto inteiro sem IA.
 | 01 | [Contas, carteiras e saldo](fase-01-contas-carteiras-e-saldo.md) | Concluída |
 | 02 | [Categorias e transações](fase-02-categorias-e-transacoes.md) | Concluída |
 | 03 | [Cartão de crédito](fase-03-cartao-de-credito.md) | Concluída |
-| 04 | [Workspace compartilhado](fase-04-workspace-compartilhado.md) | Planejada |
+| 04 | [Workspace compartilhado](fase-04-workspace-compartilhado.md) | Concluída |
 | 05 | [Analytics e gráficos](fase-05-analytics-e-graficos.md) | Planejada |
 | 06 | [Settings, aceitação e entrega](fase-06-settings-e-aceitacao.md) | Planejada |
 

@@ -48,6 +48,7 @@ the successor exists; the successor adds its own row here.
 | 023 | [a transfer is a two-leg zero-sum transaction with no category](023-transfer-is-a-two-leg-zero-sum-transaction.md) | active |
 | 024 | [the invoice is a row with state; the cycle is derived from the closing day](024-invoice-is-a-row-with-state-cycle-is-derived.md) | active |
 | 025 | [paying an invoice is a transfer, not a new movement type](025-paying-an-invoice-is-a-transfer.md) | active |
+| 026 | [the organization is the financial workspace; `viewer` is the read-only role, decided in the use case](026-viewer-role-and-use-case-authorization.md) | active |
 
 ## Historical
 

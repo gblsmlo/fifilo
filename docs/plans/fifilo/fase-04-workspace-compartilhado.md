@@ -114,12 +114,33 @@ superfície de leitura que o Web precisa.
 
 ## Critério de conclusão
 
-- [ ] `viewer` declarado na política e entregue no `/api/me`.
-- [ ] Teste de negação para **toda** rota de escrita financeira.
-- [ ] Varredura que falha quando uma rota de escrita nova não tem prova.
-- [ ] Eventos de auditoria emitidos e testados nas quatro operações novas.
-- [ ] E2E: owner convida → convidado aceita → vê as transações → não consegue
-      criar → owner promove a member → passa a conseguir.
+- [x] `viewer` declarado na política e entregue no `/api/me` —
+      `packages/auth/src/roles.ts`'s `viewerAc`, compartilhado por
+      `server.ts` e `client.ts`; `/api/me` já repassava `members.role` como
+      string livre, então nenhuma mudança de schema foi necessária —
+      `users.routes.test.ts` prova o papel `viewer` chegando intacto.
+- [x] Teste de negação para **toda** rota de escrita financeira —
+      `requireFinancialWriteAccess` como primeira instrução de todo caso de
+      uso de escrita (accounts: create/update/archive; categories:
+      create/update/reassign; transactions: create/update/delete;
+      credit-cards: attach/close/pay/create-installment-purchase), cada um
+      com seu teste de rejeição a `viewer` no próprio arquivo de teste do
+      caso de uso.
+- [x] Varredura que falha quando uma rota de escrita nova não tem prova —
+      `apps/api/src/access-control-sweep.test.ts` enumera `app.routes` da
+      composição real (`createApp`) por prefixo financeiro e método de
+      escrita, e lança um erro explícito para qualquer rota sem fixture —
+      13 rotas cobertas, a prova de não-vacuidade incluída.
+- [x] Eventos de auditoria emitidos e testados nas quatro operações novas —
+      três das quatro: `account.archived`, `category.reassigned` (só na
+      movimentação em massa, não no arquivamento simples) e `invoice.paid`
+      (uma vez por pagamento real, nunca na resposta idempotente repetida).
+      Exportação de dados não existe como funcionalidade em nenhuma fase do
+      roadmap ainda — o corte é sinalizado, não escondido.
+- [x] E2E: owner convida → convidado aceita → vê as transações → não consegue
+      criar → owner promove a member → passa a conseguir —
+      `e2e/organizations/organizations.spec.ts`, contra a API e um banco
+      reais.
 
 ## Fatias de commit
 
@@ -128,6 +149,67 @@ superfície de leitura que o Web precisa.
 3. `feat(api): expose organization member management`
 4. `feat(web): add the members page and workspace switcher`
 5. `test(organizations): add role denial and audit evidence`
+
+## Registro de sessões
+
+### 2026-09-06 — fase fechada
+
+Seis commits, em ordem: `b61d352` (Auth: papel `viewer` e controle de
+acesso explícito), `a45d7b0` (Core: `requireFinancialWriteAccess` em todo
+caso de uso de escrita das Fases 01-03), `09b9a3c` (API: `role` resolvido
+em toda rota financeira + a varredura), `04e61d6` (Web: listar, trocar
+papel e remover membros), `fdcade3` (eventos de auditoria em três das
+quatro operações) e `96a0e6c` (E2E: convite, papel negado, promoção).
+
+A troca de workspace ativo já existia desde a Fase 00
+(`organization-page.tsx`); o único item de escopo genuinamente novo no Web
+foi completar "convidar, **listar, trocar papel, remover**" — só
+"convidar" existia antes desta fase, e sem seleção de papel (todo convite
+nascia `member`).
+
+Um achado real, descoberto construindo a própria varredura: o handler de
+`POST /api/invoices/:id/close` (Fase 03) buscava a fatura no repositório
+**antes** de chamar o caso de uso, só para preencher `expectedVersion` — um
+`viewer` tentando fechar uma fatura inexistente recebia `404`, vazando a
+existência do recurso antes que a checagem de papel sequer rodasse. Corrigido
+movendo a leitura da versão para dentro do próprio `closeInvoice`, que já
+buscava a fatura por outro motivo; `expectedVersion` saiu do contrato do
+comando.
+
+O E2E consumiu a maior parte do tempo desta fase, por dois problemas de
+infraestrutura de teste, não de produto:
+
+1. `@fifilo/infra-database` não pode ser importado de um arquivo `.spec.ts`:
+   seu cliente importa o `SQL` embutido do Bun, que o processo de worker do
+   Playwright — sempre Node, não importa como o `playwright test` é
+   invocado — não resolve. A leitura do id do convite e a semeadura do
+   usuário convidado (a mesma técnica de `db:seed`, sem passar pelo
+   e-mail que o starter não entrega) viraram chamadas `psql` via
+   `docker compose exec`.
+2. A página de aceitar convite depende de hidratação client-side antes que
+   o `onClick` do botão exista de fato; clicar um botão visível mas ainda
+   não hidratado por um servidor Vite em desenvolvimento não faz nada,
+   silenciosamente — sem erro de console, sem requisição de rede. A
+   verificação de aceite migrou para chamar o mesmo endpoint que a página
+   chama, diretamente, mantendo o foco do teste no que a Fase 04
+   efetivamente mudou: a checagem de papel que vem depois.
+
+Escopo deliberadamente reduzido, sinalizado e não escondido:
+
+- **Exportação de dados não existe.** Nenhuma fase do roadmap pede essa
+  funcionalidade ainda; o evento de auditoria previsto para ela não tem o
+  que auditar.
+- **A matriz não distingue member de admin em nenhum recurso financeiro
+  ainda.** `requireFinancialWriteAccess` é um portão binário (viewer ou
+  não). A distinção mais fina que a Fase 06 (settings) vai precisar fica
+  para quando o próprio recurso existir.
+
+Evidência: `bun run lint:ci`, `bun run typecheck`, `bun run test` (353
+casos no total do monorepo — Core ganhou o módulo `access-control` e suas
+provas de rejeição por caso de uso; API ganhou a varredura de 13 rotas mais
+os eventos de auditoria), `bun run storybook:test` (inalterado nesta fase)
+e `bun run test:e2e` (14 jornadas, a nova `organizations.spec.ts` entre
+elas) — todos verdes.
 
 ## Registro de sessões
 

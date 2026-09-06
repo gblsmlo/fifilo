@@ -48,7 +48,7 @@ produto inteiro sem IA.
 
 | Fase | Título | Estado |
 | ---: | --- | --- |
-| 00 | [Fundação do produto](fase-00-fundacao-do-produto.md) | Planejada |
+| 00 | [Fundação do produto](fase-00-fundacao-do-produto.md) | Concluída |
 | 01 | [Contas, carteiras e saldo](fase-01-contas-carteiras-e-saldo.md) | Planejada |
 | 02 | [Categorias e transações](fase-02-categorias-e-transacoes.md) | Planejada |
 | 03 | [Cartão de crédito](fase-03-cartao-de-credito.md) | Planejada |

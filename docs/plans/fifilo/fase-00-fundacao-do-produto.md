@@ -174,15 +174,41 @@ Numeração a partir de 017 porque 016 é a última ativa em
 
 ## Critério de conclusão
 
-- [ ] Zero ocorrências de `twincam` fora do histórico do Git.
-- [ ] `bun run lint:ci`, `bun run typecheck`, `bun run test` verdes na raiz.
-- [ ] `docker compose build` e `docker compose up` sobem com o nome novo.
-- [ ] `Money` com teste de rateio e de estouro de limite.
-- [ ] Helper de policy + migração aplicada em banco limpo + as cinco provas
-      negativas passando contra PostgreSQL real.
-- [ ] `idempotency.ts` com teste de chave repetida devolvendo o resultado
-      guardado, sem segundo efeito.
-- [ ] Decisões 017–020 registradas e indexadas.
+- [x] Zero ocorrências de `twincam` fora do histórico do Git — com três
+      exceções deliberadas, não o Git em si: `docs/plans/2026-09-atualizacao-layers-tooling.md`
+      (plano anterior à identidade do produto), `docs/bugs/001-*.md` (evidência
+      presa à revisão `8d98f66`, anterior ao rename) e as duas linhas de
+      genealogia em `docs/plans/fifilo/` (`README.md` e este arquivo) que
+      nomeiam o starter de origem. Reescrever essas quatro ocorrências
+      falsificaria o registro histórico que elas existem para preservar;
+      nenhuma delas é `@twincam/*`, import, config ou qualquer coisa que
+      `typecheck`/`build` exercite. Zero ocorrências em código, config, skills
+      e docs vivos — verificado por grep no diretório de trabalho inteiro.
+- [x] `bun run lint:ci`, `bun run typecheck`, `bun run test` verdes na raiz —
+      136 testes.
+- [x] `docker compose build` e `docker compose up` sobem com o nome novo —
+      verificado com o volume recriado do zero (`docker compose down -v`),
+      `<title>Fifilo</title>` servido pelo Web.
+- [x] `Money` com teste de rateio e de estouro de limite —
+      `packages/core/src/primitives.test.ts`, 13 casos.
+- [x] Helper de policy + migração aplicada em banco limpo + as cinco provas
+      negativas passando contra PostgreSQL real — e, a caminho disso, um
+      achado que o próprio risco desta fase previu: a imagem oficial do
+      Postgres sempre inicia `POSTGRES_USER` como superusuário, e `FORCE ROW
+      LEVEL SECURITY` não tem efeito sobre um superusuário. A primeira
+      execução da suíte reproduziu exatamente isso — prova 2 vazou, prova 3
+      não rejeitou. `bun run db:bootstrap-roles` (novo, idempotente) resolve
+      criando o papel `POSTGRES_APP_USER`, não-superusuário, que `DATABASE_URL`
+      passa a usar.
+- [x] `idempotency.ts` com teste de chave repetida devolvendo o resultado
+      guardado, sem segundo efeito — `apps/api/src/libs/idempotency.ts`,
+      5 casos. `idempotency_records` não é uma tabela migrada: nada no
+      repositório hoje chama um efeito externo que precise dela, a mesma razão
+      pela qual a suíte de RLS usa uma fixture descartável em vez de uma tabela
+      real. `IdempotencyStore` é a porta que o primeiro adapter real
+      implementa.
+- [x] Decisões 017–020 registradas e indexadas — registradas em sessão
+      anterior a esta (commit `533f9b7`); confirmadas ativas no índice.
 
 ## Fatias de commit
 
@@ -194,4 +220,21 @@ Numeração a partir de 017 porque 016 é a última ativa em
 
 ## Registro de sessões
 
-_(a preencher durante a execução)_
+### 2026-09-06 — fase fechada
+
+As cinco fatias de commit, em ordem: `55a6063` (rename), `5e8dbb1` (Money),
+`f13f61f` (policy de tenant + papéis de banco), `297e91a` (idempotência); as
+decisões 017–020 já vinham de `533f9b7`, de uma sessão anterior.
+
+Achado fora do escopo original da fase, registrado e corrigido no mesmo commit
+que a suíte de RLS: a role de aplicação precisou deixar de ser a mesma role
+dona do schema, porque a imagem oficial do Postgres torna `POSTGRES_USER`
+superusuário e nenhum superusuário é afetado por `FORCE ROW LEVEL SECURITY`.
+Sem o papel `fifilo_app`, a suíte de cinco provas passaria verde sem proteger
+nada — exatamente o modo de falha que a seção Riscos desta fase já nomeava.
+
+Evidência: `bun run lint:ci`, `bun run typecheck`, `bun run test` (136 casos),
+`bun run test:e2e` (9 jornadas), `bun run storybook:test` (130 histórias),
+`docker compose build` e um `docker compose up` completo com volume recriado
+do zero, sign-in do owner semeado e `<title>Fifilo</title>` servido pelo Web —
+todos verdes.

@@ -317,4 +317,45 @@ describe('analytics persistence', () => {
 
     expect(result).toEqual({ availableCashMinor: 30_000, committedInvoiceMinor: 0 })
   })
+
+  test('an empty period reports no rows, not an error', async () => {
+    const points = await reader.monthlyCashflow({
+      from: '2030-01-01',
+      organizationId: ORGANIZATION_A,
+      to: '2030-12-31',
+    })
+
+    expect(points).toEqual([])
+  })
+
+  test('a month with no movement inside the queried range is simply absent, not zero-filled', async () => {
+    const points = await reader.monthlyCashflow({
+      from: '2026-01-01',
+      organizationId: ORGANIZATION_A,
+      to: '2026-04-30',
+    })
+
+    expect(points.map((point) => point.month)).toEqual(['2026-01', '2026-02'])
+  })
+
+  test('an archived account still reports its historical spend', async () => {
+    await withWorkspaceTransactionOn(db, ORGANIZATION_A, (tx) =>
+      tx
+        .update(financialAccounts)
+        .set({ archivedAt: new Date() })
+        .where(eq(financialAccounts.id, checkingId)),
+    )
+
+    const rows = await reader.spendByAccount({
+      from: '2026-01-01',
+      organizationId: ORGANIZATION_A,
+      to: '2026-02-28',
+    })
+
+    expect(rows).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ accountId: checkingId, totalMinor: 20_000 }),
+      ]),
+    )
+  })
 })

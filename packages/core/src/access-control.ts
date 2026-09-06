@@ -33,3 +33,23 @@ export const requireFinancialWriteAccess = (
   role === 'viewer'
     ? err(forbiddenError('insufficient_role', 'A read-only member cannot make this change.'))
     : ok(true)
+
+/**
+ * Workspace settings are the first resource where member and admin diverge
+ * (Decision 026's own revisit trigger): `currency`, `timezone` and
+ * `monthStartDay` change every projection and every new entry's civil date
+ * for the whole workspace, so only `owner` and `admin` may change them - a
+ * `member` keeps read/write on every financial resource but not on the
+ * settings that define how they are all interpreted.
+ */
+export const requireSettingsWriteAccess = (
+  role: WorkspaceRole,
+): Result<true, AccessControlError> =>
+  role === 'owner' || role === 'admin'
+    ? ok(true)
+    : err(
+        forbiddenError(
+          'insufficient_role',
+          'Only an owner or admin can change workspace settings.',
+        ),
+      )

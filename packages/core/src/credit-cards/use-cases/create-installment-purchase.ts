@@ -1,3 +1,8 @@
+import {
+  type AccessControlError,
+  type WorkspaceRole,
+  requireFinancialWriteAccess,
+} from '../../access-control'
 import { type DomainError, conflictError, notFoundError, validationError } from '../../errors'
 import type { EntityId } from '../../primitives'
 import { generateEntityId } from '../../primitives'
@@ -21,22 +26,25 @@ export type CreateInstallmentPurchaseCommand = {
   installments: number
   notes: string | null
   organizationId: string
+  role: WorkspaceRole
   today: string
   totalMinor: number
   userId: EntityId
 }
 
-export type CreateInstallmentPurchaseError = DomainError<
-  'conflict' | 'not_found' | 'validation',
-  | 'account_archived'
-  | 'account_not_credit_card'
-  | 'account_not_found'
-  | 'category_archived'
-  | 'category_kind_mismatch'
-  | 'category_not_found'
-  | 'credit_card_not_configured'
-  | 'invalid_installment_count'
->
+export type CreateInstallmentPurchaseError =
+  | DomainError<
+      'conflict' | 'not_found' | 'validation',
+      | 'account_archived'
+      | 'account_not_credit_card'
+      | 'account_not_found'
+      | 'category_archived'
+      | 'category_kind_mismatch'
+      | 'category_not_found'
+      | 'credit_card_not_configured'
+      | 'invalid_installment_count'
+    >
+  | AccessControlError
 
 const checkCategory = async (
   organizationId: string,
@@ -72,6 +80,9 @@ export const createInstallmentPurchase = async (
   accounts: CardAccountLookup,
   categories: CategoryLookup,
 ): Promise<Result<EntityId[], CreateInstallmentPurchaseError>> => {
+  const access = requireFinancialWriteAccess(command.role)
+  if (!access.ok) return access
+
   const account = await accounts.findById(command.organizationId, command.accountId)
   if (!account) return err(notFoundError('account_not_found', 'Account not found.'))
   if (account.archivedAt) {

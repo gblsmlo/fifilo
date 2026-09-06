@@ -1,3 +1,8 @@
+import {
+  type AccessControlError,
+  type WorkspaceRole,
+  requireFinancialWriteAccess,
+} from '../../access-control'
 import { type DomainError, conflictError, notFoundError } from '../../errors'
 import type { EntityId } from '../../primitives'
 import { type Result, err, ok } from '../../result'
@@ -10,17 +15,23 @@ export type UpdateAccountCommand = {
   id: EntityId
   organizationId: string
   patch: AccountUpdatePatch
+  role: WorkspaceRole
 }
 
-export type UpdateAccountError = DomainError<
-  'conflict' | 'not_found',
-  'account_name_taken' | 'account_not_found' | 'version_conflict'
->
+export type UpdateAccountError =
+  | DomainError<
+      'conflict' | 'not_found',
+      'account_name_taken' | 'account_not_found' | 'version_conflict'
+    >
+  | AccessControlError
 
 export const updateAccount = async (
   command: UpdateAccountCommand,
   repository: AccountRepository,
 ): Promise<Result<Account, UpdateAccountError>> => {
+  const access = requireFinancialWriteAccess(command.role)
+  if (!access.ok) return access
+
   if (command.patch.name) {
     const nameKey = accountNameKey(command.patch.name)
     const existing = await repository.findByName(command.organizationId, nameKey)

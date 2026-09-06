@@ -28,7 +28,10 @@ describe('archiveAccount', () => {
     const account = seedAccount()
     const repository = createFakeAccountRepository([account])
 
-    const result = await archiveAccount({ id: account.id, organizationId: 'org_a' }, repository)
+    const result = await archiveAccount(
+      { id: account.id, organizationId: 'org_a', role: 'owner' },
+      repository,
+    )
 
     expect(result.ok).toBe(true)
     if (!result.ok) return
@@ -42,7 +45,10 @@ describe('archiveAccount', () => {
     const account = seedAccount()
     const repository = createFakeAccountRepository([account])
 
-    const result = await archiveAccount({ id: account.id, organizationId: 'org_a' }, repository)
+    const result = await archiveAccount(
+      { id: account.id, organizationId: 'org_a', role: 'owner' },
+      repository,
+    )
 
     expect(result.ok).toBe(true)
 
@@ -54,7 +60,10 @@ describe('archiveAccount', () => {
     const account = seedAccount()
     const repository = createFakeAccountRepository([account])
 
-    const result = await archiveAccount({ id: account.id, organizationId: 'org_b' }, repository)
+    const result = await archiveAccount(
+      { id: account.id, organizationId: 'org_b', role: 'owner' },
+      repository,
+    )
 
     expect(result.ok).toBe(false)
     if (!result.ok) expect(result.error.code).toBe('account_not_found')

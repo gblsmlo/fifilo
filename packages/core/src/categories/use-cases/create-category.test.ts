@@ -32,6 +32,7 @@ describe('createCategory', () => {
         name: 'Transporte',
         organizationId: 'org_a',
         parentId: null,
+        role: 'owner',
       },
       repository,
     )
@@ -53,6 +54,7 @@ describe('createCategory', () => {
         name: 'Aluguel',
         organizationId: 'org_a',
         parentId: parent.id,
+        role: 'owner',
       },
       repository,
     )
@@ -72,6 +74,7 @@ describe('createCategory', () => {
         name: 'Aluguel',
         organizationId: 'org_a',
         parentId: parent.id,
+        role: 'owner',
       },
       repository,
     )
@@ -85,6 +88,7 @@ describe('createCategory', () => {
         name: 'Condomínio',
         organizationId: 'org_a',
         parentId: child.value.id,
+        role: 'owner',
       },
       repository,
     )
@@ -103,6 +107,7 @@ describe('createCategory', () => {
         name: 'Transporte',
         organizationId: 'org_a',
         parentId: null,
+        role: 'owner',
       },
       repository,
     )
@@ -115,6 +120,7 @@ describe('createCategory', () => {
         name: 'transporte',
         organizationId: 'org_a',
         parentId: null,
+        role: 'owner',
       },
       repository,
     )
@@ -133,6 +139,7 @@ describe('createCategory', () => {
         name: 'Outros',
         organizationId: 'org_a',
         parentId: null,
+        role: 'owner',
       },
       repository,
     )
@@ -145,6 +152,7 @@ describe('createCategory', () => {
         name: 'Outros',
         organizationId: 'org_a',
         parentId: null,
+        role: 'owner',
       },
       repository,
     )

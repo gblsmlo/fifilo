@@ -26,7 +26,7 @@ describe('reassignCategory', () => {
     const repository = createFakeCategoryRepository([category])
 
     const result = await reassignCategory(
-      { id: category.id, organizationId: 'org_a', targetCategoryId: null },
+      { id: category.id, organizationId: 'org_a', role: 'owner', targetCategoryId: null },
       repository,
     )
 
@@ -40,7 +40,7 @@ describe('reassignCategory', () => {
     const repository = createFakeCategoryRepository([category], { [category.id]: 3 })
 
     const result = await reassignCategory(
-      { id: category.id, organizationId: 'org_a', targetCategoryId: null },
+      { id: category.id, organizationId: 'org_a', role: 'owner', targetCategoryId: null },
       repository,
     )
 
@@ -54,7 +54,7 @@ describe('reassignCategory', () => {
     const repository = createFakeCategoryRepository([category, target], { [category.id]: 2 })
 
     const result = await reassignCategory(
-      { id: category.id, organizationId: 'org_a', targetCategoryId: target.id },
+      { id: category.id, organizationId: 'org_a', role: 'owner', targetCategoryId: target.id },
       repository,
     )
 
@@ -68,7 +68,7 @@ describe('reassignCategory', () => {
     const repository = createFakeCategoryRepository([category, target], { [category.id]: 5 })
 
     const result = await reassignCategory(
-      { id: category.id, organizationId: 'org_a', targetCategoryId: target.id },
+      { id: category.id, organizationId: 'org_a', role: 'owner', targetCategoryId: target.id },
       repository,
     )
 
@@ -84,7 +84,7 @@ describe('reassignCategory', () => {
     const repository = createFakeCategoryRepository()
 
     const result = await reassignCategory(
-      { id: generateEntityId(), organizationId: 'org_a', targetCategoryId: null },
+      { id: generateEntityId(), organizationId: 'org_a', role: 'owner', targetCategoryId: null },
       repository,
     )
 

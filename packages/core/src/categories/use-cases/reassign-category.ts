@@ -1,3 +1,8 @@
+import {
+  type AccessControlError,
+  type WorkspaceRole,
+  requireFinancialWriteAccess,
+} from '../../access-control'
 import { type DomainError, notFoundError, validationError } from '../../errors'
 import type { EntityId } from '../../primitives'
 import { type Result, err, ok } from '../../result'
@@ -7,13 +12,16 @@ import type { CategoryRepository } from '../ports'
 export type ReassignCategoryCommand = {
   id: EntityId
   organizationId: string
+  role: WorkspaceRole
   targetCategoryId: EntityId | null
 }
 
-export type ReassignCategoryError = DomainError<
-  'not_found' | 'validation',
-  'category_not_found' | 'invalid_target_category' | 'target_category_required'
->
+export type ReassignCategoryError =
+  | DomainError<
+      'not_found' | 'validation',
+      'category_not_found' | 'invalid_target_category' | 'target_category_required'
+    >
+  | AccessControlError
 
 /**
  * A category with nothing pointing at it just archives. One with existing
@@ -25,6 +33,9 @@ export const reassignCategory = async (
   command: ReassignCategoryCommand,
   repository: CategoryRepository,
 ): Promise<Result<Category, ReassignCategoryError>> => {
+  const access = requireFinancialWriteAccess(command.role)
+  if (!access.ok) return access
+
   const category = await repository.findById(command.organizationId, command.id)
   if (!category) return err(notFoundError('category_not_found', 'Category not found.'))
 

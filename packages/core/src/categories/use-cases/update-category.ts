@@ -1,3 +1,8 @@
+import {
+  type AccessControlError,
+  type WorkspaceRole,
+  requireFinancialWriteAccess,
+} from '../../access-control'
 import { type DomainError, conflictError, notFoundError } from '../../errors'
 import type { EntityId } from '../../primitives'
 import { type Result, err, ok } from '../../result'
@@ -10,17 +15,23 @@ export type UpdateCategoryCommand = {
   id: EntityId
   organizationId: string
   patch: CategoryUpdatePatch
+  role: WorkspaceRole
 }
 
-export type UpdateCategoryError = DomainError<
-  'conflict' | 'not_found',
-  'category_name_taken' | 'category_not_found' | 'version_conflict'
->
+export type UpdateCategoryError =
+  | DomainError<
+      'conflict' | 'not_found',
+      'category_name_taken' | 'category_not_found' | 'version_conflict'
+    >
+  | AccessControlError
 
 export const updateCategory = async (
   command: UpdateCategoryCommand,
   repository: CategoryRepository,
 ): Promise<Result<Category, UpdateCategoryError>> => {
+  const access = requireFinancialWriteAccess(command.role)
+  if (!access.ok) return access
+
   if (command.patch.name) {
     const current = await repository.findById(command.organizationId, command.id)
     if (!current) return err(notFoundError('category_not_found', 'Category not found.'))

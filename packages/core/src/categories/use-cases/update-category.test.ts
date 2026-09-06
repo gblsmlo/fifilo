@@ -26,7 +26,13 @@ describe('updateCategory', () => {
     const repository = createFakeCategoryRepository([category])
 
     const result = await updateCategory(
-      { expectedVersion: 1, id: category.id, organizationId: 'org_a', patch: { color: '#f00' } },
+      {
+        expectedVersion: 1,
+        id: category.id,
+        organizationId: 'org_a',
+        patch: { color: '#f00' },
+        role: 'owner',
+      },
       repository,
     )
 
@@ -41,7 +47,13 @@ describe('updateCategory', () => {
     const repository = createFakeCategoryRepository([category])
 
     const result = await updateCategory(
-      { expectedVersion: 1, id: category.id, organizationId: 'org_a', patch: { color: '#f00' } },
+      {
+        expectedVersion: 1,
+        id: category.id,
+        organizationId: 'org_a',
+        patch: { color: '#f00' },
+        role: 'owner',
+      },
       repository,
     )
 
@@ -55,7 +67,13 @@ describe('updateCategory', () => {
     const repository = createFakeCategoryRepository([first, second])
 
     const result = await updateCategory(
-      { expectedVersion: 1, id: second.id, organizationId: 'org_a', patch: { name: 'transporte' } },
+      {
+        expectedVersion: 1,
+        id: second.id,
+        organizationId: 'org_a',
+        patch: { name: 'transporte' },
+        role: 'owner',
+      },
       repository,
     )
 

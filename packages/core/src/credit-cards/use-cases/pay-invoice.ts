@@ -1,3 +1,8 @@
+import {
+  type AccessControlError,
+  type WorkspaceRole,
+  requireFinancialWriteAccess,
+} from '../../access-control'
 import { type DomainError, conflictError, notFoundError, validationError } from '../../errors'
 import type { EntityId } from '../../primitives'
 import { type Result, err, ok } from '../../result'
@@ -10,19 +15,22 @@ export type PayInvoiceCommand = {
   fromAccountId: EntityId
   id: EntityId
   organizationId: string
+  role: WorkspaceRole
   today: string
   userId: EntityId
 }
 
-export type PayInvoiceError = DomainError<
-  'conflict' | 'not_found' | 'validation',
-  | 'account_archived'
-  | 'account_not_found'
-  | 'currency_mismatch'
-  | 'invoice_already_paid'
-  | 'invoice_not_closed'
-  | 'invoice_not_found'
->
+export type PayInvoiceError =
+  | DomainError<
+      'conflict' | 'not_found' | 'validation',
+      | 'account_archived'
+      | 'account_not_found'
+      | 'currency_mismatch'
+      | 'invoice_already_paid'
+      | 'invoice_not_closed'
+      | 'invoice_not_found'
+    >
+  | AccessControlError
 
 /**
  * Paying is a transfer from the source account to the card account, the
@@ -39,6 +47,9 @@ export const payInvoice = async (
   accounts: AccountLookup,
   transactions: TransactionRepository,
 ): Promise<Result<{ invoice: CardInvoice; transactionId: EntityId }, PayInvoiceError>> => {
+  const access = requireFinancialWriteAccess(command.role)
+  if (!access.ok) return access
+
   const invoice = await invoices.findById(command.organizationId, command.id)
   if (!invoice) return err(notFoundError('invoice_not_found', 'Invoice not found.'))
   if (invoice.status === 'paid') {
@@ -69,6 +80,7 @@ export const payInvoice = async (
       notes: null,
       occurredOn: command.today,
       organizationId: command.organizationId,
+      role: command.role,
       toAccountId: invoice.accountId,
       userId: command.userId,
     },

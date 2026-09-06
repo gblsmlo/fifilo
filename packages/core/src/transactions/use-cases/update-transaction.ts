@@ -1,3 +1,8 @@
+import {
+  type AccessControlError,
+  type WorkspaceRole,
+  requireFinancialWriteAccess,
+} from '../../access-control'
 import { type DomainError, conflictError, notFoundError, validationError } from '../../errors'
 import type { CurrencyCode, EntityId } from '../../primitives'
 import { generateEntityId } from '../../primitives'
@@ -18,6 +23,7 @@ export type UpdateTransactionCommand =
       notes: string | null
       occurredOn: string
       organizationId: string
+      role: WorkspaceRole
     }
   | {
       amountMinor: number
@@ -29,21 +35,24 @@ export type UpdateTransactionCommand =
       notes: string | null
       occurredOn: string
       organizationId: string
+      role: WorkspaceRole
       toAccountId: EntityId
     }
 
-export type UpdateTransactionError = DomainError<
-  'conflict' | 'not_found' | 'validation',
-  | 'account_archived'
-  | 'account_not_found'
-  | 'category_archived'
-  | 'category_kind_mismatch'
-  | 'category_not_found'
-  | 'currency_mismatch'
-  | 'transaction_kind_immutable'
-  | 'transaction_not_found'
-  | 'version_conflict'
->
+export type UpdateTransactionError =
+  | DomainError<
+      'conflict' | 'not_found' | 'validation',
+      | 'account_archived'
+      | 'account_not_found'
+      | 'category_archived'
+      | 'category_kind_mismatch'
+      | 'category_not_found'
+      | 'currency_mismatch'
+      | 'transaction_kind_immutable'
+      | 'transaction_not_found'
+      | 'version_conflict'
+    >
+  | AccessControlError
 
 const checkAccount = async (
   organizationId: string,
@@ -70,6 +79,9 @@ export const updateTransaction = async (
   accounts: AccountLookup,
   categories: CategoryLookup,
 ): Promise<Result<Transaction, UpdateTransactionError>> => {
+  const access = requireFinancialWriteAccess(command.role)
+  if (!access.ok) return access
+
   const existing = await repository.findById(command.organizationId, command.id)
   if (!existing) return err(notFoundError('transaction_not_found', 'Transaction not found.'))
   if (existing.kind !== command.kind) {

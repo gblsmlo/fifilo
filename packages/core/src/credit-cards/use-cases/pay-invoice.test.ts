@@ -44,6 +44,7 @@ describe('payInvoice', () => {
         fromAccountId: checkingId,
         id: invoice.id,
         organizationId: ORGANIZATION_ID,
+        role: 'owner',
         today: '2026-06-15',
         userId: generateEntityId(),
       },
@@ -93,6 +94,7 @@ describe('payInvoice', () => {
       fromAccountId: checkingId,
       id: invoice.id,
       organizationId: ORGANIZATION_ID,
+      role: 'owner' as const,
       today: '2026-06-15',
       userId: generateEntityId(),
     }
@@ -138,6 +140,7 @@ describe('payInvoice', () => {
         fromAccountId: checkingId,
         id: invoice.id,
         organizationId: ORGANIZATION_ID,
+        role: 'owner',
         today: '2026-06-15',
         userId: generateEntityId(),
       },

@@ -35,7 +35,7 @@ describe('deleteTransaction', () => {
     ])
 
     const result = await deleteTransaction(
-      { id: transaction.id, organizationId: 'org_a' },
+      { id: transaction.id, organizationId: 'org_a', role: 'owner' },
       repository,
     )
 
@@ -47,7 +47,7 @@ describe('deleteTransaction', () => {
     const repository = createFakeTransactionRepository()
 
     const result = await deleteTransaction(
-      { id: generateEntityId(), organizationId: 'org_a' },
+      { id: generateEntityId(), organizationId: 'org_a', role: 'owner' },
       repository,
     )
 

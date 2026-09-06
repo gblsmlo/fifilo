@@ -1,3 +1,8 @@
+import {
+  type AccessControlError,
+  type WorkspaceRole,
+  requireFinancialWriteAccess,
+} from '../../access-control'
 import { type DomainError, conflictError, notFoundError, validationError } from '../../errors'
 import type { CurrencyCode, EntityId } from '../../primitives'
 import { generateEntityId } from '../../primitives'
@@ -16,6 +21,7 @@ export type CreateTransactionCommand =
       notes: string | null
       occurredOn: string
       organizationId: string
+      role: WorkspaceRole
       userId: EntityId
     }
   | {
@@ -26,19 +32,22 @@ export type CreateTransactionCommand =
       notes: string | null
       occurredOn: string
       organizationId: string
+      role: WorkspaceRole
       toAccountId: EntityId
       userId: EntityId
     }
 
-export type CreateTransactionError = DomainError<
-  'conflict' | 'not_found' | 'validation',
-  | 'account_archived'
-  | 'account_not_found'
-  | 'category_archived'
-  | 'category_kind_mismatch'
-  | 'category_not_found'
-  | 'currency_mismatch'
->
+export type CreateTransactionError =
+  | DomainError<
+      'conflict' | 'not_found' | 'validation',
+      | 'account_archived'
+      | 'account_not_found'
+      | 'category_archived'
+      | 'category_kind_mismatch'
+      | 'category_not_found'
+      | 'currency_mismatch'
+    >
+  | AccessControlError
 
 const checkAccount = async (
   organizationId: string,
@@ -59,6 +68,9 @@ export const createTransaction = async (
   accounts: AccountLookup,
   categories: CategoryLookup,
 ): Promise<Result<Transaction, CreateTransactionError>> => {
+  const access = requireFinancialWriteAccess(command.role)
+  if (!access.ok) return access
+
   if (command.kind === 'transfer') {
     const from = await checkAccount(command.organizationId, command.fromAccountId, accounts)
     if (!from.ok) return from

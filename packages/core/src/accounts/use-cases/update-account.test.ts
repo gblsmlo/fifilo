@@ -34,6 +34,7 @@ describe('updateAccount', () => {
         id: account.id,
         organizationId: 'org_a',
         patch: { institution: 'Bank A' },
+        role: 'owner',
       },
       repository,
     )
@@ -54,6 +55,7 @@ describe('updateAccount', () => {
         id: account.id,
         organizationId: 'org_a',
         patch: { institution: 'Bank A' },
+        role: 'owner',
       },
       repository,
     )
@@ -72,6 +74,7 @@ describe('updateAccount', () => {
         id: account.id,
         organizationId: 'org_b',
         patch: { institution: 'Bank A' },
+        role: 'owner',
       },
       repository,
     )
@@ -86,7 +89,13 @@ describe('updateAccount', () => {
     const repository = createFakeAccountRepository([savings, checking])
 
     const result = await updateAccount(
-      { expectedVersion: 1, id: checking.id, organizationId: 'org_a', patch: { name: 'savings' } },
+      {
+        expectedVersion: 1,
+        id: checking.id,
+        organizationId: 'org_a',
+        patch: { name: 'savings' },
+        role: 'owner',
+      },
       repository,
     )
 
@@ -104,6 +113,7 @@ describe('updateAccount', () => {
         id: account.id,
         organizationId: 'org_a',
         patch: { name: 'Checking', institution: 'Bank A' },
+        role: 'owner',
       },
       repository,
     )

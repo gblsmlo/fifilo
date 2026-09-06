@@ -15,6 +15,7 @@ const baseCommand: CreateAccountCommand = {
   openingBalanceDate: null,
   openingBalanceMinor: 0,
   organizationId: 'org_a',
+  role: 'owner',
   userId: generateEntityId(),
 }
 

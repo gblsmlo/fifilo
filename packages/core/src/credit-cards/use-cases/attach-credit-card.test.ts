@@ -24,6 +24,7 @@ describe('attachCreditCard', () => {
         dueDay: 20,
         limitMinor: 500_000,
         organizationId: ORGANIZATION_ID,
+        role: 'owner',
       },
       repository,
       accounts,
@@ -48,6 +49,7 @@ describe('attachCreditCard', () => {
         dueDay: 20,
         limitMinor: 500_000,
         organizationId: ORGANIZATION_ID,
+        role: 'owner',
       },
       repository,
       accounts,
@@ -71,6 +73,7 @@ describe('attachCreditCard', () => {
         dueDay: 20,
         limitMinor: 500_000,
         organizationId: ORGANIZATION_ID,
+        role: 'owner',
       },
       repository,
       accounts,
@@ -92,6 +95,7 @@ describe('attachCreditCard', () => {
       dueDay: 20,
       limitMinor: 500_000,
       organizationId: ORGANIZATION_ID,
+      role: 'owner' as const,
     }
 
     await attachCreditCard(command, repository, accounts)
@@ -112,6 +116,7 @@ describe('attachCreditCard', () => {
         dueDay: 20,
         limitMinor: 500_000,
         organizationId: ORGANIZATION_ID,
+        role: 'owner',
       },
       repository,
       accounts,

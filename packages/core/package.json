@@ -4,6 +4,7 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
+    "./access-control": "./src/access-control.ts",
     "./accounts": "./src/accounts/index.ts",
     "./categories": "./src/categories/index.ts",
     "./contracts/*": "./src/contracts/*.ts",

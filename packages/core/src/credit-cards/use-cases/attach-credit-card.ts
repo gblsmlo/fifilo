@@ -1,3 +1,8 @@
+import {
+  type AccessControlError,
+  type WorkspaceRole,
+  requireFinancialWriteAccess,
+} from '../../access-control'
 import { type DomainError, conflictError, notFoundError, validationError } from '../../errors'
 import type { EntityId } from '../../primitives'
 import { type Result, err, ok } from '../../result'
@@ -10,15 +15,18 @@ export type AttachCreditCardCommand = {
   dueDay: number
   limitMinor: number
   organizationId: string
+  role: WorkspaceRole
 }
 
-export type AttachCreditCardError = DomainError<
-  'conflict' | 'not_found' | 'validation',
-  | 'account_archived'
-  | 'account_not_credit_card'
-  | 'account_not_found'
-  | 'credit_card_already_attached'
->
+export type AttachCreditCardError =
+  | DomainError<
+      'conflict' | 'not_found' | 'validation',
+      | 'account_archived'
+      | 'account_not_credit_card'
+      | 'account_not_found'
+      | 'credit_card_already_attached'
+    >
+  | AccessControlError
 
 /**
  * One `credit_card_details` row per account (Fase 03 § Persistência): the
@@ -30,6 +38,9 @@ export const attachCreditCard = async (
   repository: CreditCardRepository,
   accounts: CardAccountLookup,
 ): Promise<Result<CreditCardDetails, AttachCreditCardError>> => {
+  const access = requireFinancialWriteAccess(command.role)
+  if (!access.ok) return access
+
   const account = await accounts.findById(command.organizationId, command.accountId)
   if (!account) return err(notFoundError('account_not_found', 'Account not found.'))
   if (account.archivedAt) {

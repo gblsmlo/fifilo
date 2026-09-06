@@ -1,3 +1,8 @@
+import {
+  type AccessControlError,
+  type WorkspaceRole,
+  requireFinancialWriteAccess,
+} from '../../access-control'
 import { type DomainError, conflictError } from '../../errors'
 import type { CurrencyCode, EntityId } from '../../primitives'
 import { generateEntityId } from '../../primitives'
@@ -16,15 +21,19 @@ export type CreateAccountCommand = {
   openingBalanceDate: string | null
   openingBalanceMinor: number
   organizationId: string
+  role: WorkspaceRole
   userId: EntityId
 }
 
-export type CreateAccountError = DomainError<'conflict', 'account_name_taken'>
+export type CreateAccountError = DomainError<'conflict', 'account_name_taken'> | AccessControlError
 
 export const createAccount = async (
   command: CreateAccountCommand,
   repository: AccountRepository,
 ): Promise<Result<Account, CreateAccountError>> => {
+  const access = requireFinancialWriteAccess(command.role)
+  if (!access.ok) return access
+
   const nameKey = accountNameKey(command.name)
   const existing = await repository.findByName(command.organizationId, nameKey)
 

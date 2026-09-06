@@ -29,6 +29,13 @@ export type IdempotencyStore = {
   ) => Promise<boolean>
   complete: (organizationId: string, key: string, responseBody: unknown) => Promise<void>
   find: (organizationId: string, key: string) => Promise<IdempotencyRecord | null>
+  /**
+   * Releases a claim `execute()` never completed. Without this, a command
+   * that throws — a validation failure, a dependency outage — leaves the key
+   * `pending` forever: every retry, including one with corrected input, reads
+   * back "still in progress" and never gets a second attempt.
+   */
+  release: (organizationId: string, key: string) => Promise<void>
 }
 
 export type IdempotencyConflictError = DomainError<
@@ -73,9 +80,16 @@ export const withIdempotency = async <TResponse>({
   const claimed = await store.begin(organizationId, idempotencyKey, requestHash, expiresAt)
 
   if (claimed) {
-    const responseBody = await execute()
-    await store.complete(organizationId, idempotencyKey, responseBody)
-    return ok(responseBody)
+    try {
+      const responseBody = await execute()
+      await store.complete(organizationId, idempotencyKey, responseBody)
+      return ok(responseBody)
+    } catch (error) {
+      // The claim never resolved into a response worth replaying; releasing
+      // it is what makes the key usable again, corrected input included.
+      await store.release(organizationId, idempotencyKey)
+      throw error
+    }
   }
 
   const existing = await store.find(organizationId, idempotencyKey)

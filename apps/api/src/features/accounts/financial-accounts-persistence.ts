@@ -8,6 +8,7 @@ import type {
   UpdateOutcome,
 } from '@fifilo/core/accounts'
 import type { CurrencyCode, EntityId } from '@fifilo/core/primitives'
+import { isUniqueViolation } from '@fifilo/infra-database/postgres-errors'
 import { entries, financialAccounts } from '@fifilo/infra-database/schema'
 import { withWorkspaceTransaction } from '@fifilo/infra-database/workspace'
 import { and, eq, isNull, sql } from 'drizzle-orm'
@@ -33,10 +34,6 @@ const mapRow = (row: FinancialAccountRow): Account => ({
   updatedAt: row.updatedAt,
   version: row.version,
 })
-
-/** Postgres' `unique_violation` SQLSTATE, not a message substring (Decision 004). */
-const isUniqueViolation = (error: unknown): boolean =>
-  typeof error === 'object' && error !== null && (error as { errno?: string }).errno === '23505'
 
 const findAccountByName = async (
   organizationId: string,

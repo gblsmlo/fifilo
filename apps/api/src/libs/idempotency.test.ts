@@ -29,6 +29,9 @@ const createFakeStore = (): IdempotencyStore => {
     async find(organizationId, key) {
       return records.get(keyOf(organizationId, key)) ?? null
     },
+    async release(organizationId, key) {
+      records.delete(keyOf(organizationId, key))
+    },
   }
 }
 
@@ -128,5 +131,29 @@ describe('withIdempotency', () => {
     await callFor('org_b')
 
     expect(execute).toHaveBeenCalledTimes(2)
+  })
+
+  test('a failed attempt releases the key so a corrected retry is not stuck "in progress" forever', async () => {
+    const store = createFakeStore()
+    const failThenSucceed = mock(async () => {
+      if (failThenSucceed.mock.calls.length === 1) throw new Error('validation failed')
+      return { id: 'created_1' }
+    })
+
+    const call = () =>
+      withIdempotency({
+        execute: failThenSucceed,
+        idempotencyKey: 'key-1',
+        organizationId: 'org_a',
+        requestPayload: { amount: 100 },
+        store,
+      })
+
+    await expect(call()).rejects.toThrow('validation failed')
+
+    const result = await call()
+
+    expect(result).toEqual({ ok: true, value: { id: 'created_1' } })
+    expect(failThenSucceed).toHaveBeenCalledTimes(2)
   })
 })

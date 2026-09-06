@@ -46,6 +46,26 @@ afterAll(async () => {
 })
 
 describe('financial accounts persistence', () => {
+  test('a duplicate name at the repository itself - bypassing the use case`s upfront check - returns null, not a thrown exception', async () => {
+    const first = {
+      color: null,
+      createdAt: new Date(),
+      createdBy: USER_ID as EntityId,
+      currency: 'BRL' as const,
+      icon: null,
+      id: generateEntityId(),
+      institution: null,
+      kind: 'wallet' as const,
+      name: 'Race Condition Check',
+      organizationId: ORGANIZATION_A,
+    }
+
+    await repository.create(first, null)
+    const second = await repository.create({ ...first, id: generateEntityId() }, null)
+
+    expect(second).toBeNull()
+  })
+
   test('creates an account with its opening entry atomically, and the balance reads it back', async () => {
     const id = generateEntityId()
 

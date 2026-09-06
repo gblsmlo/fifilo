@@ -117,7 +117,7 @@ cd twincam-monorepo
 cp .env.example .env
 bun install
 
-docker compose up -d postgres
+docker compose up -d --wait postgres
 bun run db:migrate
 bun run db:seed
 bun run dev

@@ -35,6 +35,7 @@ environment.
 | Variable | Read by | Purpose |
 | --- | --- | --- |
 | `NODE_ENV` | server | `development`, `test` or `production` |
+| `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD` | Compose | credentials the `postgres` service initializes its data directory with; must match the ones inside `DATABASE_URL` |
 | `API_PORT` | server, web-server | where the API listens; the web SSR process reaches it there |
 | `API_BASE_URL` | web-server | optional origin of the API when it is not on `127.0.0.1:API_PORT`, such as inside Compose |
 | `APP_NAME` | server | server-side product name |
@@ -68,6 +69,9 @@ so no backend URL is published in the bundle; the browser calls `/api`.
 - No silent default for a secret or a critical setting.
 - Docker Compose loads `.env`, not `.env.example`. Working development values are
   explicit defaults in `docker-compose.yml`.
+- The `postgres` service reads the same `POSTGRES_*` variables the connection
+  URLs are built from. They apply only when the data volume is created, so a
+  credential change after the first start needs `docker compose down -v`.
 
 ## Reusable schema pieces
 

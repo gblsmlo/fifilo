@@ -8,9 +8,11 @@ quality gates and what runs in CI.
 Bun `1.3.14` and Node `24.18.0` are pinned in `packageManager`, `.bun-version`,
 `.node-version` and `.nvmrc`; keep the four aligned. Use the official Bun
 runtime, not one installed through NVM or npm. `sh scripts/check-toolchain.sh`
-verifies both; the hooks source it, and it activates the pinned Node through
-`fnm` or `nvm` when the shell resolves another version. It fails only when
-neither manager has that version installed.
+verifies both; the hooks source it, and it activates the pinned Node when the
+shell resolves another version: `fnm`, then `nvm.sh`, then the version
+directory a fish `nvm` keeps under `$nvm_data` (`~/.local/share/nvm` by
+default), which ships no POSIX entrypoint to source. It fails only when none of
+them has that version installed.
 
 ## Docker in a Bun monorepo
 

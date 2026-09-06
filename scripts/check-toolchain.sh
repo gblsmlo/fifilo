@@ -163,6 +163,17 @@ node_matches() {
   [ "${current#v}" = "$1" ]
 }
 
+# nvm.fish keeps its versions as plain directories and ships no POSIX entrypoint
+# to source, so the only way to reach one from /bin/sh is its bin directory.
+nvm_data_dir() {
+  printf '%s\n' "${nvm_data:-${XDG_DATA_HOME:-$HOME/.local/share}/nvm}"
+}
+
+installed_node_bin() {
+  candidate="$(nvm_data_dir)/v$1/bin"
+  [ -x "$candidate/node" ] && printf '%s\n' "$candidate"
+}
+
 # PATH resolution alone can't be trusted to carry the pinned Node into a shell
 # that defaults elsewhere: activate it via whichever manager the
 # machine has, sourced from the caller's hooks so the switch survives past
@@ -177,11 +188,18 @@ activate_pinned_node() {
     fnm use "$target" >/dev/null 2>&1 && node_matches "$target" && return 0
   fi
 
-  if [ -s "$HOME/.nvm/nvm.sh" ]; then
+  if [ -s "${NVM_DIR:-$HOME/.nvm}/nvm.sh" ]; then
     export NVM_DIR="${NVM_DIR:-$HOME/.nvm}"
     # shellcheck disable=SC1091
     . "$NVM_DIR/nvm.sh"
     nvm use "$target" >/dev/null 2>&1 && node_matches "$target" && return 0
+  fi
+
+  target_bin="$(installed_node_bin "$target")"
+  if [ -n "$target_bin" ]; then
+    PATH="$target_bin:$PATH"
+    export PATH
+    node_matches "$target" && return 0
   fi
 
   return 1
@@ -195,7 +213,7 @@ node_install_hint() {
     return
   fi
 
-  if [ -s "$HOME/.nvm/nvm.sh" ]; then
+  if [ -s "${NVM_DIR:-$HOME/.nvm}/nvm.sh" ] || [ -d "$(nvm_data_dir)" ]; then
     printf 'nvm install %s' "$target"
     return
   fi

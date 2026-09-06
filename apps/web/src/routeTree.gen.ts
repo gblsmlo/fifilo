@@ -18,6 +18,7 @@ import { Route as authResetPasswordRouteImport } from './routes/(auth)/reset-pas
 import { Route as authSignUpRouteImport } from './routes/(auth)/sign-up'
 import { Route as authTwoFactorRouteImport } from './routes/(auth)/two-factor'
 import { Route as authenticatedAcceptInvitationRouteImport } from './routes/(authenticated)/accept-invitation'
+import { Route as authenticatedAccountsRouteImport } from './routes/(authenticated)/accounts'
 import { Route as authenticatedDashboardRouteImport } from './routes/(authenticated)/dashboard'
 import { Route as authenticatedOnboardingRouteImport } from './routes/(authenticated)/onboarding'
 import { Route as authenticatedOrganizationRouteImport } from './routes/(authenticated)/organization'
@@ -66,6 +67,11 @@ const authenticatedAcceptInvitationRoute =
     path: '/accept-invitation',
     getParentRoute: () => authenticatedRouteRoute,
   } as any)
+const authenticatedAccountsRoute = authenticatedAccountsRouteImport.update({
+  id: '/accounts',
+  path: '/accounts',
+  getParentRoute: () => authenticatedRouteRoute,
+} as any)
 const authenticatedDashboardRoute = authenticatedDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -91,6 +97,7 @@ export interface FileRoutesByFullPath {
   '/sign-up': typeof authSignUpRoute
   '/two-factor': typeof authTwoFactorRoute
   '/accept-invitation': typeof authenticatedAcceptInvitationRoute
+  '/accounts': typeof authenticatedAccountsRoute
   '/dashboard': typeof authenticatedDashboardRoute
   '/onboarding': typeof authenticatedOnboardingRoute
   '/organization': typeof authenticatedOrganizationRoute
@@ -103,6 +110,7 @@ export interface FileRoutesByTo {
   '/sign-up': typeof authSignUpRoute
   '/two-factor': typeof authTwoFactorRoute
   '/accept-invitation': typeof authenticatedAcceptInvitationRoute
+  '/accounts': typeof authenticatedAccountsRoute
   '/dashboard': typeof authenticatedDashboardRoute
   '/onboarding': typeof authenticatedOnboardingRoute
   '/organization': typeof authenticatedOrganizationRoute
@@ -118,6 +126,7 @@ export interface FileRoutesById {
   '/(auth)/sign-up': typeof authSignUpRoute
   '/(auth)/two-factor': typeof authTwoFactorRoute
   '/(authenticated)/accept-invitation': typeof authenticatedAcceptInvitationRoute
+  '/(authenticated)/accounts': typeof authenticatedAccountsRoute
   '/(authenticated)/dashboard': typeof authenticatedDashboardRoute
   '/(authenticated)/onboarding': typeof authenticatedOnboardingRoute
   '/(authenticated)/organization': typeof authenticatedOrganizationRoute
@@ -132,6 +141,7 @@ export interface FileRouteTypes {
     | '/sign-up'
     | '/two-factor'
     | '/accept-invitation'
+    | '/accounts'
     | '/dashboard'
     | '/onboarding'
     | '/organization'
@@ -144,6 +154,7 @@ export interface FileRouteTypes {
     | '/sign-up'
     | '/two-factor'
     | '/accept-invitation'
+    | '/accounts'
     | '/dashboard'
     | '/onboarding'
     | '/organization'
@@ -158,6 +169,7 @@ export interface FileRouteTypes {
     | '/(auth)/sign-up'
     | '/(auth)/two-factor'
     | '/(authenticated)/accept-invitation'
+    | '/(authenticated)/accounts'
     | '/(authenticated)/dashboard'
     | '/(authenticated)/onboarding'
     | '/(authenticated)/organization'
@@ -234,6 +246,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof authenticatedAcceptInvitationRouteImport
       parentRoute: typeof authenticatedRouteRoute
     }
+    '/(authenticated)/accounts': {
+      id: '/(authenticated)/accounts'
+      path: '/accounts'
+      fullPath: '/accounts'
+      preLoaderRoute: typeof authenticatedAccountsRouteImport
+      parentRoute: typeof authenticatedRouteRoute
+    }
     '/(authenticated)/dashboard': {
       id: '/(authenticated)/dashboard'
       path: '/dashboard'
@@ -280,6 +299,7 @@ const authRouteRouteWithChildren = authRouteRoute._addFileChildren(
 
 interface authenticatedRouteRouteChildren {
   authenticatedAcceptInvitationRoute: typeof authenticatedAcceptInvitationRoute
+  authenticatedAccountsRoute: typeof authenticatedAccountsRoute
   authenticatedDashboardRoute: typeof authenticatedDashboardRoute
   authenticatedOnboardingRoute: typeof authenticatedOnboardingRoute
   authenticatedOrganizationRoute: typeof authenticatedOrganizationRoute
@@ -287,6 +307,7 @@ interface authenticatedRouteRouteChildren {
 
 const authenticatedRouteRouteChildren: authenticatedRouteRouteChildren = {
   authenticatedAcceptInvitationRoute: authenticatedAcceptInvitationRoute,
+  authenticatedAccountsRoute: authenticatedAccountsRoute,
   authenticatedDashboardRoute: authenticatedDashboardRoute,
   authenticatedOnboardingRoute: authenticatedOnboardingRoute,
   authenticatedOrganizationRoute: authenticatedOrganizationRoute,

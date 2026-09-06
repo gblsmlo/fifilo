@@ -29,6 +29,7 @@ export {
   accountErrorResponseSchema,
   accountKindSchema,
   accountResponseSchema,
+  createAccountRequestObjectSchema,
   createAccountRequestSchema,
   listAccountsQuerySchema,
   updateAccountRequestSchema,

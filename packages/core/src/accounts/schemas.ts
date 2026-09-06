@@ -10,7 +10,7 @@ export const accountKindSchema = z.enum([
   'investment',
 ])
 
-const accountNameSchema = z.string().trim().min(1).max(120)
+const accountNameSchema = z.string().trim().min(1, 'Informe o nome da conta.').max(120)
 const accountColorSchema = z.string().trim().min(1).max(32).nullable()
 const accountIconSchema = z.string().trim().min(1).max(64).nullable()
 const accountInstitutionSchema = z.string().trim().min(1).max(120).nullable()
@@ -31,24 +31,33 @@ export const accountResponseSchema = z.object({
 })
 
 /**
+ * The plain object, exported so a UX-layer schema (the Web create form) can
+ * `.pick()` a subset without redeclaring a field rule (Decision 002 § one
+ * fact, one owner) — `.refine()` below returns a wrapper `.pick()` does not
+ * have.
+ */
+export const createAccountRequestObjectSchema = z.object({
+  color: accountColorSchema.optional(),
+  icon: accountIconSchema.optional(),
+  institution: accountInstitutionSchema.optional(),
+  kind: accountKindSchema,
+  name: accountNameSchema,
+  openingBalanceDate: z.iso.date().optional(),
+  openingBalanceMinor: moneySchema.shape.amountMinor.optional(),
+})
+
+/**
  * The opening balance is optional; when present it becomes the account's
  * first entry (Fase 01 § Modelagem), so the civil date it happened on
  * (Decision 018) is required alongside it — the domain never assumes "today".
  */
-export const createAccountRequestSchema = z
-  .object({
-    color: accountColorSchema.optional(),
-    icon: accountIconSchema.optional(),
-    institution: accountInstitutionSchema.optional(),
-    kind: accountKindSchema,
-    name: accountNameSchema,
-    openingBalanceDate: z.iso.date().optional(),
-    openingBalanceMinor: moneySchema.shape.amountMinor.optional(),
-  })
-  .refine((input) => !input.openingBalanceMinor || Boolean(input.openingBalanceDate), {
+export const createAccountRequestSchema = createAccountRequestObjectSchema.refine(
+  (input) => !input.openingBalanceMinor || Boolean(input.openingBalanceDate),
+  {
     error: 'Informe a data do saldo de abertura.',
     path: ['openingBalanceDate'],
-  })
+  },
+)
 
 export const updateAccountRequestSchema = z.object({
   color: accountColorSchema.optional(),
@@ -58,8 +67,18 @@ export const updateAccountRequestSchema = z.object({
   version: z.int().min(1),
 })
 
+/**
+ * `z.coerce.boolean()` is wrong for a query string: `Boolean('false')` is
+ * `true`, since any non-empty string coerces truthy. A query value is only
+ * ever a string (or absent), so the literal text is what decides.
+ */
+const booleanQueryParamSchema = z.preprocess((value) => {
+  if (typeof value === 'string') return value.toLowerCase() === 'true'
+  return value
+}, z.boolean())
+
 export const listAccountsQuerySchema = z.object({
-  includeArchived: z.coerce.boolean().default(false),
+  includeArchived: booleanQueryParamSchema.default(false),
 })
 
 export const accountBalanceSchema = z.object({

@@ -50,7 +50,7 @@ test.describe('@auth first access and organization creation', () => {
     await page.getByRole('button', { name: 'Criar organização' }).click()
 
     await expect(page).toHaveURL(/\/dashboard/)
-    await expect(page.getByText(/ponto de partida de Organização E2E/)).toBeVisible()
+    await expect(page.getByText(/painel de Organização E2E/)).toBeVisible()
 
     // Revisiting onboarding with an active organization goes back to the app.
     await page.goto('/onboarding')

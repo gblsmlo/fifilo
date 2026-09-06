@@ -71,6 +71,27 @@ export const Default: Story = {
   },
 }
 
+/**
+ * Toda cor do gráfico vem de `var(--color-chart-N)`/`var(--color-border)`/
+ * `var(--color-muted-foreground)` (Decision 027) - nunca um valor fixo -
+ * então o mesmo gráfico já é o do tema claro sob o toggle `Theme` da
+ * toolbar. Esta story fixa isso via `globals`, então o par claro/escuro é
+ * conferido em toda execução de `storybook:test`, não só manualmente.
+ */
+export const LightTheme: Story = {
+  globals: { theme: 'light' },
+  play: async ({ canvasElement }) => {
+    const chart = await waitFor(() => {
+      const svg = canvasElement.querySelector('svg.recharts-surface:has(.recharts-cartesian-grid)')
+      if (!svg || svg.clientWidth === 0) throw new Error('o gráfico ainda não mediu layout real')
+      return svg
+    })
+
+    expect(chart.querySelectorAll('.recharts-line-curve')).toHaveLength(2)
+    await expect(within(canvasElement).getByRole('img', { name: 'Fluxo mensal' })).toBeVisible()
+  },
+}
+
 export const AccessibleTableBehindTheChart: Story = {
   play: async ({ canvasElement }) => {
     const screen = within(canvasElement)

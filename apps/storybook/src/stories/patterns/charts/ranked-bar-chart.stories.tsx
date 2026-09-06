@@ -60,6 +60,25 @@ export const Default: Story = {
   },
 }
 
+/**
+ * Toda cor vem de `var(--color-chart-N)` (Decision 027), nunca um valor
+ * fixo, então o mesmo gráfico já é o do tema claro sob o toggle `Theme` da
+ * toolbar - fixado aqui via `globals` para que o par claro/escuro seja
+ * conferido em toda execução de `storybook:test`.
+ */
+export const LightTheme: Story = {
+  globals: { theme: 'light' },
+  play: async ({ canvasElement }) => {
+    const chart = await waitFor(() => {
+      const svg = canvasElement.querySelector('svg.recharts-surface')
+      if (!svg || svg.clientWidth === 0) throw new Error('o gráfico ainda não mediu layout real')
+      return svg
+    })
+
+    expect(chart.querySelectorAll('.recharts-bar-rectangle')).toHaveLength(3)
+  },
+}
+
 export const AccessibleTableBehindTheChart: Story = {
   play: async ({ canvasElement }) => {
     const screen = within(canvasElement)

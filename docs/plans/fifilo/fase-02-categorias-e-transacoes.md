@@ -148,14 +148,31 @@ sobre `(occurred_on, id)` — `offset` degrada e o histórico só cresce.
 
 ## Critério de conclusão
 
-- [ ] Invariante de soma de pernas provada por teste para os três tipos.
-- [ ] Cinco provas negativas de RLS em `categories` e `transactions`.
-- [ ] Teste de reatribuição com rollback no meio.
-- [ ] Paginação por cursor com teste de fronteira (mesma data, ids diferentes).
-- [ ] Filtro na URL sobrevive a recarregar; teste do fuso deslocado passa.
-- [ ] Stories dos três formulários e do estado vazio da lista.
-- [ ] E2E: criar categoria → registrar despesa → transferir entre contas →
-      conferir saldo das duas contas → filtrar por período.
+- [x] Invariante de soma de pernas provada por teste para os três tipos —
+      `packages/core/src/transactions/transaction.test.ts`, `deriveLegs`
+      varrido para `income`, `expense` e `transfer`.
+- [x] Cinco provas negativas de RLS em `categories` e `transactions` — linha
+      própria, isolamento entre organizações, `WITH CHECK`, sem contexto e
+      rollback; as cinco contra PostgreSQL real, através dos adapters que a
+      API de fato chama, em ambas as tabelas.
+- [x] Teste de reatribuição com rollback no meio —
+      `categories-persistence.integration.test.ts`: uma falha forçada entre
+      mover as transações e arquivar a origem não deixa nem uma coisa nem
+      outra pela metade.
+- [x] Paginação por cursor com teste de fronteira (mesma data, ids
+      diferentes) — três transações na mesma data, `limit: 2`, a segunda
+      página não repete nem pula a linha de fronteira.
+- [x] Filtro na URL sobrevive a recarregar; teste do fuso deslocado passa —
+      `route-search.ts` com contrato Zod; `resolveThisMonthRange` resolve o
+      mês a partir de um fuso explícito, nunca o do executor, provado com
+      `TZ` do processo deslocado para `Pacific/Kiritimati`.
+- [x] Stories dos três formulários e do estado vazio da lista — Despesa,
+      Receita e Transferência em `TransactionFormFields`/`TransferFormFields`,
+      mais `TransactionList`'s `Empty`/`ErrorState`/`WithTransactions`.
+- [x] E2E: criar categoria → registrar despesa → transferir entre contas →
+      conferir saldo das duas contas → filtrar por período —
+      `e2e/transactions/transactions.spec.ts`, contra a API e um banco reais,
+      incluindo o reload que prova a sobrevivência do filtro na URL.
 
 ## Fatias de commit
 
@@ -167,4 +184,55 @@ sobre `(occurred_on, id)` — `offset` degrada e o histórico só cresce.
 
 ## Registro de sessões
 
-_(a preencher durante a execução)_
+### 2026-09-06 — fase fechada
+
+Oito commits, em ordem: `ca8886e` (fix no Core: categoria arquivada e
+`currency` tipado nas pernas), `dd16ce2` (schema e migrações), `3f12c64`
+(fix na API: `Idempotency-Key` travada e `isUniqueViolation` compartilhado),
+`be1286c` (API: rotas de categorias e transações), `b97c859` (`MoneyInput`
+em `packages/ui`), `652a02e` (Web: as duas jornadas), `ccce507` (stories) e
+`3eca887` (prova de rollback da reatribuição e E2E).
+
+Bug encontrado em produção antes de qualquer teste tocar nele: o servidor de
+desenvolvimento da API, de pé desde antes desta sessão, respondia
+`400 invalid_request` genérico em `POST /api/transactions` mesmo com um corpo
+que o próprio schema Zod validava isoladamente. Uma hora de depuração
+descartou o schema, a fábrica de rotas e a composição do `app.ts` — todos
+corretos quando testados frescos. A causa era mais simples: o processo do
+`bun --watch` não tinha pego alguma mudança de código ao longo da sessão.
+Matar e reiniciar o processo resolveu sem qualquer alteração de código. A
+lição registrada para a próxima depuração: suspeitar do processo antes da
+composição quando o comportamento isolado e o comportamento em produção
+divergem sem uma diferença de código que explique.
+
+Achado fora do escopo original, corrigido no lugar: `transactions-persistence.ts`
+lia `occurred_on` de volta como se fosse sempre string, mas o driver `SQL`
+do Bun analisa uma coluna `date` para um `Date` do JavaScript antes de o
+Drizzle aplicar seu próprio mapeamento em modo string. Sem correção, todo
+`nextCursor.occurredOn` e todo `Transaction.occurredOn` lido do banco vinha
+como um `Date`, não uma string `YYYY-MM-DD` — o teste de fronteira da
+paginação por cursor expôs isso ao comparar o cursor esperado com
+`toEqual`. `toDateOnly` normaliza a leitura no único lugar que a cruza.
+
+Segundo achado, também fora do escopo original: nenhum `<select>` nativo do
+formulário tinha a amarração `id`/`aria-labelledby` que `FieldLabel` precisa
+para se associar a um controle — funciona de graça para `Input` (que atravessa
+`Field.Control` da Base UI por dentro), não para um elemento nativo solto.
+`account-form.tsx` já carregava o defeito desde a Fase 01, sem teste que o
+exercitasse; a story de `TransferFormFields` e o E2E desta fase foram os
+primeiros a chamar `findByLabelText`/`getByLabel` num desses campos e a
+expor o problema. Toda ocorrência nova e a antiga foram embrulhadas em
+`FieldControl` com `render`.
+
+Escopo deliberadamente reduzido, sinalizado e não escondido: a categoria não
+tem editor de cor nem de ícone no formulário Web ainda, embora o contrato os
+declare — um seletor visual para qualquer um dos dois é entrega própria, não
+um campo de texto. `resolveThisMonthRange` fixa o fuso do workspace numa
+constante; a Fase 06 o torna uma configuração de fato (`monthStartDay`
+incluso), como a Decisão 018 já previa.
+
+Evidência: `bun run lint:ci`, `bun run typecheck`, `bun run test` (255
+casos: 62 Core, 79 API — incluindo as dez provas negativas de RLS contra
+PostgreSQL real —, 20 Web, mais UI/patterns/infra), `bun run storybook:test`
+(152 histórias, 41 arquivos) e `bun run test:e2e` (11 jornadas, a nova
+`transactions.spec.ts` entre elas) — todos verdes.

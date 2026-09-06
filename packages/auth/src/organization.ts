@@ -6,27 +6,13 @@ import { auditEvent } from '@fifilo/observability/runtime'
 import { APIError } from 'better-auth'
 import type { OrganizationOptions } from 'better-auth/plugins'
 import type { AccessControl } from 'better-auth/plugins/access'
-import { adminAc, defaultAc, memberAc, ownerAc } from 'better-auth/plugins/organization/access'
+import { defaultAc } from 'better-auth/plugins/organization/access'
 import { and, eq, ne } from 'drizzle-orm'
+
+import { organizationRoles } from './roles'
 
 const ORGANIZATION_INVITATION_TTL_SECONDS = 60 * 60 * 48
 const ORGANIZATION_MEMBERSHIP_LIMIT = 25
-
-/**
- * Read-only on every Better Auth org-management statement (organization,
- * member, invitation, team, ac) - a viewer manages nothing about the
- * workspace itself (Fase 04 § Modelagem). The financial matrix this role
- * also drives (accounts, categories, transactions, invoices) is a separate,
- * bespoke check (`@fifilo/core/access-control`); Better Auth's own access
- * control has no statement for a resource it never modeled.
- */
-const viewerAc = defaultAc.newRole({
-  ac: [],
-  invitation: [],
-  member: [],
-  organization: [],
-  team: [],
-})
 
 const auditOrganizationEvent = async (action: string, context: Record<string, unknown>) => {
   auditEvent({
@@ -117,12 +103,7 @@ export const organizationOptions = {
   invitationExpiresIn: ORGANIZATION_INVITATION_TTL_SECONDS,
   membershipLimit: ORGANIZATION_MEMBERSHIP_LIMIT,
   requireEmailVerificationOnInvitation: true,
-  roles: {
-    admin: adminAc,
-    member: memberAc,
-    owner: ownerAc,
-    viewer: viewerAc,
-  },
+  roles: organizationRoles,
   sendInvitationEmail: sendOrganizationInvitation,
   teams: {
     enabled: false,

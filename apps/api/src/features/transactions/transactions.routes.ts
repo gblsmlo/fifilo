@@ -1,3 +1,4 @@
+import { toWorkspaceRole } from '@fifilo/core/access-control'
 import type { EntityId } from '@fifilo/core/primitives'
 import type {
   AccountLookup,
@@ -79,6 +80,7 @@ const buildCreateCommand = (
         notes: body.notes ?? null,
         occurredOn: body.occurredOn,
         organizationId: context.organizationId,
+        role: toWorkspaceRole(context.role),
         toAccountId: body.toAccountId as EntityId,
         userId: context.userId as EntityId,
       }
@@ -91,6 +93,7 @@ const buildCreateCommand = (
         notes: body.notes ?? null,
         occurredOn: body.occurredOn,
         organizationId: context.organizationId,
+        role: toWorkspaceRole(context.role),
         userId: context.userId as EntityId,
       }
 
@@ -110,6 +113,7 @@ const buildUpdateCommand = (
         notes: body.notes ?? null,
         occurredOn: body.occurredOn,
         organizationId: context.organizationId,
+        role: toWorkspaceRole(context.role),
         toAccountId: body.toAccountId as EntityId,
       }
     : {
@@ -123,6 +127,7 @@ const buildUpdateCommand = (
         notes: body.notes ?? null,
         occurredOn: body.occurredOn,
         organizationId: context.organizationId,
+        role: toWorkspaceRole(context.role),
       }
 
 export type TransactionRouteDependencies = {
@@ -257,7 +262,11 @@ export const createTransactionRoutes = ({
       async ({ actorContext, params, set }) => {
         const context = requireActorContext(actorContext)
         const result = await deleteTransaction(
-          { id: params.id as EntityId, organizationId: context.organizationId },
+          {
+            id: params.id as EntityId,
+            organizationId: context.organizationId,
+            role: toWorkspaceRole(context.role),
+          },
           transactionRepository,
         )
 

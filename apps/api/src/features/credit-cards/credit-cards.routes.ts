@@ -1,3 +1,4 @@
+import { toWorkspaceRole } from '@fifilo/core/access-control'
 import type {
   CardAccountLookup,
   CreditCardRepository,
@@ -120,6 +121,7 @@ export const createCreditCardRoutes = ({
             dueDay: body.dueDay,
             limitMinor: body.limitMinor,
             organizationId: context.organizationId,
+            role: toWorkspaceRole(context.role),
           },
           creditCardRepository,
           cardAccountLookup,
@@ -221,21 +223,11 @@ export const createCreditCardRoutes = ({
       '/api/invoices/:id/close',
       async ({ actorContext, params, set }) => {
         const context = requireActorContext(actorContext)
-        const invoice = await invoiceRepository.findById(
-          context.organizationId,
-          params.id as EntityId,
-        )
-
-        if (!invoice) {
-          set.status = 404
-          return { error: { code: 'invoice_not_found', message: 'Invoice not found.' } }
-        }
-
         const result = await closeInvoice(
           {
-            expectedVersion: invoice.version,
             id: params.id as EntityId,
             organizationId: context.organizationId,
+            role: toWorkspaceRole(context.role),
           },
           invoiceRepository,
         )
@@ -272,6 +264,7 @@ export const createCreditCardRoutes = ({
               fromAccountId: body.fromAccountId as EntityId,
               id: params.id as EntityId,
               organizationId: context.organizationId,
+              role: toWorkspaceRole(context.role),
               today: workspaceToday(),
               userId: context.userId as EntityId,
             },
@@ -328,6 +321,7 @@ export const createCreditCardRoutes = ({
             installments: body.installments,
             notes: body.notes ?? null,
             organizationId: context.organizationId,
+            role: toWorkspaceRole(context.role),
             today: workspaceToday(),
             totalMinor: body.totalMinor,
             userId: context.userId as EntityId,

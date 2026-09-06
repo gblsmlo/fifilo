@@ -1,3 +1,4 @@
+import { toWorkspaceRole } from '@fifilo/core/access-control'
 import type { AccountRepository, EntryReader } from '@fifilo/core/accounts'
 import {
   DEFAULT_WORKSPACE_CURRENCY,
@@ -91,6 +92,7 @@ export const createAccountRoutes = ({
             openingBalanceDate: body.openingBalanceDate ?? null,
             openingBalanceMinor: body.openingBalanceMinor ?? 0,
             organizationId: context.organizationId,
+            role: toWorkspaceRole(context.role),
             userId: context.userId as EntityId,
           },
           accountRepository,
@@ -125,6 +127,7 @@ export const createAccountRoutes = ({
               institution: body.institution,
               name: body.name,
             },
+            role: toWorkspaceRole(context.role),
           },
           accountRepository,
         )
@@ -148,7 +151,11 @@ export const createAccountRoutes = ({
       async ({ actorContext, params, set }) => {
         const context = requireActorContext(actorContext)
         const result = await archiveAccount(
-          { id: params.id as EntityId, organizationId: context.organizationId },
+          {
+            id: params.id as EntityId,
+            organizationId: context.organizationId,
+            role: toWorkspaceRole(context.role),
+          },
           accountRepository,
         )
 

@@ -1,3 +1,4 @@
+import { toWorkspaceRole } from '@fifilo/core/access-control'
 import type { CategoryRepository } from '@fifilo/core/categories'
 import {
   categoryResponseSchema,
@@ -62,6 +63,7 @@ export const createCategoryRoutes = ({
             name: body.name,
             organizationId: context.organizationId,
             parentId: (body.parentId ?? null) as EntityId | null,
+            role: toWorkspaceRole(context.role),
           },
           categoryRepository,
         )
@@ -90,6 +92,7 @@ export const createCategoryRoutes = ({
             id: params.id as EntityId,
             organizationId: context.organizationId,
             patch: { color: body.color, icon: body.icon, name: body.name },
+            role: toWorkspaceRole(context.role),
           },
           categoryRepository,
         )
@@ -116,6 +119,7 @@ export const createCategoryRoutes = ({
           {
             id: params.id as EntityId,
             organizationId: context.organizationId,
+            role: toWorkspaceRole(context.role),
             targetCategoryId: (body.targetCategoryId ?? null) as EntityId | null,
           },
           categoryRepository,

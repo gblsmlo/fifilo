@@ -283,20 +283,96 @@ export const categories = pgTable(
 )
 
 /**
- * Groups the entries of one money movement (Decision 021); it never holds
- * the amount itself. `category_id` is null for a transfer (Decision 023).
+ * 1:1 with a `financial_accounts` row of `kind = credit_card` (Fase 03 §
+ * Persistência). A lateral table, not nullable columns on the main one - a
+ * card's lifecycle is distinct, and every other account kind would carry
+ * columns that never apply to it.
  */
-export const transactions = pgTable(
-  'transactions',
+export const creditCardDetails = pgTable(
+  'credit_card_details',
+  {
+    organizationId: text('organization_id')
+      .notNull()
+      .references(() => organizations.id, { onDelete: 'cascade' }),
+    accountId: text('account_id').notNull(),
+    closingDay: integer('closing_day').notNull(),
+    dueDay: integer('due_day').notNull(),
+    limitMinor: bigint('limit_minor', { mode: 'number' }).notNull(),
+    version: integer('version').notNull().default(1),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.organizationId, table.accountId] }),
+    foreignKey({
+      columns: [table.organizationId, table.accountId],
+      foreignColumns: [financialAccounts.organizationId, financialAccounts.id],
+    }),
+  ],
+)
+
+/**
+ * The billing cycle is derived, never stored (`deriveBillingCycle`); this
+ * row exists because the cycle has state - open, closed, paid - and because
+ * a changed closing day must not rewrite the past (Fase 03 § Modelagem).
+ */
+export const cardInvoices = pgTable(
+  'card_invoices',
   {
     organizationId: text('organization_id')
       .notNull()
       .references(() => organizations.id, { onDelete: 'cascade' }),
     id: text('id').notNull(),
-    kind: text('kind').notNull(),
+    accountId: text('account_id').notNull(),
+    periodStart: date('period_start').notNull(),
+    periodEnd: date('period_end').notNull(),
+    dueOn: date('due_on').notNull(),
+    status: text('status').notNull().default('open'),
+    totalMinor: bigint('total_minor', { mode: 'number' }).notNull().default(0),
+    closedAt: timestamp('closed_at', { withTimezone: true }),
+    paidAt: timestamp('paid_at', { withTimezone: true }),
+    version: integer('version').notNull().default(1),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.organizationId, table.id] }),
+    foreignKey({
+      columns: [table.organizationId, table.accountId],
+      foreignColumns: [financialAccounts.organizationId, financialAccounts.id],
+    }),
+    // One invoice per account per cycle (Fase 03 § Persistência) - the
+    // adapter's own get-or-create race relies on this to fail closed.
+    uniqueIndex('card_invoices_org_account_period_unique').on(
+      table.organizationId,
+      table.accountId,
+      table.periodStart,
+    ),
+    index('card_invoices_org_account_status_idx').on(
+      table.organizationId,
+      table.accountId,
+      table.status,
+    ),
+  ],
+)
+
+/**
+ * One purchase, N transactions, one per consecutive cycle (Fase 03 §
+ * Modelagem). The plan row is the thing a user edits or deletes; each
+ * generated transaction is independent once written.
+ */
+export const installmentPlans = pgTable(
+  'installment_plans',
+  {
+    organizationId: text('organization_id')
+      .notNull()
+      .references(() => organizations.id, { onDelete: 'cascade' }),
+    id: text('id').notNull(),
     description: text('description').notNull(),
     notes: text('notes'),
-    occurredOn: date('occurred_on').notNull(),
+    totalMinor: bigint('total_minor', { mode: 'number' }).notNull(),
+    installments: integer('installments').notNull(),
+    firstOccurredOn: date('first_occurred_on').notNull(),
     categoryId: text('category_id'),
     createdBy: text('created_by')
       .notNull()
@@ -311,11 +387,55 @@ export const transactions = pgTable(
       columns: [table.organizationId, table.categoryId],
       foreignColumns: [categories.organizationId, categories.id],
     }),
+  ],
+)
+
+/**
+ * Groups the entries of one money movement (Decision 021); it never holds
+ * the amount itself. `category_id` is null for a transfer (Decision 023).
+ * `installment_plan_id`/`installment_number` are null outside a plan (Fase
+ * 03 § Modelagem) - one column pair, not a second transaction shape.
+ */
+export const transactions = pgTable(
+  'transactions',
+  {
+    organizationId: text('organization_id')
+      .notNull()
+      .references(() => organizations.id, { onDelete: 'cascade' }),
+    id: text('id').notNull(),
+    kind: text('kind').notNull(),
+    description: text('description').notNull(),
+    notes: text('notes'),
+    occurredOn: date('occurred_on').notNull(),
+    categoryId: text('category_id'),
+    installmentPlanId: text('installment_plan_id'),
+    installmentNumber: integer('installment_number'),
+    createdBy: text('created_by')
+      .notNull()
+      .references(() => users.id),
+    version: integer('version').notNull().default(1),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.organizationId, table.id] }),
+    foreignKey({
+      columns: [table.organizationId, table.categoryId],
+      foreignColumns: [categories.organizationId, categories.id],
+    }),
+    foreignKey({
+      columns: [table.organizationId, table.installmentPlanId],
+      foreignColumns: [installmentPlans.organizationId, installmentPlans.id],
+    }),
     index('transactions_org_occurred_idx').on(table.organizationId, desc(table.occurredOn)),
     index('transactions_org_category_occurred_idx').on(
       table.organizationId,
       table.categoryId,
       table.occurredOn,
+    ),
+    index('transactions_org_installment_plan_idx').on(
+      table.organizationId,
+      table.installmentPlanId,
     ),
   ],
 )
@@ -326,7 +446,10 @@ export const transactions = pgTable(
  * balance is `sum(amount_minor)` with no special case, and a card statement
  * is a query over entries, not a second model. `transaction_id` had no
  * foreign key in Fase 01, since `transactions` did not exist yet; Fase 02
- * adds it as an expand step (operation.md).
+ * adds it as an expand step (operation.md). `invoice_id` is Fase 03's own
+ * expand step: null for every non-card entry, set once at creation for a
+ * card one (Fase 03 § Escopo - "atribuição automática de lançamento ao
+ * ciclo") and never recomputed on read.
  */
 export const entries = pgTable(
   'entries',
@@ -340,6 +463,7 @@ export const entries = pgTable(
     amountMinor: bigint('amount_minor', { mode: 'number' }).notNull(),
     currency: char('currency', { length: 3 }).notNull(),
     occurredOn: date('occurred_on').notNull(),
+    invoiceId: text('invoice_id'),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => [
@@ -354,22 +478,59 @@ export const entries = pgTable(
       columns: [table.organizationId, table.transactionId],
       foreignColumns: [transactions.organizationId, transactions.id],
     }),
+    foreignKey({
+      columns: [table.organizationId, table.invoiceId],
+      foreignColumns: [cardInvoices.organizationId, cardInvoices.id],
+    }),
     index('entries_org_account_occurred_idx').on(
       table.organizationId,
       table.accountId,
       table.occurredOn,
     ),
+    index('entries_org_invoice_idx').on(table.organizationId, table.invoiceId),
   ],
 )
 
-export const financialAccountsRelations = relations(financialAccounts, ({ many }) => ({
+export const financialAccountsRelations = relations(financialAccounts, ({ many, one }) => ({
+  creditCardDetails: one(creditCardDetails, {
+    fields: [financialAccounts.organizationId, financialAccounts.id],
+    references: [creditCardDetails.organizationId, creditCardDetails.accountId],
+  }),
   entries: many(entries),
+  invoices: many(cardInvoices),
+}))
+
+export const creditCardDetailsRelations = relations(creditCardDetails, ({ one }) => ({
+  account: one(financialAccounts, {
+    fields: [creditCardDetails.organizationId, creditCardDetails.accountId],
+    references: [financialAccounts.organizationId, financialAccounts.id],
+  }),
+}))
+
+export const cardInvoicesRelations = relations(cardInvoices, ({ many, one }) => ({
+  account: one(financialAccounts, {
+    fields: [cardInvoices.organizationId, cardInvoices.accountId],
+    references: [financialAccounts.organizationId, financialAccounts.id],
+  }),
+  entries: many(entries),
+}))
+
+export const installmentPlansRelations = relations(installmentPlans, ({ many, one }) => ({
+  category: one(categories, {
+    fields: [installmentPlans.organizationId, installmentPlans.categoryId],
+    references: [categories.organizationId, categories.id],
+  }),
+  transactions: many(transactions),
 }))
 
 export const entriesRelations = relations(entries, ({ one }) => ({
   account: one(financialAccounts, {
     fields: [entries.organizationId, entries.accountId],
     references: [financialAccounts.organizationId, financialAccounts.id],
+  }),
+  invoice: one(cardInvoices, {
+    fields: [entries.organizationId, entries.invoiceId],
+    references: [cardInvoices.organizationId, cardInvoices.id],
   }),
   transaction: one(transactions, {
     fields: [entries.organizationId, entries.transactionId],
@@ -393,6 +554,10 @@ export const transactionsRelations = relations(transactions, ({ many, one }) => 
     references: [categories.organizationId, categories.id],
   }),
   entries: many(entries),
+  installmentPlan: one(installmentPlans, {
+    fields: [transactions.organizationId, transactions.installmentPlanId],
+    references: [installmentPlans.organizationId, installmentPlans.id],
+  }),
 }))
 
 export const usersRelations = relations(users, ({ many }) => ({
@@ -422,10 +587,13 @@ export const authSchema = {
 
 export const databaseSchema = {
   ...authSchema,
+  cardInvoices,
   categories,
+  creditCardDetails,
   entries,
   financialAccounts,
   idempotencyRecords,
+  installmentPlans,
   notificationOutbox,
   transactions,
 }

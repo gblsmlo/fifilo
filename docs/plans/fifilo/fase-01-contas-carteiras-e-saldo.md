@@ -158,14 +158,22 @@ Forma da Decision 007, com `apps/web/src/features/auth` como modelo. Rota
 
 ## Critério de conclusão
 
-- [ ] Casos de uso com teste de sucesso, falha esperada e invariante.
-- [ ] Cinco provas negativas de RLS em `financial_accounts` e `entries`.
-- [ ] Teste de concorrência: duas edições com a mesma `version`, uma vence,
-      a outra recebe `409`.
-- [ ] Contrato no OpenAPI e cliente Eden tipado no Web.
-- [ ] Story de `AccountFormFields` e de `AccountList` com estado vazio, cheio e
-      erro.
-- [ ] E2E: criar conta → ver saldo → arquivar → sumir da lista ativa.
+- [x] Casos de uso com teste de sucesso, falha esperada e invariante — 32
+      testes em `packages/core/src/accounts/use-cases/`, um fake repository
+      compartilhado.
+- [x] Cinco provas negativas de RLS em `financial_accounts` e `entries` —
+      linha própria, isolamento entre organizações, `WITH CHECK`, sem
+      contexto e rollback; as cinco contra PostgreSQL real, através do
+      adapter que a API de fato chama.
+- [x] Teste de concorrência: duas edições com a mesma `version`, uma vence,
+      a outra recebe `409` — no fake (Core) e contra PostgreSQL real (API).
+- [x] Contrato no OpenAPI e cliente Eden tipado no Web — `/openapi` lista as
+      cinco rotas sem passo manual; `api.accounts.*` tipado compila no Web.
+- [x] Story de `AccountFormFields` e de `AccountList` com estado vazio, cheio e
+      erro — `AccountList` passou a ser dona dos três estados, não só a
+      página, para caber literalmente no critério.
+- [x] E2E: criar conta → ver saldo → arquivar → sumir da lista ativa —
+      `e2e/accounts/accounts.spec.ts`, contra a API e um banco reais.
 
 ## Fatias de commit
 
@@ -177,4 +185,32 @@ Forma da Decision 007, com `apps/web/src/features/auth` como modelo. Rota
 
 ## Registro de sessões
 
-_(a preencher durante a execução)_
+### 2026-09-06 — fase fechada
+
+Cinco fatias, em ordem: `1e93e22` (Core), `a01f4e0` (schema e migração),
+`e33598b` (API), `53dd7d1` (Web), `2ddd31b` (prova de rollback).
+
+Decisão 014 aplicada pela primeira vez: accounts e entries são a primeira
+capacidade a precisar de id gerado pela aplicação, o que é o próprio gatilho
+da decisão para centralizar o gerador. `generateId`/`generateEntityId`
+entraram em `primitives.ts`; os três `crypto.randomUUID()` existentes
+(observability, outbox de convite) migraram para lá.
+
+Achado fora do escopo original, corrigido na fatia Web: `listAccountsQuerySchema`
+usava `z.coerce.boolean()`, e `Boolean('false')` é `true` em JavaScript — todo
+pedido da lista "somente ativas" devolvia arquivadas também, silenciosamente.
+O E2E que exercita create → archive → sumir da lista foi o que expôs o
+defeito; a correção validada por caso de teste, para nenhum outro filtro
+booleano em query repetir o mesmo erro sem aviso.
+
+Escopo deliberadamente deixado de fora, sinalizado e não escondido: o saldo de
+abertura é parte do contrato e do caso de uso, mas não do formulário Web ainda
+— capturar um valor monetário exige uma entrada mascarada que edita o inteiro,
+nunca o texto exibido (Decisão 017), o que é entrega própria. Contas nascem
+com saldo zero nesta fase; uma transação as alimenta quando a Fase 02 chegar.
+
+Evidência: `bun run lint:ci`, `bun run typecheck`, `bun run test` (171 casos),
+`bun run storybook:test` (137 histórias), `bun run test:e2e` (10 jornadas,
+seed_organization limpa da poluição de testes manuais antes da corrida final),
+`bun run build`, `docker compose build` e um `docker compose up` completo com
+sign-in e `<title>Fifilo</title>` servidos — todos verdes.

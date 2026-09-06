@@ -14,6 +14,8 @@ import {
   updateAccountRequestSchema,
 } from '@fifilo/core/accounts'
 import type { EntityId } from '@fifilo/core/primitives'
+import type { AuditEvent } from '@fifilo/observability/runtime'
+import { auditEvent as recordAuditEvent } from '@fifilo/observability/runtime'
 import { Elysia } from 'elysia'
 import { z } from 'zod'
 import { toHttpErrorResponse } from '../../libs/domain-error-status'
@@ -28,12 +30,14 @@ const accountIdParamsSchema = z.object({ id: z.string().min(1) })
 
 export type AccountRouteDependencies = {
   accountRepository?: AccountRepository
+  auditEvent?: (event: AuditEvent) => void
   entryReader?: EntryReader
   resolveActor?: ActorResolver
 }
 
 export const createAccountRoutes = ({
   accountRepository = createAccountRepository(),
+  auditEvent = recordAuditEvent,
   entryReader = createEntryReader(),
   resolveActor,
 }: AccountRouteDependencies = {}) =>
@@ -164,6 +168,18 @@ export const createAccountRoutes = ({
           set.status = httpError.status
           return httpError.body
         }
+
+        // Archiving keeps every entry the account already has (Fase 01 §
+        // Modelagem) - the audit trail is what lets someone reconstruct
+        // whose history just went read-only and when (Fase 04 § Modelagem).
+        auditEvent({
+          action: 'account.archived',
+          actorId: context.userId,
+          actorType: 'user',
+          entityId: result.value.id,
+          entityType: 'financial_account',
+          workspaceId: context.organizationId,
+        })
 
         return toAccountResponse(result.value)
       },

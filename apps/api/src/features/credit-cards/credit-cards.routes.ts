@@ -28,6 +28,8 @@ import type {
   CategoryLookup,
   TransactionRepository,
 } from '@fifilo/core/transactions'
+import type { AuditEvent } from '@fifilo/observability/runtime'
+import { auditEvent as recordAuditEvent } from '@fifilo/observability/runtime'
 import { Elysia } from 'elysia'
 import { z } from 'zod'
 
@@ -75,6 +77,7 @@ class DomainResultError<E> extends Error {
 
 export type CreditCardRouteDependencies = {
   accountLookup?: AccountLookup
+  auditEvent?: (event: AuditEvent) => void
   cardAccountLookup?: CardAccountLookup
   categoryLookup?: CategoryLookup
   creditCardRepository?: CreditCardRepository
@@ -97,6 +100,7 @@ export type CreditCardRouteDependencies = {
  */
 export const createCreditCardRoutes = ({
   accountLookup = createAccountLookup(),
+  auditEvent = recordAuditEvent,
   cardAccountLookup = createCardAccountLookup(),
   categoryLookup = createCategoryLookup(),
   creditCardRepository = createCreditCardRepository(),
@@ -274,6 +278,22 @@ export const createCreditCardRoutes = ({
             transactionRepository,
           )
           if (!result.ok) throw new DomainResultError(result.error)
+
+          // Inside `execute`, not after `withIdempotency` resolves: a replay
+          // returns the stored response without ever calling this again, so
+          // the event fires exactly once per real payment (Fase 04 §
+          // Modelagem names "pagar fatura" as one of the four).
+          auditEvent({
+            action: 'invoice.paid',
+            actorId: context.userId,
+            actorType: 'user',
+            afterRef: result.value.transactionId,
+            entityId: params.id,
+            entityType: 'card_invoice',
+            metadata: { fromAccountId: body.fromAccountId },
+            workspaceId: context.organizationId,
+          })
+
           return toInvoiceResponse(result.value.invoice)
         }
 

@@ -178,4 +178,36 @@ describe('categories routes', () => {
     expect(categoryRepository.transactionCountsById.get(target.id)).toBe(3)
     expect(categoryRepository.transactionCountsById.get(source.id)).toBe(0)
   })
+
+  test('POST /:id/reassign records an audit event only for the bulk move, not a plain archive', async () => {
+    const emptyCategory = seedCategory({ name: 'Vazia' })
+    const source = seedCategory({ id: generateEntityId(), name: 'Antiga' })
+    const target = seedCategory({ id: generateEntityId(), name: 'Nova' })
+    const categoryRepository = createFakeCategoryRepository([emptyCategory, source, target])
+    categoryRepository.transactionCountsById.set(source.id, 2)
+    const events: unknown[] = []
+    const routes = createCategoryRoutes({
+      auditEvent: (event) => events.push(event),
+      categoryRepository,
+      resolveActor: async () => actor,
+    })
+
+    await request(routes, `/${emptyCategory.id}/reassign`, jsonRequest({}))
+    expect(events).toHaveLength(0)
+
+    await request(routes, `/${source.id}/reassign`, jsonRequest({ targetCategoryId: target.id }))
+
+    expect(events).toEqual([
+      {
+        action: 'category.reassigned',
+        actorId: 'user_1',
+        actorType: 'user',
+        afterRef: target.id,
+        beforeRef: source.id,
+        entityId: source.id,
+        entityType: 'category',
+        workspaceId: 'org_a',
+      },
+    ])
+  })
 })

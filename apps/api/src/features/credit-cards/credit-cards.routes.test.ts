@@ -200,8 +200,10 @@ describe('credit card routes', () => {
       seedActiveAccount({ id: cardAccountId }),
     ])
     const transactionRepository = createFakeTransactionRepository()
+    const events: unknown[] = []
     const routes = createCreditCardRoutes({
       accountLookup,
+      auditEvent: (event) => events.push(event),
       cardAccountLookup,
       idempotencyStore: createFakeIdempotencyStore(),
       invoiceRepository,
@@ -226,6 +228,11 @@ describe('credit card routes', () => {
     )
     expect(second.status).toBe(200)
     expect(await second.json()).toEqual(firstBody)
+
+    // The audit event fires from inside `execute`, which the replayed second
+    // call never re-runs (Fase 04 § Modelagem: one event per real payment).
+    expect(events).toHaveLength(1)
+    expect(events[0]).toMatchObject({ action: 'invoice.paid', entityId: invoice.id })
   })
 
   test('POST /api/transactions/installments creates the plan`s transactions', async () => {

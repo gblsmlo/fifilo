@@ -155,6 +155,45 @@ describe('accounts routes', () => {
     expect(response.status).toBe(404)
   })
 
+  test('POST /:id/archive records an audit event on success (Fase 04 § Modelagem)', async () => {
+    const account = {
+      archivedAt: null,
+      color: null,
+      createdAt: new Date(),
+      createdBy: generateEntityId(),
+      currency: 'BRL' as const,
+      icon: null,
+      id: generateEntityId(),
+      institution: null,
+      kind: 'checking' as const,
+      name: 'Checking',
+      organizationId: 'org_a',
+      updatedAt: new Date(),
+      version: 1,
+    }
+    const accountRepository = createFakeAccountRepository([account])
+    const events: unknown[] = []
+    const routes = createAccountRoutes({
+      accountRepository,
+      auditEvent: (event) => events.push(event),
+      resolveActor: async () => actor,
+    })
+
+    const response = await request(routes, `/${account.id}/archive`, { method: 'POST' })
+
+    expect(response.status).toBe(200)
+    expect(events).toEqual([
+      {
+        action: 'account.archived',
+        actorId: 'user_1',
+        actorType: 'user',
+        entityId: account.id,
+        entityType: 'financial_account',
+        workspaceId: 'org_a',
+      },
+    ])
+  })
+
   test('GET /balances reports the consolidated balance', async () => {
     const account = {
       archivedAt: null,

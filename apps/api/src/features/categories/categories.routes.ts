@@ -12,6 +12,8 @@ import {
   updateCategoryRequestSchema,
 } from '@fifilo/core/categories'
 import type { EntityId } from '@fifilo/core/primitives'
+import type { AuditEvent } from '@fifilo/observability/runtime'
+import { auditEvent as recordAuditEvent } from '@fifilo/observability/runtime'
 import { Elysia } from 'elysia'
 import { z } from 'zod'
 
@@ -25,11 +27,13 @@ import { createCategoryRepository } from './repository'
 const categoryIdParamsSchema = z.object({ id: z.string().min(1) })
 
 export type CategoryRouteDependencies = {
+  auditEvent?: (event: AuditEvent) => void
   categoryRepository?: CategoryRepository
   resolveActor?: ActorResolver
 }
 
 export const createCategoryRoutes = ({
+  auditEvent = recordAuditEvent,
   categoryRepository = createCategoryRepository(),
   resolveActor,
 }: CategoryRouteDependencies = {}) =>
@@ -129,6 +133,23 @@ export const createCategoryRoutes = ({
           const httpError = toHttpErrorResponse(result.error)
           set.status = httpError.status
           return httpError.body
+        }
+
+        // Only the bulk move gets an event, not a plain archive with nothing
+        // pointing at it (Fase 04 § Modelagem: "reatribuir categoria em
+        // massa") - a target present in the request is exactly the signal
+        // `reassignCategory` itself uses to tell the two paths apart.
+        if (body.targetCategoryId) {
+          auditEvent({
+            action: 'category.reassigned',
+            actorId: context.userId,
+            actorType: 'user',
+            afterRef: body.targetCategoryId,
+            beforeRef: params.id,
+            entityId: result.value.id,
+            entityType: 'category',
+            workspaceId: context.organizationId,
+          })
         }
 
         return toCategoryResponse(result.value)

@@ -134,14 +134,38 @@ caso que justifica o envelope de idempotência da Fase 00.
 
 ## Critério de conclusão
 
-- [ ] Tabela de casos de ciclo (fevereiro, dia do fechamento, vencimento antes
-      do fechamento, retroativo) coberta por teste.
-- [ ] Teste de propriedade do rateio.
-- [ ] Pagar a fatura duas vezes com a mesma chave produz um pagamento.
-- [ ] Despesa no cartão não move o saldo em caixa — teste explícito.
-- [ ] Cinco provas negativas de RLS nas três tabelas.
-- [ ] E2E: cadastrar cartão → compra parcelada em 3 → fechar fatura → pagar →
-      conferir saldo da conta e limite disponível.
+- [x] Tabela de casos de ciclo (fevereiro, dia do fechamento, vencimento antes
+      do fechamento, retroativo) coberta por teste —
+      `packages/core/src/credit-cards/cycle.test.ts` cobre fevereiro bissexto
+      e não bissexto, todo mês de 30 dias, compra no dia do fechamento e
+      vencimento antes do fechamento; o caso retroativo tem sua própria
+      suíte em `use-cases/resolve-invoice-for-occurrence.test.ts`, incluindo
+      o caso em que nenhuma fatura aberta existe ainda.
+- [x] Teste de propriedade do rateio —
+      `packages/core/src/credit-cards/installment.test.ts` varre todo total
+      de 0 a 500 (passo 7) contra toda contagem de parcelas de 1 a 12 e prova
+      que a soma volta a bater com o total em cada combinação.
+- [x] Pagar a fatura duas vezes com a mesma chave produz um pagamento —
+      provado em duas camadas: `pay-invoice.test.ts` prova que a segunda
+      chamada de domínio encontra a fatura já paga e rejeita
+      (`invoice_already_paid`), contando as transferências realmente
+      escritas; `credit-cards.routes.test.ts` prova que a mesma
+      `Idempotency-Key` na rota HTTP replica a mesma resposta, reaproveitando
+      o envelope de idempotência que `idempotency-persistence.integration.test.ts`
+      já prova contra PostgreSQL real desde a Fase 00.
+- [x] Despesa no cartão não move o saldo em caixa — teste explícito —
+      `card-purchase-cash-balance.integration.test.ts`: um saldo de abertura
+      na conta corrente permanece intacto depois de uma despesa no cartão,
+      lido pelo mesmo `entryReader.balancesByAccount` que a produção usa.
+- [x] Cinco provas negativas de RLS nas três tabelas —
+      `credit-cards-persistence.integration.test.ts`,
+      `invoices-persistence.integration.test.ts` e
+      `installment-plans-persistence.integration.test.ts`, as cinco contra
+      PostgreSQL real em cada uma das três tabelas novas.
+- [x] E2E: cadastrar cartão → compra parcelada em 3 → fechar fatura → pagar →
+      conferir saldo da conta e limite disponível —
+      `e2e/credit-cards/credit-cards.spec.ts`, contra a API e um banco
+      reais, com os dois números finais conferidos (não só "mudou").
 
 ## Fatias de commit
 
@@ -152,5 +176,66 @@ caso que justifica o envelope de idempotência da Fase 00.
 5. `test(credit-cards): add cycle, allocation and idempotency evidence`
 
 ## Registro de sessões
+
+### 2026-09-06 — fase fechada
+
+Seis commits, em ordem: `ee02a7e` (Core: ciclo, fatura, parcelamento e casos
+de uso), `68fbdb5` (schema e migração das três tabelas novas), `306a8e9`
+(API: rotas de cartão e fatura), `bc0cc57` (as cinco provas de RLS nas três
+tabelas mais a prova de saldo em caixa), `68d5982` (Web: a jornada completa)
+e `11c68b2` (E2E).
+
+Nenhum bug de produção nesta fase — ao contrário da Fase 02, cuja depuração
+consumiu uma hora em um processo de desenvolvimento obsoleto, a suíte de
+testes encontrou os dois defeitos reais desta fase antes de qualquer
+execução manual:
+
+Primeiro achado, na própria modelagem: a primeira versão de
+`resolveInvoiceForOccurrence` tratava "fatura natural fechada, nenhuma
+fatura aberta encontrada" caindo de volta na fatura fechada em si —
+reabrindo exatamente a fatura que a regra existe para proteger. O teste
+`resolve-invoice-for-occurrence.test.ts` que cobre esse caso vazio (nenhuma
+fatura aberta no arquivo) expôs isso antes de qualquer código de
+persistência existir; a correção abre o ciclo atual de verdade (a partir de
+`today`, não do `occurredOn` retroativo) em vez de usar `natural ?? ...`.
+
+Segundo achado, ao escrever o E2E: o link "Gerenciar cartão" em
+`account-list.tsx` usa `Button` com `render={<Link .../>}` (Decision 006 —
+Base UI troca o elemento final, não só a aparência), o que muda seu papel de
+acessibilidade para `link`, não `button`. O primeiro rascunho do teste
+procurava `getByRole('button', { name: 'Gerenciar cartão' })` e nunca
+encontrava o elemento; a árvore de acessibilidade capturada no erro do
+Playwright mostrou o papel real.
+
+Escopo deliberadamente reduzido, sinalizado e não escondido:
+
+- **Pagamento parcial não existe.** `payInvoice` sempre paga
+  `invoice.totalMinor` inteiro; o resto que "entra na fatura seguinte como
+  lançamento próprio" (Fase 03 § Modelagem) fica para quando um consumidor
+  real pedir — Decisão 025 documenta a razão.
+- **A flag de retroatividade não atravessa o contrato HTTP.** O domínio
+  já a calcula (`ResolvedInvoice.retroactive`); nenhuma rota ou tela a expõe
+  ainda, porque nada no critério de conclusão desta fase precisa dela
+  visível.
+- **A lista de contas não mostra limite e vencimento do cartão inline.**
+  Mostrá-los ali exigiria que a feature `accounts` dependesse de
+  `credit-cards`, que já depende de `accounts` para os próprios lookups de
+  conta — o único ciclo entre duas features que esta fase deliberadamente
+  não introduz. O link "Gerenciar cartão" leva à página do cartão, que
+  mostra os dois números.
+- **Sem editor de plano de parcelamento.** Criar o plano funciona; editar
+  parcelas futuras ou apagar o plano (Fase 03 § Modelagem os descreve) não
+  foi pedido nesta entrega.
+
+Evidência: `bun run lint:ci`, `bun run typecheck`, `bun run test` (326 casos
+no total do monorepo: 99 Core — 37 novos de `credit-cards`, incluindo o
+teste de propriedade do rateio —, 113 API — incluindo as quinze provas
+negativas de RLS das três tabelas novas contra PostgreSQL real e a prova de
+saldo em caixa —, mais UI/patterns/infra/Web nas contagens já estabelecidas
+pelas fases anteriores),
+`bun run storybook:test` (166 histórias, 45 arquivos — `InvoiceDetail` com
+os cinco estados do critério de conclusão: nenhuma selecionada, vazia,
+aberta, fechada, paga e vencida) e `bun run test:e2e` (12 jornadas, a nova
+`credit-cards.spec.ts` entre elas) — todos verdes.
 
 _(a preencher durante a execução)_

@@ -46,6 +46,8 @@ the successor exists; the successor adds its own row here.
 | 021 | [the entry is the signed leg of a money movement; the transaction groups entries](021-entry-is-the-signed-leg-of-money-movement.md) | active |
 | 022 | [a category has a fixed kind and one level of subcategory; it archives, it does not delete](022-category-has-fixed-kind-and-one-subcategory-level.md) | active |
 | 023 | [a transfer is a two-leg zero-sum transaction with no category](023-transfer-is-a-two-leg-zero-sum-transaction.md) | active |
+| 024 | [the invoice is a row with state; the cycle is derived from the closing day](024-invoice-is-a-row-with-state-cycle-is-derived.md) | active |
+| 025 | [paying an invoice is a transfer, not a new movement type](025-paying-an-invoice-is-a-transfer.md) | active |
 
 ## Historical
 

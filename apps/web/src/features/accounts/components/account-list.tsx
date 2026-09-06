@@ -7,6 +7,7 @@ import { Badge } from '@fifilo/ui/components/badge'
 import { Button } from '@fifilo/ui/components/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@fifilo/ui/components/card'
 import { formatMoney } from '@libs/format-money'
+import { Link } from '@tanstack/react-router'
 import { useState } from 'react'
 
 type AccountBalance = { amountMinor: number; currency: CurrencyCode }
@@ -122,15 +123,31 @@ export function AccountList({
                       >
                         {balance ? formatMoney(balance) : '—'}
                       </span>
-                      {!account.archivedAt ? (
-                        <Button
-                          onClick={() => setPendingArchiveId(account.id)}
-                          type='button'
-                          variant='ghost'
-                        >
-                          Arquivar
-                        </Button>
-                      ) : null}
+                      <div className='flex items-center gap-2'>
+                        {account.kind === 'credit_card' && !account.archivedAt ? (
+                          <Button
+                            render={
+                              <Link
+                                params={{ accountId: account.id }}
+                                to='/credit-cards/$accountId'
+                              />
+                            }
+                            type='button'
+                            variant='outline'
+                          >
+                            Gerenciar cartão
+                          </Button>
+                        ) : null}
+                        {!account.archivedAt ? (
+                          <Button
+                            onClick={() => setPendingArchiveId(account.id)}
+                            type='button'
+                            variant='ghost'
+                          >
+                            Arquivar
+                          </Button>
+                        ) : null}
+                      </div>
                     </CardContent>
                   </Card>
                 )

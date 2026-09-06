@@ -24,6 +24,7 @@ import { Route as authenticatedDashboardRouteImport } from './routes/(authentica
 import { Route as authenticatedOnboardingRouteImport } from './routes/(authenticated)/onboarding'
 import { Route as authenticatedOrganizationRouteImport } from './routes/(authenticated)/organization'
 import { Route as authenticatedTransactionsRouteImport } from './routes/(authenticated)/transactions'
+import { Route as authenticatedCreditCardsAccountIdRouteImport } from './routes/(authenticated)/credit-cards.$accountId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -101,6 +102,12 @@ const authenticatedTransactionsRoute =
     path: '/transactions',
     getParentRoute: () => authenticatedRouteRoute,
   } as any)
+const authenticatedCreditCardsAccountIdRoute =
+  authenticatedCreditCardsAccountIdRouteImport.update({
+    id: '/credit-cards/$accountId',
+    path: '/credit-cards/$accountId',
+    getParentRoute: () => authenticatedRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -116,6 +123,7 @@ export interface FileRoutesByFullPath {
   '/onboarding': typeof authenticatedOnboardingRoute
   '/organization': typeof authenticatedOrganizationRoute
   '/transactions': typeof authenticatedTransactionsRoute
+  '/credit-cards/$accountId': typeof authenticatedCreditCardsAccountIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -131,6 +139,7 @@ export interface FileRoutesByTo {
   '/onboarding': typeof authenticatedOnboardingRoute
   '/organization': typeof authenticatedOrganizationRoute
   '/transactions': typeof authenticatedTransactionsRoute
+  '/credit-cards/$accountId': typeof authenticatedCreditCardsAccountIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -149,6 +158,7 @@ export interface FileRoutesById {
   '/(authenticated)/onboarding': typeof authenticatedOnboardingRoute
   '/(authenticated)/organization': typeof authenticatedOrganizationRoute
   '/(authenticated)/transactions': typeof authenticatedTransactionsRoute
+  '/(authenticated)/credit-cards/$accountId': typeof authenticatedCreditCardsAccountIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -166,6 +176,7 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/organization'
     | '/transactions'
+    | '/credit-cards/$accountId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -181,6 +192,7 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/organization'
     | '/transactions'
+    | '/credit-cards/$accountId'
   id:
     | '__root__'
     | '/'
@@ -198,6 +210,7 @@ export interface FileRouteTypes {
     | '/(authenticated)/onboarding'
     | '/(authenticated)/organization'
     | '/(authenticated)/transactions'
+    | '/(authenticated)/credit-cards/$accountId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -313,6 +326,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof authenticatedTransactionsRouteImport
       parentRoute: typeof authenticatedRouteRoute
     }
+    '/(authenticated)/credit-cards/$accountId': {
+      id: '/(authenticated)/credit-cards/$accountId'
+      path: '/credit-cards/$accountId'
+      fullPath: '/credit-cards/$accountId'
+      preLoaderRoute: typeof authenticatedCreditCardsAccountIdRouteImport
+      parentRoute: typeof authenticatedRouteRoute
+    }
   }
 }
 
@@ -344,6 +364,7 @@ interface authenticatedRouteRouteChildren {
   authenticatedOnboardingRoute: typeof authenticatedOnboardingRoute
   authenticatedOrganizationRoute: typeof authenticatedOrganizationRoute
   authenticatedTransactionsRoute: typeof authenticatedTransactionsRoute
+  authenticatedCreditCardsAccountIdRoute: typeof authenticatedCreditCardsAccountIdRoute
 }
 
 const authenticatedRouteRouteChildren: authenticatedRouteRouteChildren = {
@@ -354,6 +375,8 @@ const authenticatedRouteRouteChildren: authenticatedRouteRouteChildren = {
   authenticatedOnboardingRoute: authenticatedOnboardingRoute,
   authenticatedOrganizationRoute: authenticatedOrganizationRoute,
   authenticatedTransactionsRoute: authenticatedTransactionsRoute,
+  authenticatedCreditCardsAccountIdRoute:
+    authenticatedCreditCardsAccountIdRoute,
 }
 
 const authenticatedRouteRouteWithChildren =

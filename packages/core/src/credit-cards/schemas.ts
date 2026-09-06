@@ -3,8 +3,14 @@ import { z } from 'zod'
 import { moneySchema } from '../contracts/money'
 import { MONEY_AMOUNT_MINOR_MAX } from '../primitives'
 
-const dayOfMonthSchema = z.int().min(1).max(31)
-const positiveAmountMinorSchema = z.int().min(1).max(MONEY_AMOUNT_MINOR_MAX)
+const dayOfMonthSchema = z
+  .int()
+  .min(1, 'Informe um dia entre 1 e 31.')
+  .max(31, 'Informe um dia entre 1 e 31.')
+const positiveAmountMinorSchema = z
+  .int()
+  .min(1, 'O valor deve ser maior que zero.')
+  .max(MONEY_AMOUNT_MINOR_MAX)
 
 export const attachCreditCardRequestSchema = z.object({
   closingDay: dayOfMonthSchema,
@@ -69,7 +75,7 @@ export const createInstallmentPurchaseRequestSchema = z.object({
   categoryId: z.string().min(1),
   description: installmentDescriptionSchema,
   firstOccurredOn: z.iso.date(),
-  installments: z.int().min(2).max(60),
+  installments: z.int().min(2, 'Escolha pelo menos 2 parcelas.').max(60),
   notes: installmentNotesSchema.optional(),
   totalMinor: positiveAmountMinorSchema,
 })

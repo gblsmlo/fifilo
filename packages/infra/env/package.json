@@ -1,0 +1,20 @@
+{
+  "name": "@twincam/infra-env",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "bun test",
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "exports": {
+    ".": "./src/index.ts",
+    "./client": "./src/client.ts",
+    "./migration": "./src/migration.ts",
+    "./server": "./src/server.ts",
+    "./spike": "./src/spike.ts",
+    "./web-server": "./src/web-server.ts"
+  },
+  "dependencies": {
+    "zod": "^4.1.12"
+  }
+}

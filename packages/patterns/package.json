@@ -1,0 +1,32 @@
+{
+  "name": "@twincam/patterns",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "bun test --isolate --timeout 20000",
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@twincam/ui": "workspace:*",
+    "lucide-react": "catalog:"
+  },
+  "exports": {
+    "./confirm-dialog": "./src/confirm-dialog.tsx",
+    "./destructive-dialog": "./src/destructive-dialog.tsx",
+    "./dialog": "./src/dialog/index.ts",
+    "./password-strength": "./src/password-strength.tsx",
+    "./settings": "./src/settings/index.ts",
+    "./state-kinds": "./src/state-kinds.ts",
+    "./state-surface": "./src/state-surface.tsx"
+  },
+  "peerDependencies": {
+    "@base-ui/react": "catalog:",
+    "react": "catalog:"
+  },
+  "devDependencies": {
+    "@base-ui/react": "catalog:",
+    "@testing-library/react": "^16.3.0",
+    "jsdom": "^26.1.0",
+    "react": "catalog:"
+  }
+}

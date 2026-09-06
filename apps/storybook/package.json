@@ -1,0 +1,35 @@
+{
+  "name": "@twincam/storybook",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "storybook": "storybook dev --no-open --port ${PORT:-6006}",
+    "storybook:build": "storybook build",
+    "storybook:test": "vitest run --project=storybook",
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@base-ui/react": "catalog:",
+    "@twincam/patterns": "workspace:*",
+    "@twincam/ui": "workspace:*",
+    "react": "catalog:",
+    "react-dom": "catalog:"
+  },
+  "devDependencies": {
+    "@hookform/resolvers": "^5.2.2",
+    "@storybook/addon-a11y": "10.5.7",
+    "@storybook/addon-docs": "10.5.7",
+    "@storybook/addon-vitest": "10.5.7",
+    "@storybook/react-vite": "10.5.7",
+    "@tailwindcss/vite": "4.2.2",
+    "@tanstack/react-router": "^1.170.17",
+    "@vitest/browser-playwright": "^4.1.11",
+    "lucide-react": "catalog:",
+    "playwright": "1.58.2",
+    "react-hook-form": "^7.62.0",
+    "storybook": "10.5.7",
+    "typescript": "^6.0.3",
+    "vite": "^7.1.0",
+    "vitest": "^4.1.11"
+  }
+}

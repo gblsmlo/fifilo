@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "allowImportingTsExtensions": true,
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "module": "Preserve",
+    "moduleResolution": "Bundler",
+    "noEmit": true,
+    "noUncheckedIndexedAccess": true,
+    "ignoreDeprecations": "6.0",
+    "paths": {
+      "@features/*": ["./apps/web/src/features/*"],
+      "@libs/*": ["./apps/web/src/libs/*"],
+      "@web/*": ["./apps/web/src/*"]
+    },
+    "skipLibCheck": true,
+    "strict": true,
+    "target": "ES2022",
+    "types": ["bun"],
+    "verbatimModuleSyntax": true
+  }
+}

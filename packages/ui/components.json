@@ -1,0 +1,23 @@
+{
+  "$schema": "https://ui.shadcn.com/schema.json",
+  "aliases": {
+    "components": "@twincam/ui/components",
+    "hooks": "@twincam/ui/hooks",
+    "lib": "@twincam/ui/lib",
+    "ui": "@twincam/ui/components",
+    "utils": "@twincam/ui/lib/utils"
+  },
+  "iconLibrary": "lucide",
+  "registries": {
+    "@coss": "https://coss.com/ui/r/{name}.json"
+  },
+  "rsc": false,
+  "style": "new-york",
+  "tailwind": {
+    "baseColor": "neutral",
+    "config": "",
+    "css": "../../apps/web/src/styles/global.css",
+    "cssVariables": true
+  },
+  "tsx": true
+}

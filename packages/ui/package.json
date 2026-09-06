@@ -1,0 +1,32 @@
+{
+  "name": "@twincam/ui",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "bun test --isolate --timeout 20000",
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "class-variance-authority": "catalog:",
+    "clsx": "2.1.1",
+    "lucide-react": "catalog:",
+    "react-day-picker": "10.0.1",
+    "tailwind-merge": "3.6.0"
+  },
+  "exports": {
+    "./components/*.test": null,
+    "./components/*": "./src/components/*.tsx",
+    "./hooks/*": "./src/hooks/*.ts",
+    "./lib/*": "./src/lib/*.ts"
+  },
+  "peerDependencies": {
+    "@base-ui/react": "catalog:",
+    "react": "catalog:"
+  },
+  "devDependencies": {
+    "@base-ui/react": "catalog:",
+    "@testing-library/react": "^16.3.0",
+    "jsdom": "^26.1.0",
+    "react": "catalog:"
+  }
+}

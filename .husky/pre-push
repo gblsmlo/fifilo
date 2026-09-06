@@ -1,0 +1,4 @@
+set -e
+. scripts/check-toolchain.sh
+bun run lint:ci
+bun run typecheck

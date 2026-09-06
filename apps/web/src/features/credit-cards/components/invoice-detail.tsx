@@ -110,6 +110,7 @@ export function InvoiceDetail({
             {invoice.status === 'closed' || invoice.status === 'overdue' ? (
               <>
                 <select
+                  aria-label='Pagar com'
                   className='h-9 rounded-md border border-input bg-transparent px-3 text-sm'
                   onChange={(event) => setPayFromAccountId(event.target.value)}
                   value={payFromAccountId}

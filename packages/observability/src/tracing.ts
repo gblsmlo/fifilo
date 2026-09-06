@@ -1,4 +1,4 @@
-import { type ObservabilityContext, createHttpContext } from './context'
+import { type ObservabilityContext, createHttpContext, createRequestId } from './context'
 import { logEvent } from './logger'
 
 type TraceOptions = {
@@ -15,7 +15,7 @@ export const traceOperation = async <T>(
 ): Promise<T> => {
   const startedAt = now()
   const context = {
-    requestId: options.context?.requestId ?? crypto.randomUUID(),
+    requestId: options.context?.requestId ?? createRequestId(),
     ...options.context,
   } satisfies ObservabilityContext
 

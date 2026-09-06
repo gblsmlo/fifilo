@@ -4,6 +4,7 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
+    "./accounts": "./src/accounts/index.ts",
     "./contracts/*": "./src/contracts/*.ts",
     "./errors": "./src/errors.ts",
     "./primitives": "./src/primitives.ts",

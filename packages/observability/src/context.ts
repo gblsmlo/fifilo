@@ -1,3 +1,5 @@
+import { generateId } from '@fifilo/core/primitives'
+
 export type ObservabilityContext = {
   actorId?: string
   requestId: string
@@ -5,7 +7,7 @@ export type ObservabilityContext = {
   workspaceId?: string
 }
 
-export const createRequestId = () => crypto.randomUUID()
+export const createRequestId = () => generateId()
 
 export const createObservabilityContext = (
   context: Partial<ObservabilityContext> = {},

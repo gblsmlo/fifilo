@@ -1,3 +1,4 @@
+import { generateId } from '@fifilo/core/primitives'
 import { db } from '@fifilo/infra-database/client'
 import { members, notificationOutbox, sessions } from '@fifilo/infra-database/schema'
 import { serverEnv } from '@fifilo/infra-env/server'
@@ -29,7 +30,7 @@ const sendOrganizationInvitation: NonNullable<OrganizationOptions['sendInvitatio
   invitationUrl.searchParams.set('invitationId', id)
 
   await db.insert(notificationOutbox).values({
-    id: crypto.randomUUID(),
+    id: generateId(),
     eventType: 'organization.invitation.email',
     payload: {
       invitationId: id,

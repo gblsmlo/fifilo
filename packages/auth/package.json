@@ -11,6 +11,7 @@
     "./server": "./src/server.ts"
   },
   "dependencies": {
+    "@fifilo/core": "workspace:*",
     "@fifilo/infra-database": "workspace:*",
     "@fifilo/infra-env": "workspace:*",
     "@fifilo/observability": "workspace:*",

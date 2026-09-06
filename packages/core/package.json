@@ -5,7 +5,9 @@
   "exports": {
     ".": "./src/index.ts",
     "./accounts": "./src/accounts/index.ts",
+    "./categories": "./src/categories/index.ts",
     "./contracts/*": "./src/contracts/*.ts",
+    "./transactions": "./src/transactions/index.ts",
     "./errors": "./src/errors.ts",
     "./primitives": "./src/primitives.ts",
     "./result": "./src/result.ts"

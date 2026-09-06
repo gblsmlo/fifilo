@@ -43,6 +43,9 @@ the successor exists; the successor adds its own row here.
 | 018 | [the financial fact is a civil date](018-the-financial-fact-is-a-civil-date.md) | active |
 | 019 | [the composite key `(organization_id, id)` is the tenant proof](019-composite-key-is-the-tenant-proof.md) | active |
 | 020 | [row-level security with `FORCE`, and five negative proofs before exposure](020-row-level-security-with-force.md) | active |
+| 021 | [the entry is the signed leg of a money movement; the transaction groups entries](021-entry-is-the-signed-leg-of-money-movement.md) | active |
+| 022 | [a category has a fixed kind and one level of subcategory; it archives, it does not delete](022-category-has-fixed-kind-and-one-subcategory-level.md) | active |
+| 023 | [a transfer is a two-leg zero-sum transaction with no category](023-transfer-is-a-two-leg-zero-sum-transaction.md) | active |
 
 ## Historical
 

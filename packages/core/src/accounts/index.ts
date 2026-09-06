@@ -18,6 +18,7 @@ export type {
 export type {
   AccountBalancesResponse,
   AccountErrorResponse,
+  AccountResponse,
   CreateAccountRequest,
   ListAccountsQuery as ListAccountsQueryContract,
   UpdateAccountRequest,

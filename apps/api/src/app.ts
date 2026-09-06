@@ -2,6 +2,7 @@ import { healthResponseSchema } from '@fifilo/core/contracts/health'
 import { traceHttpRequest } from '@fifilo/observability/runtime'
 import { Elysia } from 'elysia'
 
+import { createAccountRoutes } from './features/accounts'
 import { createAuthHandlerRoutes, createAuthRoutes } from './features/auth'
 import { createHealthResponse } from './features/health'
 import { createUserRoutes } from './features/users'
@@ -21,5 +22,6 @@ export const createApp = () =>
     .use(createAuthHandlerRoutes())
     .use(createAuthRoutes())
     .use(createUserRoutes())
+    .use(createAccountRoutes())
 
 export type App = ReturnType<typeof createApp>

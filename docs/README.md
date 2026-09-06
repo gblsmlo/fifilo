@@ -21,6 +21,7 @@ guide, other documents point to it instead of repeating it.
 | How do we protect access and data? | [Security](engineering/security.md) |
 | Idempotency, migrations and rollout? | [Operation](engineering/operation.md) |
 | What is being worked on now? | [Plans](plans/) hold the current update plan; the tracker of the product built on this starter owns execution |
+| What is the product roadmap, phase by phase? | [Fifilo roadmap](plans/fifilo/README.md) |
 
 ## Authority
 

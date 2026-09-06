@@ -162,4 +162,36 @@ describe('financial accounts persistence', () => {
     const entryRows = await db.execute(sql`select id from entries where account_id = ${id}`)
     expect([...entryRows]).toHaveLength(0)
   })
+
+  test('an error mid-transaction rolls back both the account and its entry', async () => {
+    const id = generateEntityId()
+
+    const failure = withWorkspaceTransactionOn(db, ORGANIZATION_A, async (tx) => {
+      await tx.execute(
+        sql`insert into financial_accounts
+              (organization_id, id, kind, name, currency, created_by)
+            values
+              (${ORGANIZATION_A}, ${id}, 'wallet', 'Rollback check', 'BRL', ${USER_ID})`,
+      )
+      await tx.execute(
+        sql`insert into entries
+              (organization_id, id, account_id, amount_minor, currency, occurred_on)
+            values
+              (${ORGANIZATION_A}, ${generateEntityId()}, ${id}, 1000, 'BRL', '2026-01-01')`,
+      )
+      throw new Error('forced rollback')
+    })
+
+    await expect(failure).rejects.toThrow('forced rollback')
+
+    const accountRows = await withWorkspaceTransactionOn(db, ORGANIZATION_A, (tx) =>
+      tx.execute(sql`select id from financial_accounts where id = ${id}`),
+    )
+    expect([...accountRows]).toHaveLength(0)
+
+    const entryRows = await withWorkspaceTransactionOn(db, ORGANIZATION_A, (tx) =>
+      tx.execute(sql`select id from entries where account_id = ${id}`),
+    )
+    expect([...entryRows]).toHaveLength(0)
+  })
 })

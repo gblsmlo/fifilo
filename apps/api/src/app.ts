@@ -5,6 +5,7 @@ import { Elysia } from 'elysia'
 import { createAccountRoutes } from './features/accounts'
 import { createAuthHandlerRoutes, createAuthRoutes } from './features/auth'
 import { createCategoryRoutes } from './features/categories'
+import { createCreditCardRoutes } from './features/credit-cards'
 import { createHealthResponse } from './features/health'
 import { createTransactionRoutes } from './features/transactions'
 import { createUserRoutes } from './features/users'
@@ -27,5 +28,6 @@ export const createApp = () =>
     .use(createAccountRoutes())
     .use(createCategoryRoutes())
     .use(createTransactionRoutes())
+    .use(createCreditCardRoutes())
 
 export type App = ReturnType<typeof createApp>

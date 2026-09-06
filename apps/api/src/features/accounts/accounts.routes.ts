@@ -17,14 +17,13 @@ import { Elysia } from 'elysia'
 import { z } from 'zod'
 import { toHttpErrorResponse } from '../../libs/domain-error-status'
 import { errorStatuses, mapValidationError } from '../../libs/http-errors'
+import { workspaceToday } from '../../libs/workspace-today'
 import type { ActorResolver } from '../auth'
 import { createAuthGuard, requireActorContext } from '../auth'
 import { toAccountBalancesResponse, toAccountResponse } from './accounts.mapper'
 import { createAccountRepository, createEntryReader } from './repository'
 
 const accountIdParamsSchema = z.object({ id: z.string().min(1) })
-
-const today = (): string => new Date().toISOString().slice(0, 10)
 
 export type AccountRouteDependencies = {
   accountRepository?: AccountRepository
@@ -60,7 +59,7 @@ export const createAccountRoutes = ({
       async ({ actorContext, set }) => {
         const context = requireActorContext(actorContext)
         const result = await getBalances(
-          { asOf: today(), organizationId: context.organizationId },
+          { asOf: workspaceToday(), organizationId: context.organizationId },
           accountRepository,
           entryReader,
         )

@@ -19,9 +19,11 @@ import { Route as authSignUpRouteImport } from './routes/(auth)/sign-up'
 import { Route as authTwoFactorRouteImport } from './routes/(auth)/two-factor'
 import { Route as authenticatedAcceptInvitationRouteImport } from './routes/(authenticated)/accept-invitation'
 import { Route as authenticatedAccountsRouteImport } from './routes/(authenticated)/accounts'
+import { Route as authenticatedCategoriesRouteImport } from './routes/(authenticated)/categories'
 import { Route as authenticatedDashboardRouteImport } from './routes/(authenticated)/dashboard'
 import { Route as authenticatedOnboardingRouteImport } from './routes/(authenticated)/onboarding'
 import { Route as authenticatedOrganizationRouteImport } from './routes/(authenticated)/organization'
+import { Route as authenticatedTransactionsRouteImport } from './routes/(authenticated)/transactions'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -72,6 +74,11 @@ const authenticatedAccountsRoute = authenticatedAccountsRouteImport.update({
   path: '/accounts',
   getParentRoute: () => authenticatedRouteRoute,
 } as any)
+const authenticatedCategoriesRoute = authenticatedCategoriesRouteImport.update({
+  id: '/categories',
+  path: '/categories',
+  getParentRoute: () => authenticatedRouteRoute,
+} as any)
 const authenticatedDashboardRoute = authenticatedDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -88,6 +95,12 @@ const authenticatedOrganizationRoute =
     path: '/organization',
     getParentRoute: () => authenticatedRouteRoute,
   } as any)
+const authenticatedTransactionsRoute =
+  authenticatedTransactionsRouteImport.update({
+    id: '/transactions',
+    path: '/transactions',
+    getParentRoute: () => authenticatedRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -98,9 +111,11 @@ export interface FileRoutesByFullPath {
   '/two-factor': typeof authTwoFactorRoute
   '/accept-invitation': typeof authenticatedAcceptInvitationRoute
   '/accounts': typeof authenticatedAccountsRoute
+  '/categories': typeof authenticatedCategoriesRoute
   '/dashboard': typeof authenticatedDashboardRoute
   '/onboarding': typeof authenticatedOnboardingRoute
   '/organization': typeof authenticatedOrganizationRoute
+  '/transactions': typeof authenticatedTransactionsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -111,9 +126,11 @@ export interface FileRoutesByTo {
   '/two-factor': typeof authTwoFactorRoute
   '/accept-invitation': typeof authenticatedAcceptInvitationRoute
   '/accounts': typeof authenticatedAccountsRoute
+  '/categories': typeof authenticatedCategoriesRoute
   '/dashboard': typeof authenticatedDashboardRoute
   '/onboarding': typeof authenticatedOnboardingRoute
   '/organization': typeof authenticatedOrganizationRoute
+  '/transactions': typeof authenticatedTransactionsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -127,9 +144,11 @@ export interface FileRoutesById {
   '/(auth)/two-factor': typeof authTwoFactorRoute
   '/(authenticated)/accept-invitation': typeof authenticatedAcceptInvitationRoute
   '/(authenticated)/accounts': typeof authenticatedAccountsRoute
+  '/(authenticated)/categories': typeof authenticatedCategoriesRoute
   '/(authenticated)/dashboard': typeof authenticatedDashboardRoute
   '/(authenticated)/onboarding': typeof authenticatedOnboardingRoute
   '/(authenticated)/organization': typeof authenticatedOrganizationRoute
+  '/(authenticated)/transactions': typeof authenticatedTransactionsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -142,9 +161,11 @@ export interface FileRouteTypes {
     | '/two-factor'
     | '/accept-invitation'
     | '/accounts'
+    | '/categories'
     | '/dashboard'
     | '/onboarding'
     | '/organization'
+    | '/transactions'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -155,9 +176,11 @@ export interface FileRouteTypes {
     | '/two-factor'
     | '/accept-invitation'
     | '/accounts'
+    | '/categories'
     | '/dashboard'
     | '/onboarding'
     | '/organization'
+    | '/transactions'
   id:
     | '__root__'
     | '/'
@@ -170,9 +193,11 @@ export interface FileRouteTypes {
     | '/(auth)/two-factor'
     | '/(authenticated)/accept-invitation'
     | '/(authenticated)/accounts'
+    | '/(authenticated)/categories'
     | '/(authenticated)/dashboard'
     | '/(authenticated)/onboarding'
     | '/(authenticated)/organization'
+    | '/(authenticated)/transactions'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -253,6 +278,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof authenticatedAccountsRouteImport
       parentRoute: typeof authenticatedRouteRoute
     }
+    '/(authenticated)/categories': {
+      id: '/(authenticated)/categories'
+      path: '/categories'
+      fullPath: '/categories'
+      preLoaderRoute: typeof authenticatedCategoriesRouteImport
+      parentRoute: typeof authenticatedRouteRoute
+    }
     '/(authenticated)/dashboard': {
       id: '/(authenticated)/dashboard'
       path: '/dashboard'
@@ -272,6 +304,13 @@ declare module '@tanstack/react-router' {
       path: '/organization'
       fullPath: '/organization'
       preLoaderRoute: typeof authenticatedOrganizationRouteImport
+      parentRoute: typeof authenticatedRouteRoute
+    }
+    '/(authenticated)/transactions': {
+      id: '/(authenticated)/transactions'
+      path: '/transactions'
+      fullPath: '/transactions'
+      preLoaderRoute: typeof authenticatedTransactionsRouteImport
       parentRoute: typeof authenticatedRouteRoute
     }
   }
@@ -300,17 +339,21 @@ const authRouteRouteWithChildren = authRouteRoute._addFileChildren(
 interface authenticatedRouteRouteChildren {
   authenticatedAcceptInvitationRoute: typeof authenticatedAcceptInvitationRoute
   authenticatedAccountsRoute: typeof authenticatedAccountsRoute
+  authenticatedCategoriesRoute: typeof authenticatedCategoriesRoute
   authenticatedDashboardRoute: typeof authenticatedDashboardRoute
   authenticatedOnboardingRoute: typeof authenticatedOnboardingRoute
   authenticatedOrganizationRoute: typeof authenticatedOrganizationRoute
+  authenticatedTransactionsRoute: typeof authenticatedTransactionsRoute
 }
 
 const authenticatedRouteRouteChildren: authenticatedRouteRouteChildren = {
   authenticatedAcceptInvitationRoute: authenticatedAcceptInvitationRoute,
   authenticatedAccountsRoute: authenticatedAccountsRoute,
+  authenticatedCategoriesRoute: authenticatedCategoriesRoute,
   authenticatedDashboardRoute: authenticatedDashboardRoute,
   authenticatedOnboardingRoute: authenticatedOnboardingRoute,
   authenticatedOrganizationRoute: authenticatedOrganizationRoute,
+  authenticatedTransactionsRoute: authenticatedTransactionsRoute,
 }
 
 const authenticatedRouteRouteWithChildren =

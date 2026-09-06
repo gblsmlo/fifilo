@@ -3,7 +3,7 @@ import { generateEntityId } from '@fifilo/core/primitives'
 import { db } from '@fifilo/infra-database/client'
 import { organizations, transactions, users } from '@fifilo/infra-database/schema'
 import { withWorkspaceTransactionOn } from '@fifilo/infra-database/workspace'
-import { eq, inArray, sql } from 'drizzle-orm'
+import { and, eq, inArray, sql } from 'drizzle-orm'
 
 import { requirePostgres } from '../../test/require-postgres'
 import { createCategoriesRepository } from './categories-persistence'
@@ -213,5 +213,67 @@ describe('categories persistence', () => {
 
     const moved = await repository.countTransactions(ORGANIZATION_A, target)
     expect(moved).toBe(3)
+  })
+
+  test('a failure between moving transactions and archiving leaves neither half-applied', async () => {
+    const source = generateEntityId()
+    const target = generateEntityId()
+    await repository.create({
+      color: null,
+      createdAt: new Date(),
+      icon: null,
+      id: source,
+      kind: 'expense',
+      name: 'Origem instável',
+      organizationId: ORGANIZATION_A,
+      parentId: null,
+    })
+    await repository.create({
+      color: null,
+      createdAt: new Date(),
+      icon: null,
+      id: target,
+      kind: 'expense',
+      name: 'Destino instável',
+      organizationId: ORGANIZATION_A,
+      parentId: null,
+    })
+
+    const transactionId = generateEntityId()
+    await withWorkspaceTransactionOn(db, ORGANIZATION_A, (tx) =>
+      tx.insert(transactions).values({
+        categoryId: source,
+        createdBy: USER_ID,
+        description: 'Não deveria se mover',
+        id: transactionId,
+        kind: 'expense' as const,
+        occurredOn: '2026-01-15',
+        organizationId: ORGANIZATION_A,
+      }),
+    )
+
+    // Mirrors reassignAndArchiveCategoryRow's own two statements, but forces
+    // an error between them - one instruction, one transaction (Fase 02 §
+    // Riscos): the move and the archive must rise or fall together.
+    const failure = withWorkspaceTransactionOn(db, ORGANIZATION_A, async (tx) => {
+      await tx
+        .update(transactions)
+        .set({ categoryId: target })
+        .where(
+          and(eq(transactions.organizationId, ORGANIZATION_A), eq(transactions.categoryId, source)),
+        )
+      throw new Error('forced rollback between move and archive')
+    })
+
+    await expect(failure).rejects.toThrow('forced rollback between move and archive')
+
+    const category = await repository.findById(ORGANIZATION_A, source)
+    expect(category?.archivedAt).toBeNull()
+
+    const stillOnSource = await repository.countTransactions(ORGANIZATION_A, source)
+    expect(stillOnSource).toBe(1)
+
+    const movedByAccident = await repository.countTransactions(ORGANIZATION_A, target)
+    expect(movedByAccident).toBe(0)
   })
 })

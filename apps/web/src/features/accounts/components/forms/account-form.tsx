@@ -1,5 +1,5 @@
 import { Button } from '@fifilo/ui/components/button'
-import { Field, FieldError, FieldLabel } from '@fifilo/ui/components/field'
+import { Field, FieldControl, FieldError, FieldLabel } from '@fifilo/ui/components/field'
 import { Form } from '@fifilo/ui/components/form'
 import { Input } from '@fifilo/ui/components/input'
 import { FormProvider, useFormContext } from 'react-hook-form'
@@ -48,16 +48,20 @@ export function AccountFormFields({ onSubmit }: Readonly<AccountFormFieldsProps>
 
       <Field invalid={Boolean(errors.kind)} name='kind'>
         <FieldLabel>Tipo</FieldLabel>
-        <select
-          {...register('kind')}
-          className='h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50'
-        >
-          {Object.entries(ACCOUNT_KIND_LABELS).map(([value, label]) => (
-            <option key={value} value={value}>
-              {label}
-            </option>
-          ))}
-        </select>
+        <FieldControl
+          render={
+            <select
+              {...register('kind')}
+              className='h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50'
+            >
+              {Object.entries(ACCOUNT_KIND_LABELS).map(([value, label]) => (
+                <option key={value} value={value}>
+                  {label}
+                </option>
+              ))}
+            </select>
+          }
+        />
         <FieldError>{errors.kind?.message}</FieldError>
       </Field>
 

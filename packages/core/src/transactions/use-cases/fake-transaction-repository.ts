@@ -5,21 +5,22 @@ import type {
   ActiveCategory,
   CategoryLookup,
   NewTransactionRecord,
+  PersistableLeg,
   TransactionListFilter,
   TransactionListPage,
   TransactionRepository,
   TransactionUpdatePatch,
   UpdateOutcome,
 } from '../ports'
-import type { Transaction, TransactionLeg } from '../transaction'
+import type { Transaction } from '../transaction'
 
 export const createFakeTransactionRepository = (
   seed: Transaction[] = [],
 ): TransactionRepository & {
-  legsByTransactionId: Map<string, Array<TransactionLeg & { id: EntityId }>>
+  legsByTransactionId: Map<string, PersistableLeg[]>
 } => {
   const transactions = new Map(seed.map((transaction) => [transaction.id, transaction]))
-  const legsByTransactionId = new Map<string, Array<TransactionLeg & { id: EntityId }>>()
+  const legsByTransactionId = new Map<string, PersistableLeg[]>()
 
   return {
     legsByTransactionId,
@@ -32,6 +33,7 @@ export const createFakeTransactionRepository = (
         description: record.description,
         id: record.id,
         kind: record.kind,
+        legs: record.legs,
         notes: record.notes,
         occurredOn: record.occurredOn,
         organizationId: record.organizationId,
@@ -77,6 +79,7 @@ export const createFakeTransactionRepository = (
         ...transaction,
         categoryId: patch.categoryId,
         description: patch.description,
+        legs: patch.legs,
         notes: patch.notes,
         occurredOn: patch.occurredOn,
         updatedAt: new Date(),

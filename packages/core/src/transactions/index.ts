@@ -4,6 +4,7 @@ export type {
   ActiveCategory,
   CategoryLookup,
   NewTransactionRecord,
+  PersistableLeg,
   TransactionListFilter,
   TransactionListPage,
   TransactionRepository,
@@ -31,7 +32,7 @@ export {
   transactionsPageResponseSchema,
   updateTransactionRequestSchema,
 } from './schemas'
-export type { Transaction, TransactionLeg } from './transaction'
+export type { Transaction, TransactionKind, TransactionLeg } from './transaction'
 export { deriveLegs } from './transaction'
 export type {
   CreateTransactionCommand,

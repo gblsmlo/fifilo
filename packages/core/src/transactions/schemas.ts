@@ -108,6 +108,7 @@ export const transactionsPageResponseSchema = z.object({
 const transactionErrorCodeSchema = z.enum([
   'account_archived',
   'account_not_found',
+  'category_archived',
   'category_kind_mismatch',
   'category_not_found',
   'currency_mismatch',

@@ -22,6 +22,7 @@ const seedTransaction = (overrides: Partial<Transaction> = {}): Transaction => (
   description: 'Supermercado',
   id: generateEntityId(),
   kind: 'expense',
+  legs: [],
   notes: null,
   occurredOn: '2026-01-15',
   organizationId: orgId,
@@ -57,7 +58,7 @@ describe('updateTransaction', () => {
     if (!result.ok) return
     expect(result.value.version).toBe(2)
     expect(repository.legsByTransactionId.get(transaction.id)).toEqual([
-      { accountId: checking.id, amountMinor: -7_500, id: expect.any(String) },
+      { accountId: checking.id, amountMinor: -7_500, currency: 'BRL', id: expect.any(String) },
     ])
   })
 

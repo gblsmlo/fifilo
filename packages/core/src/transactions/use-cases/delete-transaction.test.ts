@@ -12,6 +12,7 @@ const seedTransaction = (overrides: Partial<Transaction> = {}): Transaction => (
   description: 'Supermercado',
   id: generateEntityId(),
   kind: 'expense',
+  legs: [],
   notes: null,
   occurredOn: '2026-01-15',
   organizationId: 'org_a',
@@ -25,7 +26,12 @@ describe('deleteTransaction', () => {
     const transaction = seedTransaction()
     const repository = createFakeTransactionRepository([transaction])
     repository.legsByTransactionId.set(transaction.id, [
-      { accountId: generateEntityId(), amountMinor: -1_000, id: generateEntityId() },
+      {
+        accountId: generateEntityId(),
+        amountMinor: -1_000,
+        currency: 'BRL',
+        id: generateEntityId(),
+      },
     ])
 
     const result = await deleteTransaction(

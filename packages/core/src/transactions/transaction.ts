@@ -2,6 +2,11 @@ import type { EntityId } from '../primitives'
 
 export type TransactionKind = 'expense' | 'income' | 'transfer'
 
+export type TransactionLeg = {
+  accountId: EntityId
+  amountMinor: number
+}
+
 export type Transaction = {
   categoryId: EntityId | null
   createdAt: Date
@@ -9,16 +14,13 @@ export type Transaction = {
   description: string
   id: EntityId
   kind: TransactionKind
+  /** The legs the entries table actually holds - read here, never derived again on read (Decision 021). */
+  legs: readonly TransactionLeg[]
   notes: string | null
   occurredOn: string
   organizationId: string
   updatedAt: Date
   version: number
-}
-
-export type TransactionLeg = {
-  accountId: EntityId
-  amountMinor: number
 }
 
 type LegSource =

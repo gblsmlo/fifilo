@@ -2,6 +2,9 @@ import type { CategoryKind } from '../categories'
 import type { CurrencyCode, EntityId } from '../primitives'
 import type { Transaction, TransactionKind, TransactionLeg } from './transaction'
 
+/** A leg ready to persist: the account's own currency, looked up once by the use case, travels with it so the adapter never re-queries for it. */
+export type PersistableLeg = TransactionLeg & { currency: CurrencyCode; id: EntityId }
+
 export type NewTransactionRecord = {
   categoryId: EntityId | null
   createdAt: Date
@@ -9,7 +12,7 @@ export type NewTransactionRecord = {
   description: string
   id: EntityId
   kind: TransactionKind
-  legs: ReadonlyArray<TransactionLeg & { id: EntityId }>
+  legs: ReadonlyArray<PersistableLeg>
   notes: string | null
   occurredOn: string
   organizationId: string
@@ -18,7 +21,7 @@ export type NewTransactionRecord = {
 export type TransactionUpdatePatch = {
   categoryId: EntityId | null
   description: string
-  legs: ReadonlyArray<TransactionLeg & { id: EntityId }>
+  legs: ReadonlyArray<PersistableLeg>
   notes: string | null
   occurredOn: string
 }

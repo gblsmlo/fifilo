@@ -1,5 +1,5 @@
 import { type DomainError, conflictError, notFoundError, validationError } from '../../errors'
-import type { EntityId } from '../../primitives'
+import type { CurrencyCode, EntityId } from '../../primitives'
 import { generateEntityId } from '../../primitives'
 import { type Result, err, ok } from '../../result'
 import type { AccountLookup, CategoryLookup, TransactionRepository } from '../ports'
@@ -34,6 +34,7 @@ export type CreateTransactionError = DomainError<
   'conflict' | 'not_found' | 'validation',
   | 'account_archived'
   | 'account_not_found'
+  | 'category_archived'
   | 'category_kind_mismatch'
   | 'category_not_found'
   | 'currency_mismatch'
@@ -43,7 +44,7 @@ const checkAccount = async (
   organizationId: string,
   accountId: EntityId,
   accounts: AccountLookup,
-): Promise<Result<{ currency: string; id: EntityId }, CreateTransactionError>> => {
+): Promise<Result<{ currency: CurrencyCode; id: EntityId }, CreateTransactionError>> => {
   const account = await accounts.findActiveById(organizationId, accountId)
   if (!account) return err(notFoundError('account_not_found', 'Account not found.'))
   if (account.archivedAt) {
@@ -71,7 +72,11 @@ export const createTransaction = async (
       )
     }
 
-    const legs = deriveLegs(command).map((leg) => ({ ...leg, id: generateEntityId() }))
+    const legs = deriveLegs(command).map((leg) => ({
+      ...leg,
+      currency: from.value.currency,
+      id: generateEntityId(),
+    }))
     const created = await repository.create({
       categoryId: null,
       createdAt: new Date(),
@@ -93,6 +98,11 @@ export const createTransaction = async (
 
   const category = await categories.findActiveById(command.organizationId, command.categoryId)
   if (!category) return err(notFoundError('category_not_found', 'Category not found.'))
+  if (category.archivedAt) {
+    return err(
+      conflictError('category_archived', 'This category no longer accepts new transactions.'),
+    )
+  }
   if (category.kind !== command.kind) {
     return err(
       validationError(
@@ -102,7 +112,11 @@ export const createTransaction = async (
     )
   }
 
-  const legs = deriveLegs(command).map((leg) => ({ ...leg, id: generateEntityId() }))
+  const legs = deriveLegs(command).map((leg) => ({
+    ...leg,
+    currency: account.value.currency,
+    id: generateEntityId(),
+  }))
   const created = await repository.create({
     categoryId: command.categoryId,
     createdAt: new Date(),

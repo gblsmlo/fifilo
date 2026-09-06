@@ -15,9 +15,14 @@ const archivedAccount = { archivedAt: new Date(), currency: 'BRL' as const, id: 
 const usdAccount = { archivedAt: null, currency: 'USD' as const, id: generateEntityId() }
 const groceries = { archivedAt: null, id: generateEntityId(), kind: 'expense' as const }
 const salary = { archivedAt: null, id: generateEntityId(), kind: 'income' as const }
+const archivedCategory = {
+  archivedAt: new Date(),
+  id: generateEntityId(),
+  kind: 'expense' as const,
+}
 
 const accounts = createFakeAccountLookup([checking, savings, archivedAccount, usdAccount])
-const categories = createFakeCategoryLookup([groceries, salary])
+const categories = createFakeCategoryLookup([groceries, salary, archivedCategory])
 
 describe('createTransaction', () => {
   test('creates an expense with one negative leg', async () => {
@@ -43,7 +48,7 @@ describe('createTransaction', () => {
     expect(result.ok).toBe(true)
     if (!result.ok) return
     expect(repository.legsByTransactionId.get(result.value.id)).toEqual([
-      { accountId: checking.id, amountMinor: -5_000, id: expect.any(String) },
+      { accountId: checking.id, amountMinor: -5_000, currency: 'BRL', id: expect.any(String) },
     ])
   })
 
@@ -143,5 +148,29 @@ describe('createTransaction', () => {
 
     expect(result.ok).toBe(false)
     if (!result.ok) expect(result.error.code).toBe('account_archived')
+  })
+
+  test('rejects a transaction into an archived category', async () => {
+    const repository = createFakeTransactionRepository()
+
+    const result = await createTransaction(
+      {
+        accountId: checking.id,
+        amountMinor: 5_000,
+        categoryId: archivedCategory.id,
+        description: 'Compra',
+        kind: 'expense',
+        notes: null,
+        occurredOn: '2026-01-15',
+        organizationId: orgId,
+        userId: generateEntityId(),
+      },
+      repository,
+      accounts,
+      categories,
+    )
+
+    expect(result.ok).toBe(false)
+    if (!result.ok) expect(result.error.code).toBe('category_archived')
   })
 })

@@ -51,6 +51,7 @@ the successor exists; the successor adds its own row here.
 | 026 | [the organization is the financial workspace; `viewer` is the read-only role, decided in the use case](026-viewer-role-and-use-case-authorization.md) | active |
 | 027 | [Recharts is the chart library, chosen on four criteria](027-recharts-is-the-chart-library.md) | active |
 | 028 | [an analytics projection is a Core use case; no analytical query is born in the route or the Web](028-analytics-projection-is-a-core-use-case.md) | active |
+| 029 | [the workspace export streams its CSV in the response body; no server-side file, no expiration job](029-export-streams-the-csv-in-the-response.md) | active |
 
 ## Historical
 

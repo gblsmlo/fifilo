@@ -34,6 +34,8 @@ export const requireFinancialWriteAccess = (
     ? err(forbiddenError('insufficient_role', 'A read-only member cannot make this change.'))
     : ok(true)
 
+const isOwnerOrAdmin = (role: WorkspaceRole): boolean => role === 'owner' || role === 'admin'
+
 /**
  * Workspace settings are the first resource where member and admin diverge
  * (Decision 026's own revisit trigger): `currency`, `timezone` and
@@ -45,7 +47,7 @@ export const requireFinancialWriteAccess = (
 export const requireSettingsWriteAccess = (
   role: WorkspaceRole,
 ): Result<true, AccessControlError> =>
-  role === 'owner' || role === 'admin'
+  isOwnerOrAdmin(role)
     ? ok(true)
     : err(
         forbiddenError(
@@ -53,3 +55,15 @@ export const requireSettingsWriteAccess = (
           'Only an owner or admin can change workspace settings.',
         ),
       )
+
+/**
+ * A full-workspace export is the single read that reaches the most rows at
+ * once (Fase 06 § Riscos); `security.md`'s access matrix caps it at owner and
+ * admin the same way it caps workspace settings, so this shares the same
+ * owner-or-admin predicate under its own message rather than repeating the
+ * comparison.
+ */
+export const requireExportAccess = (role: WorkspaceRole): Result<true, AccessControlError> =>
+  isOwnerOrAdmin(role)
+    ? ok(true)
+    : err(forbiddenError('insufficient_role', 'Only an owner or admin can export workspace data.'))

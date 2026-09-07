@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'bun:test'
 
 import {
+  requireExportAccess,
   requireFinancialWriteAccess,
   requireSettingsWriteAccess,
   toWorkspaceRole,
@@ -28,6 +29,21 @@ describe('requireSettingsWriteAccess', () => {
     'viewer',
   ] as const)('rejects %s - settings are narrower than the general financial matrix', (role) => {
     const result = requireSettingsWriteAccess(role)
+    expect(result.ok).toBe(false)
+    if (!result.ok) expect(result.error.code).toBe('insufficient_role')
+  })
+})
+
+describe('requireExportAccess', () => {
+  test.each(['owner', 'admin'] as const)('allows %s to export workspace data', (role) => {
+    expect(requireExportAccess(role)).toEqual({ ok: true, value: true })
+  })
+
+  test.each([
+    'member',
+    'viewer',
+  ] as const)('rejects %s - export is narrower than the general financial matrix', (role) => {
+    const result = requireExportAccess(role)
     expect(result.ok).toBe(false)
     if (!result.ok) expect(result.error.code).toBe('insufficient_role')
   })

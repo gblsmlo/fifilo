@@ -10,6 +10,7 @@
     "./categories": "./src/categories/index.ts",
     "./contracts/*": "./src/contracts/*.ts",
     "./credit-cards": "./src/credit-cards/index.ts",
+    "./export": "./src/export/index.ts",
     "./settings": "./src/settings/index.ts",
     "./transactions": "./src/transactions/index.ts",
     "./errors": "./src/errors.ts",

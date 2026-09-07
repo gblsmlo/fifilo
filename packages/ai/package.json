@@ -1,0 +1,19 @@
+{
+  "name": "@fifilo/ai",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./anthropic": "./src/anthropic-backend.ts",
+    "./openrouter": "./src/openrouter-backend.ts",
+    "./stub": "./src/stub-backend.ts"
+  },
+  "scripts": {
+    "test": "bun test",
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.70.0",
+    "zod": "^4.1.12"
+  }
+}

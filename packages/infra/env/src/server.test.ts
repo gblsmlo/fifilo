@@ -28,3 +28,21 @@ describe('server env database pool settings', () => {
     expect(() => createServerEnv({ ...validRuntimeEnv, DATABASE_POOL_MAX: '21' })).toThrow()
   })
 })
+
+describe('AI provider keys (Fase 07)', () => {
+  test('are undefined when absent, not required to boot', () => {
+    const env = createServerEnv(validRuntimeEnv)
+    expect(env.ANTHROPIC_API_KEY).toBeUndefined()
+    expect(env.OPENROUTER_API_KEY).toBeUndefined()
+  })
+
+  test('an empty string counts as absent - `KEY=` in a .env file, not a real key', () => {
+    const env = createServerEnv({ ...validRuntimeEnv, ANTHROPIC_API_KEY: '' })
+    expect(env.ANTHROPIC_API_KEY).toBeUndefined()
+  })
+
+  test('a real value passes through untouched', () => {
+    const env = createServerEnv({ ...validRuntimeEnv, OPENROUTER_API_KEY: 'sk-or-test' })
+    expect(env.OPENROUTER_API_KEY).toBe('sk-or-test')
+  })
+})

@@ -51,6 +51,8 @@ environment.
 | `VITE_APP_NAME` | client | browser-visible product name |
 | `ALLOW_DESTRUCTIVE_SPIKES` | spike | opt-in for tests that truncate or migrate |
 | `WEB_HOST`, `WEB_PORT` | Vite | dev server bind; the E2E runner sets them |
+| `ANTHROPIC_API_KEY` | server | optional, Anthropic API adapter (Fase 07); blank counts as absent |
+| `OPENROUTER_API_KEY` | server | optional, OpenRouter adapter (Fase 07); blank counts as absent |
 
 `VITE_*` variables are public by definition: they are substituted at build time
 and shipped in the bundle. Secrets, credentialed URLs and private keys never

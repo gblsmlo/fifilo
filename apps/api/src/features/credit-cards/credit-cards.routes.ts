@@ -346,37 +346,69 @@ export const createCreditCardRoutes = ({
     )
     .post(
       '/api/transactions/installments',
-      async ({ actorContext, body, set }) => {
+      async ({ actorContext, body, headers, set }) => {
         const context = requireActorContext(actorContext)
-        const result = await createInstallmentPurchase(
-          {
-            accountId: body.accountId as EntityId,
-            categoryId: body.categoryId as EntityId,
-            description: body.description,
-            firstOccurredOn: body.firstOccurredOn,
-            installments: body.installments,
-            notes: body.notes ?? null,
-            organizationId: context.organizationId,
-            role: toWorkspaceRole(context.role),
-            today: await resolveToday(context.organizationId),
-            totalMinor: body.totalMinor,
-            userId: context.userId as EntityId,
-          },
-          installmentPlanRepository,
-          creditCardRepository,
-          invoiceRepository,
-          cardAccountLookup,
-          categoryLookup,
-        )
+        const idempotencyKey = headers['idempotency-key']
 
-        if (!result.ok) {
-          const httpError = toHttpErrorResponse(result.error)
-          set.status = httpError.status
-          return httpError.body
+        // N transactions created at once (Fase 06 audit, NFR-05): a retried
+        // request must not double the whole purchase, not just one leg.
+        if (!idempotencyKey) {
+          set.status = 400
+          return {
+            error: { code: 'idempotency_key_required', message: 'Send an Idempotency-Key header.' },
+          }
         }
 
-        set.status = 201
-        return { transactionIds: result.value }
+        const execute = async () => {
+          const result = await createInstallmentPurchase(
+            {
+              accountId: body.accountId as EntityId,
+              categoryId: body.categoryId as EntityId,
+              description: body.description,
+              firstOccurredOn: body.firstOccurredOn,
+              installments: body.installments,
+              notes: body.notes ?? null,
+              organizationId: context.organizationId,
+              role: toWorkspaceRole(context.role),
+              today: await resolveToday(context.organizationId),
+              totalMinor: body.totalMinor,
+              userId: context.userId as EntityId,
+            },
+            installmentPlanRepository,
+            creditCardRepository,
+            invoiceRepository,
+            cardAccountLookup,
+            categoryLookup,
+          )
+          if (!result.ok) throw new DomainResultError(result.error)
+          return { transactionIds: result.value }
+        }
+
+        try {
+          const idempotent = await withIdempotency({
+            execute,
+            idempotencyKey,
+            organizationId: context.organizationId,
+            requestPayload: body,
+            store: idempotencyStore,
+          })
+
+          if (!idempotent.ok) {
+            const httpError = toHttpErrorResponse(idempotent.error)
+            set.status = httpError.status
+            return httpError.body
+          }
+
+          set.status = 201
+          return idempotent.value
+        } catch (error) {
+          if (error instanceof DomainResultError) {
+            const httpError = toHttpErrorResponse(error.domainError)
+            set.status = httpError.status
+            return httpError.body
+          }
+          throw error
+        }
       },
       {
         body: createInstallmentPurchaseRequestSchema,

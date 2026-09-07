@@ -258,6 +258,7 @@ describe('credit card routes', () => {
       cardAccountLookup,
       categoryLookup,
       creditCardRepository,
+      idempotencyStore: createFakeIdempotencyStore(),
       installmentPlanRepository,
       invoiceRepository,
       resolveActor: async () => actor,
@@ -267,18 +268,43 @@ describe('credit card routes', () => {
     const response = await request(
       routes,
       '/api/transactions/installments',
-      jsonRequest({
-        accountId,
-        categoryId,
-        description: 'Notebook',
-        firstOccurredOn: '2026-06-05',
-        installments: 3,
-        totalMinor: 10_000,
-      }),
+      jsonRequest(
+        {
+          accountId,
+          categoryId,
+          description: 'Notebook',
+          firstOccurredOn: '2026-06-05',
+          installments: 3,
+          totalMinor: 10_000,
+        },
+        'POST',
+        { 'idempotency-key': 'installments-key' },
+      ),
     )
 
     expect(response.status).toBe(201)
     const body = (await response.json()) as { transactionIds: string[] }
     expect(body.transactionIds).toHaveLength(3)
+  })
+
+  test('POST /api/transactions/installments answers 400 without an Idempotency-Key (Fase 06 audit, NFR-05)', async () => {
+    const routes = createCreditCardRoutes({ resolveActor: async () => actor })
+
+    const response = await request(
+      routes,
+      '/api/transactions/installments',
+      jsonRequest({
+        accountId: generateEntityId(),
+        categoryId: generateEntityId(),
+        description: 'Sem chave',
+        firstOccurredOn: '2026-06-05',
+        installments: 2,
+        totalMinor: 10_000,
+      }),
+    )
+
+    expect(response.status).toBe(400)
+    const body = (await response.json()) as { error: { code: string } }
+    expect(body.error.code).toBe('idempotency_key_required')
   })
 })

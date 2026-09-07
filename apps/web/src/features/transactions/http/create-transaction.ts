@@ -3,12 +3,17 @@ import { api, edenCreated } from '@libs/api-client'
 
 import { normalizeTransactionRequestError } from './errors'
 
+/**
+ * `idempotencyKey` is required, not optional (Fase 06 audit, NFR-05): a
+ * duplicated click or a retried request must never double a financial
+ * movement, the same guarantee `payInvoice` already enforces.
+ */
 export async function createTransaction(
   payload: CreateTransactionRequest,
-  idempotencyKey?: string,
+  idempotencyKey: string,
 ): Promise<TransactionResponse> {
   const result = await api.transactions.post(payload, {
-    headers: idempotencyKey ? { 'idempotency-key': idempotencyKey } : undefined,
+    headers: { 'idempotency-key': idempotencyKey },
   })
   const { data, error } = edenCreated<TransactionResponse>(result)
 

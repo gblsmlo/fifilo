@@ -45,7 +45,11 @@ const dependencies: CreateAppDependencies = {
     resolveActor,
     settingsRepository: createFakeWorkspaceSettingsRepository(),
   },
-  transactions: { resolveActor },
+  // `POST /api/transactions` requires the header too now (Fase 06 audit,
+  // NFR-05) - `withIdempotency` claims the key before the use case's own
+  // role check ever runs, so this needs the same fake the credit-cards
+  // envelope does.
+  transactions: { idempotencyStore: createFakeIdempotencyStore(), resolveActor },
 }
 
 const app = createApp(dependencies)
@@ -104,6 +108,7 @@ const REQUEST_FIXTURES: Record<string, RequestFixture> = {
       kind: 'expense',
       occurredOn: '2026-01-01',
     },
+    headers: { 'idempotency-key': 'sweep-key' },
   },
   'POST /api/transactions/installments': {
     body: {
@@ -114,6 +119,7 @@ const REQUEST_FIXTURES: Record<string, RequestFixture> = {
       installments: 2,
       totalMinor: 1_000,
     },
+    headers: { 'idempotency-key': 'sweep-key' },
   },
 }
 

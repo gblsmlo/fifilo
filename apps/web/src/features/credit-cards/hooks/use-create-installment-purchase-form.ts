@@ -3,7 +3,7 @@ import type { CurrencyCode } from '@fifilo/core/primitives'
 import { toastManager } from '@fifilo/ui/components/toast'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useQueryClient } from '@tanstack/react-query'
-import { useMemo } from 'react'
+import { useMemo, useRef } from 'react'
 import { useForm } from 'react-hook-form'
 
 import { creditCardFeedback } from '../feedback'
@@ -37,6 +37,9 @@ export function useCreateInstallmentPurchaseForm({
   onCreated,
 }: UseCreateInstallmentPurchaseFormParams) {
   const queryClient = useQueryClient()
+  // Stable across a retried submit, fresh again after success (Fase 06
+  // audit, NFR-05) - same pattern as `use-create-transaction-form.ts`.
+  const idempotencyKeyRef = useRef<string>(undefined)
   const form = useForm<InstallmentPurchaseFormInput, unknown, InstallmentPurchaseFormValues>({
     defaultValues: {
       accountId,
@@ -65,8 +68,10 @@ export function useCreateInstallmentPurchaseForm({
   }, [currency, firstOccurredOn, installments, totalMinor])
 
   const onSubmit = form.handleSubmit(async (values) => {
+    idempotencyKeyRef.current ??= crypto.randomUUID()
+
     try {
-      await createInstallmentPurchase(values)
+      await createInstallmentPurchase(values, idempotencyKeyRef.current)
 
       toastManager.add(creditCardFeedback.installmentPurchase.success)
       form.reset({
@@ -77,6 +82,7 @@ export function useCreateInstallmentPurchaseForm({
         installments: 2,
         totalMinor: 0,
       })
+      idempotencyKeyRef.current = undefined
       await queryClient.invalidateQueries({ queryKey: ['credit-cards', accountId] })
       onCreated?.()
     } catch (error) {

@@ -184,6 +184,17 @@ export const createTransactionRoutes = ({
         const context = requireActorContext(actorContext)
         const idempotencyKey = headers['idempotency-key']
 
+        // A duplicated click or a retried request must never double a
+        // financial movement (NFR-05, the same guarantee `pay` already
+        // requires) - required, not best-effort, the way an optional check
+        // silently was before the Fase 06 audit found it.
+        if (!idempotencyKey) {
+          set.status = 400
+          return {
+            error: { code: 'idempotency_key_required', message: 'Send an Idempotency-Key header.' },
+          }
+        }
+
         const execute = async () => {
           const result = await createTransaction(
             buildCreateCommand(body, context),
@@ -196,28 +207,22 @@ export const createTransactionRoutes = ({
         }
 
         try {
-          if (idempotencyKey) {
-            const idempotent = await withIdempotency({
-              execute,
-              idempotencyKey,
-              organizationId: context.organizationId,
-              requestPayload: body,
-              store: idempotencyStore,
-            })
+          const idempotent = await withIdempotency({
+            execute,
+            idempotencyKey,
+            organizationId: context.organizationId,
+            requestPayload: body,
+            store: idempotencyStore,
+          })
 
-            if (!idempotent.ok) {
-              const httpError = toHttpErrorResponse(idempotent.error)
-              set.status = httpError.status
-              return httpError.body
-            }
-
-            set.status = 201
-            return idempotent.value
+          if (!idempotent.ok) {
+            const httpError = toHttpErrorResponse(idempotent.error)
+            set.status = httpError.status
+            return httpError.body
           }
 
-          const response = await execute()
           set.status = 201
-          return response
+          return idempotent.value
         } catch (error) {
           if (error instanceof DomainResultError) {
             const httpError = toHttpErrorResponse(error.domainError)

@@ -3,6 +3,7 @@ import { generateEntityId } from '@fifilo/core/primitives'
 import { Elysia } from 'elysia'
 
 import type { ActorResolution } from '../auth'
+import { createFakeIdempotencyStore } from '../credit-cards/credit-cards-test-support'
 import { createTransactionRoutes } from './transactions.routes'
 import {
   createFakeAccountLookup,
@@ -36,11 +37,24 @@ const request = (
   init?: RequestInit,
 ) => new Elysia().use(routes).handle(new Request(`http://localhost/api/transactions${path}`, init))
 
-const jsonRequest = (body: unknown, method = 'POST'): RequestInit => ({
-  body: JSON.stringify(body),
-  headers: { 'content-type': 'application/json' },
-  method,
-})
+let idempotencyKeySequence = 0
+
+/**
+ * A fresh key per call: `withIdempotency` would otherwise treat two
+ * different test bodies sharing one key as the same request and replay the
+ * first response, hiding the actual assertion under test.
+ */
+const jsonRequest = (body: unknown, method = 'POST'): RequestInit => {
+  idempotencyKeySequence += 1
+  return {
+    body: JSON.stringify(body),
+    headers: {
+      'content-type': 'application/json',
+      'idempotency-key': `test-key-${idempotencyKeySequence}`,
+    },
+    method,
+  }
+}
 
 describe('transactions routes', () => {
   test('GET / answers 401 without a session', async () => {
@@ -56,6 +70,7 @@ describe('transactions routes', () => {
     const routes = createTransactionRoutes({
       accountLookup: createFakeAccountLookup([account]),
       categoryLookup: createFakeCategoryLookup([category]),
+      idempotencyStore: createFakeIdempotencyStore(),
       resolveActor: async () => actor,
       transactionRepository: createFakeTransactionRepository(),
     })
@@ -85,6 +100,7 @@ describe('transactions routes', () => {
     const to = seedActiveAccount({ id: generateEntityId() })
     const routes = createTransactionRoutes({
       accountLookup: createFakeAccountLookup([from, to]),
+      idempotencyStore: createFakeIdempotencyStore(),
       resolveActor: async () => actor,
       transactionRepository: createFakeTransactionRepository(),
     })
@@ -113,10 +129,36 @@ describe('transactions routes', () => {
     expect(body.legs.reduce((sum, leg) => sum + leg.amountMinor, 0)).toBe(0)
   })
 
+  test('POST / answers 400 without an Idempotency-Key (Fase 06 audit, NFR-05)', async () => {
+    const account = seedActiveAccount({ id: generateEntityId() })
+    const routes = createTransactionRoutes({
+      accountLookup: createFakeAccountLookup([account]),
+      resolveActor: async () => actor,
+    })
+
+    const response = await request(routes, '', {
+      body: JSON.stringify({
+        accountId: account.id,
+        amountMinor: 5_000,
+        categoryId: generateEntityId(),
+        description: 'Sem chave',
+        kind: 'expense',
+        occurredOn: '2026-01-15',
+      }),
+      headers: { 'content-type': 'application/json' },
+      method: 'POST',
+    })
+
+    expect(response.status).toBe(400)
+    const body = (await response.json()) as { error: { code: string } }
+    expect(body.error.code).toBe('idempotency_key_required')
+  })
+
   test('POST / answers 400 for a transfer between the same account', async () => {
     const account = seedActiveAccount({ id: generateEntityId() })
     const routes = createTransactionRoutes({
       accountLookup: createFakeAccountLookup([account]),
+      idempotencyStore: createFakeIdempotencyStore(),
       resolveActor: async () => actor,
     })
 
@@ -142,6 +184,7 @@ describe('transactions routes', () => {
     const routes = createTransactionRoutes({
       accountLookup: createFakeAccountLookup([account]),
       categoryLookup: createFakeCategoryLookup([category]),
+      idempotencyStore: createFakeIdempotencyStore(),
       resolveActor: async () => actor,
     })
 
@@ -177,6 +220,7 @@ describe('transactions routes', () => {
     const routes = createTransactionRoutes({
       accountLookup: createFakeAccountLookup([account]),
       categoryLookup: createFakeCategoryLookup([category]),
+      idempotencyStore: createFakeIdempotencyStore(),
       resolveActor: async () => actor,
     })
 
@@ -203,7 +247,10 @@ describe('transactions routes', () => {
   })
 
   test('POST / answers 404 for an unknown account', async () => {
-    const routes = createTransactionRoutes({ resolveActor: async () => actor })
+    const routes = createTransactionRoutes({
+      idempotencyStore: createFakeIdempotencyStore(),
+      resolveActor: async () => actor,
+    })
 
     const response = await request(
       routes,

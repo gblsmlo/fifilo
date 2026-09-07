@@ -4,6 +4,8 @@
  * composition root every other feature uses, instead of reaching into
  * `*-persistence.ts` directly.
  */
+export type { GuardAiRunError, GuardAiRunQuery } from './guard-run'
+export { guardAiRun } from './guard-run'
 export {
   createAiBudgetRepository,
   createAiKillSwitchRepository,

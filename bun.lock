@@ -52,6 +52,7 @@
       "name": "@fifilo/api",
       "dependencies": {
         "@elysia/openapi": "^1.4.15",
+        "@fifilo/ai": "workspace:*",
         "@fifilo/auth": "workspace:*",
         "@fifilo/core": "workspace:*",
         "@fifilo/infra-database": "workspace:*",

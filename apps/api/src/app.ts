@@ -11,6 +11,8 @@ import type { CategoryRouteDependencies } from './features/categories'
 import { createCategoryRoutes } from './features/categories'
 import type { CreditCardRouteDependencies } from './features/credit-cards'
 import { createCreditCardRoutes } from './features/credit-cards'
+import type { ExportRouteDependencies } from './features/export'
+import { createExportRoutes } from './features/export'
 import { createHealthResponse } from './features/health'
 import type { SettingsRouteDependencies } from './features/settings'
 import { createSettingsRoutes } from './features/settings'
@@ -31,6 +33,7 @@ export type CreateAppDependencies = {
   analytics?: AnalyticsRouteDependencies
   categories?: CategoryRouteDependencies
   creditCards?: CreditCardRouteDependencies
+  export?: ExportRouteDependencies
   settings?: SettingsRouteDependencies
   transactions?: TransactionRouteDependencies
 }
@@ -55,5 +58,6 @@ export const createApp = (dependencies: CreateAppDependencies = {}) =>
     .use(createCreditCardRoutes(dependencies.creditCards))
     .use(createAnalyticsRoutes(dependencies.analytics))
     .use(createSettingsRoutes(dependencies.settings))
+    .use(createExportRoutes(dependencies.export))
 
 export type App = ReturnType<typeof createApp>

@@ -24,7 +24,8 @@ provedor é um arquivo, e nada do produto conhece o formato de ninguém.
 
 ### Entra
 
-- `packages/ai`: port do provedor, taxonomia de mensagem, um adaptador.
+- `packages/ai`: port do provedor, taxonomia de mensagem, dois adaptadores -
+  Anthropic API e OpenRouter.
 - Contabilidade de token e custo por execução.
 - Orçamento por workspace com recusa ao estourar.
 - Kill switch por workspace e global.
@@ -48,13 +49,33 @@ Taxonomia de mensagem, adaptada do Multica: `text`, `thinking`, `tool-use`,
 `tool-result`, `status`, `error`. Estados de resultado: `completed`, `failed`,
 `aborted`, `timeout`, `cancelled`.
 
+### Dois provedores desde o início
+
+Diferente do padrão usual deste starter ("o segundo adaptador só entra quando
+houver motivo"), aqui o motivo já existe e é explícito: Anthropic API dá
+acesso direto aos recursos específicos de Claude (prompt caching, extended
+thinking, o modelo mais novo no dia em que sai) sem a defasagem de um
+agregador; OpenRouter dá acesso a modelos de múltiplos provedores atrás de
+uma única chave e um formato só, cobrindo custo, fallback e comparação de
+modelo sem multiplicar integração. Nenhum dos dois é "principal" - a escolha
+de qual `AgentBackend` uma execução usa é configuração por workspace ou por
+tipo de tarefa, decidida na Fase 08 em diante; esta fase só garante que os
+dois existem, passam na mesma suíte de contrato, e trocar de um para o outro
+é configuração, não código novo.
+
 Regras de fronteira:
 
 - `packages/ai` não importa `packages/infra/database`, `packages/auth` nem
   Elysia. Ele recebe capacidade injetada, como manda a Decision 001.
-- Um adaptador por arquivo. O primeiro é Anthropic (Claude); o segundo só entra
-  quando houver motivo, e a existência do port é o que torna isso barato.
-- Chave de API só por `packages/infra/env`, nunca `Bun.env` direto.
+- Um adaptador por arquivo: `anthropic.ts` e `openrouter.ts`, cada um
+  implementando o mesmo `AgentBackend`. Um terceiro provedor só entra quando
+  houver motivo igualmente explícito - a existência do port é o que torna
+  isso barato quando o motivo aparecer.
+- Chave de API só por `packages/infra/env`, nunca `Bun.env` direto -
+  `ANTHROPIC_API_KEY` e `OPENROUTER_API_KEY`, cada uma opcional
+  individualmente (um ambiente pode rodar com um só provedor configurado),
+  mas a validação de schema recusa a dupla ausência se a Fase 08 em diante
+  depende de pelo menos um.
 
 ## Persistência
 
@@ -96,31 +117,38 @@ Mais dois específicos deste domínio:
 
 ## Critério de conclusão
 
-- [ ] Port com adaptador de stub e adaptador real, ambos passando na mesma
-      suíte de contrato.
+- [ ] Port com adaptador de stub, adaptador Anthropic e adaptador OpenRouter,
+      os três passando na mesma suíte de contrato.
 - [ ] Teste de recusa sem contexto de workspace.
 - [ ] Teste de redação: entrada com nome, e-mail e documento; nada disso
       aparece no payload que sai.
 - [ ] Teste de orçamento estourado.
 - [ ] Kill switch desliga e o produto continua de pé.
-- [ ] Contabilidade de token conferida contra uma chamada real.
+- [ ] Contabilidade de token conferida contra uma chamada real a cada
+      provedor - custo por token difere entre Anthropic API e OpenRouter, e
+      OpenRouter difere por modelo dentro de si mesmo.
 - [ ] Cinco provas negativas de RLS em `ai_runs` e `ai_budgets`.
 
 ## Decisões a registrar
 
+Numeração a partir de 030: a Fase 06 já consumiu a 029
+([`029-export-streams-the-csv-in-the-response.md`](../../decisions/029-export-streams-the-csv-in-the-response.md)).
+
 | # | Decisão |
 | ---: | --- |
-| 029 | o provedor de modelo fica atrás de um port; o produto não implementa loop de agente |
-| 030 | dado nível 3 e 4 não sai para provedor externo; sai agregado e referência |
-| 031 | toda execução de IA tem orçamento, kill switch e trilha de auditoria |
+| 030 | o provedor de modelo fica atrás de um port; o produto não implementa loop de agente |
+| 031 | Anthropic API e OpenRouter entram juntos como os dois adaptadores iniciais, não um-depois-o-outro |
+| 032 | dado nível 3 e 4 não sai para provedor externo; sai agregado e referência |
+| 033 | toda execução de IA tem orçamento, kill switch e trilha de auditoria |
 
 ## Fatias de commit
 
 1. `feat(ai): add the provider port, message taxonomy and stub adapter`
 2. `feat(ai): add the anthropic adapter`
-3. `feat(database): persist ai runs and budgets`
-4. `feat(api): add redaction, budget and kill switch guards`
-5. `test(ai): add guardrail evidence`
+3. `feat(ai): add the openrouter adapter`
+4. `feat(database): persist ai runs and budgets`
+5. `feat(api): add redaction, budget and kill switch guards`
+6. `test(ai): add guardrail evidence`
 
 ## Registro de sessões
 

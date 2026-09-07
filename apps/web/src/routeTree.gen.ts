@@ -23,6 +23,7 @@ import { Route as authenticatedCategoriesRouteImport } from './routes/(authentic
 import { Route as authenticatedDashboardRouteImport } from './routes/(authenticated)/dashboard'
 import { Route as authenticatedOnboardingRouteImport } from './routes/(authenticated)/onboarding'
 import { Route as authenticatedOrganizationRouteImport } from './routes/(authenticated)/organization'
+import { Route as authenticatedSettingsRouteImport } from './routes/(authenticated)/settings'
 import { Route as authenticatedTransactionsRouteImport } from './routes/(authenticated)/transactions'
 import { Route as authenticatedCreditCardsAccountIdRouteImport } from './routes/(authenticated)/credit-cards.$accountId'
 
@@ -96,6 +97,11 @@ const authenticatedOrganizationRoute =
     path: '/organization',
     getParentRoute: () => authenticatedRouteRoute,
   } as any)
+const authenticatedSettingsRoute = authenticatedSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => authenticatedRouteRoute,
+} as any)
 const authenticatedTransactionsRoute =
   authenticatedTransactionsRouteImport.update({
     id: '/transactions',
@@ -122,6 +128,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof authenticatedDashboardRoute
   '/onboarding': typeof authenticatedOnboardingRoute
   '/organization': typeof authenticatedOrganizationRoute
+  '/settings': typeof authenticatedSettingsRoute
   '/transactions': typeof authenticatedTransactionsRoute
   '/credit-cards/$accountId': typeof authenticatedCreditCardsAccountIdRoute
 }
@@ -138,6 +145,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof authenticatedDashboardRoute
   '/onboarding': typeof authenticatedOnboardingRoute
   '/organization': typeof authenticatedOrganizationRoute
+  '/settings': typeof authenticatedSettingsRoute
   '/transactions': typeof authenticatedTransactionsRoute
   '/credit-cards/$accountId': typeof authenticatedCreditCardsAccountIdRoute
 }
@@ -157,6 +165,7 @@ export interface FileRoutesById {
   '/(authenticated)/dashboard': typeof authenticatedDashboardRoute
   '/(authenticated)/onboarding': typeof authenticatedOnboardingRoute
   '/(authenticated)/organization': typeof authenticatedOrganizationRoute
+  '/(authenticated)/settings': typeof authenticatedSettingsRoute
   '/(authenticated)/transactions': typeof authenticatedTransactionsRoute
   '/(authenticated)/credit-cards/$accountId': typeof authenticatedCreditCardsAccountIdRoute
 }
@@ -175,6 +184,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/onboarding'
     | '/organization'
+    | '/settings'
     | '/transactions'
     | '/credit-cards/$accountId'
   fileRoutesByTo: FileRoutesByTo
@@ -191,6 +201,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/onboarding'
     | '/organization'
+    | '/settings'
     | '/transactions'
     | '/credit-cards/$accountId'
   id:
@@ -209,6 +220,7 @@ export interface FileRouteTypes {
     | '/(authenticated)/dashboard'
     | '/(authenticated)/onboarding'
     | '/(authenticated)/organization'
+    | '/(authenticated)/settings'
     | '/(authenticated)/transactions'
     | '/(authenticated)/credit-cards/$accountId'
   fileRoutesById: FileRoutesById
@@ -319,6 +331,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof authenticatedOrganizationRouteImport
       parentRoute: typeof authenticatedRouteRoute
     }
+    '/(authenticated)/settings': {
+      id: '/(authenticated)/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof authenticatedSettingsRouteImport
+      parentRoute: typeof authenticatedRouteRoute
+    }
     '/(authenticated)/transactions': {
       id: '/(authenticated)/transactions'
       path: '/transactions'
@@ -363,6 +382,7 @@ interface authenticatedRouteRouteChildren {
   authenticatedDashboardRoute: typeof authenticatedDashboardRoute
   authenticatedOnboardingRoute: typeof authenticatedOnboardingRoute
   authenticatedOrganizationRoute: typeof authenticatedOrganizationRoute
+  authenticatedSettingsRoute: typeof authenticatedSettingsRoute
   authenticatedTransactionsRoute: typeof authenticatedTransactionsRoute
   authenticatedCreditCardsAccountIdRoute: typeof authenticatedCreditCardsAccountIdRoute
 }
@@ -374,6 +394,7 @@ const authenticatedRouteRouteChildren: authenticatedRouteRouteChildren = {
   authenticatedDashboardRoute: authenticatedDashboardRoute,
   authenticatedOnboardingRoute: authenticatedOnboardingRoute,
   authenticatedOrganizationRoute: authenticatedOrganizationRoute,
+  authenticatedSettingsRoute: authenticatedSettingsRoute,
   authenticatedTransactionsRoute: authenticatedTransactionsRoute,
   authenticatedCreditCardsAccountIdRoute:
     authenticatedCreditCardsAccountIdRoute,

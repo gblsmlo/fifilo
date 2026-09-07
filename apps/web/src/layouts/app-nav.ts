@@ -1,6 +1,13 @@
 import type { LinkProps } from '@tanstack/react-router'
 import type { LucideIcon } from 'lucide-react'
-import { ArrowLeftRight, Building2, LayoutDashboard, TagIcon, WalletIcon } from 'lucide-react'
+import {
+  ArrowLeftRight,
+  Building2,
+  LayoutDashboard,
+  SettingsIcon,
+  TagIcon,
+  WalletIcon,
+} from 'lucide-react'
 
 export type AppNavAvailability = 'active' | 'planned' | 'hidden'
 
@@ -69,6 +76,13 @@ export const APP_NAV_GROUPS: readonly AppNavGroup[] = [
         id: 'categories',
         label: 'Categorias',
         to: '/categories',
+      },
+      {
+        availability: 'active',
+        icon: SettingsIcon,
+        id: 'settings',
+        label: 'Configurações',
+        to: '/settings',
       },
     ],
   },

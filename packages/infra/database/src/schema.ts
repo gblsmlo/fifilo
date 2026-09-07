@@ -491,6 +491,53 @@ export const entries = pgTable(
   ],
 )
 
+/**
+ * One row per workspace, lazily created (Fase 06 § Modelagem): a workspace
+ * that never opens Settings has no row here, and `getWorkspaceSettings`
+ * resolves the documented defaults instead of reading this table at all.
+ * `organization_id` alone is the primary key - unlike every other tenant
+ * table this schema owns, there is no second half to a composite key when a
+ * table is inherently one row per tenant.
+ */
+export const workspaceSettings = pgTable('workspace_settings', {
+  organizationId: text('organization_id')
+    .primaryKey()
+    .references(() => organizations.id, { onDelete: 'cascade' }),
+  currency: char('currency', { length: 3 }).notNull(),
+  locale: text('locale').notNull(),
+  timezone: text('timezone').notNull(),
+  monthStartDay: integer('month_start_day').notNull().default(1),
+  weekStartsOn: text('week_starts_on').notNull().default('monday'),
+  version: integer('version').notNull().default(1),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+})
+
+/**
+ * Keyed by `(organization_id, user_id)` (Fase 06 § Modelagem): the same
+ * person prefers different things in different workspaces. RLS filters on
+ * both columns, not just `organization_id` - a preference is invisible to
+ * every other member of the same workspace, not only to another tenant.
+ */
+export const userPreferences = pgTable(
+  'user_preferences',
+  {
+    organizationId: text('organization_id')
+      .notNull()
+      .references(() => organizations.id, { onDelete: 'cascade' }),
+    userId: text('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    theme: text('theme').notNull().default('system'),
+    density: text('density').notNull().default('comfortable'),
+    notifyByEmail: boolean('notify_by_email').notNull().default(true),
+    version: integer('version').notNull().default(1),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [primaryKey({ columns: [table.organizationId, table.userId] })],
+)
+
 export const financialAccountsRelations = relations(financialAccounts, ({ many, one }) => ({
   creditCardDetails: one(creditCardDetails, {
     fields: [financialAccounts.organizationId, financialAccounts.id],
@@ -596,4 +643,6 @@ export const databaseSchema = {
   installmentPlans,
   notificationOutbox,
   transactions,
+  userPreferences,
+  workspaceSettings,
 }

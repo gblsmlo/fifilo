@@ -6,6 +6,7 @@
     ".": "./src/index.ts",
     "./access-control": "./src/access-control.ts",
     "./accounts": "./src/accounts/index.ts",
+    "./ai": "./src/ai/index.ts",
     "./analytics": "./src/analytics/index.ts",
     "./categories": "./src/categories/index.ts",
     "./contracts/*": "./src/contracts/*.ts",

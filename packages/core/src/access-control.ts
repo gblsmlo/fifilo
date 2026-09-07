@@ -67,3 +67,30 @@ export const requireExportAccess = (role: WorkspaceRole): Result<true, AccessCon
   isOwnerOrAdmin(role)
     ? ok(true)
     : err(forbiddenError('insufficient_role', 'Only an owner or admin can export workspace data.'))
+
+/**
+ * The AI budget is workspace-wide spend configuration (Fase 07 §
+ * Guardrails #3) - the same owner-or-admin predicate as workspace settings
+ * and export, under its own message.
+ */
+export const requireAiBudgetWriteAccess = (
+  role: WorkspaceRole,
+): Result<true, AccessControlError> =>
+  isOwnerOrAdmin(role)
+    ? ok(true)
+    : err(forbiddenError('insufficient_role', 'Only an owner or admin can set the AI budget.'))
+
+/**
+ * Toggling the workspace kill switch turns AI off for everyone in it (Fase
+ * 07 § Guardrails #4) - owner-or-admin, matching every other workspace-wide
+ * configuration change this codebase gates the same way.
+ */
+export const requireAiKillSwitchAccess = (role: WorkspaceRole): Result<true, AccessControlError> =>
+  isOwnerOrAdmin(role)
+    ? ok(true)
+    : err(
+        forbiddenError(
+          'insufficient_role',
+          'Only an owner or admin can change the AI kill switch.',
+        ),
+      )

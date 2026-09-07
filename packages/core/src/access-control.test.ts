@@ -1,6 +1,8 @@
 import { describe, expect, test } from 'bun:test'
 
 import {
+  requireAiBudgetWriteAccess,
+  requireAiKillSwitchAccess,
   requireExportAccess,
   requireFinancialWriteAccess,
   requireSettingsWriteAccess,
@@ -44,6 +46,30 @@ describe('requireExportAccess', () => {
     'viewer',
   ] as const)('rejects %s - export is narrower than the general financial matrix', (role) => {
     const result = requireExportAccess(role)
+    expect(result.ok).toBe(false)
+    if (!result.ok) expect(result.error.code).toBe('insufficient_role')
+  })
+})
+
+describe('requireAiBudgetWriteAccess', () => {
+  test.each(['owner', 'admin'] as const)('allows %s to set the AI budget', (role) => {
+    expect(requireAiBudgetWriteAccess(role)).toEqual({ ok: true, value: true })
+  })
+
+  test.each(['member', 'viewer'] as const)('rejects %s', (role) => {
+    const result = requireAiBudgetWriteAccess(role)
+    expect(result.ok).toBe(false)
+    if (!result.ok) expect(result.error.code).toBe('insufficient_role')
+  })
+})
+
+describe('requireAiKillSwitchAccess', () => {
+  test.each(['owner', 'admin'] as const)('allows %s to change the kill switch', (role) => {
+    expect(requireAiKillSwitchAccess(role)).toEqual({ ok: true, value: true })
+  })
+
+  test.each(['member', 'viewer'] as const)('rejects %s', (role) => {
+    const result = requireAiKillSwitchAccess(role)
     expect(result.ok).toBe(false)
     if (!result.ok) expect(result.error.code).toBe('insufficient_role')
   })

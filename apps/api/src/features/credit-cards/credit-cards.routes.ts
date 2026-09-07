@@ -127,7 +127,7 @@ export const createCreditCardRoutes = ({
     return workspaceToday(new Date(), settings.value.timezone)
   }
 
-  return new Elysia()
+  return new Elysia({ detail: { tags: ['Credit cards'] } })
     .onError(mapValidationError)
     .use(createAuthGuard({ resolveActor }))
     .post(

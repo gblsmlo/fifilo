@@ -224,19 +224,22 @@ migração e o boot, não a criação de schema inteiramente do zero.
 
 **NFR-09** (documento OpenAPI coerente): `apps/api/src/openapi.ts` deriva o
 documento dos próprios schemas Zod de cada rota via `@elysia/openapi` -
-nunca escrito à mão, então nunca fica incoerente por definição. A lista de
-`tags` do documento não nomeia settings/export/analytics/credit-cards
-(nit, cosmético - não impede a rota de aparecer documentada, só a agrupa
-sem categoria).
+nunca escrito à mão, então nunca fica incoerente por definição. O nit (lista
+de `tags` sem settings/export/analytics/credit-cards e nenhuma rota
+declarando a própria tag) foi corrigido na sessão seguinte: cada
+`new Elysia({...})` de feature ganhou `detail: { tags: [...] }`, conferido
+lendo `/openapi/json` de verdade e vendo cada rota sob a tag certa.
 
 **NFR-10** (nada nível 3/4 em log): `packages/observability/src/logger.ts`
 redige por nome de chave (`authorization|cookie|token|secret|password|...`);
 nenhum ponto de log ou evento de auditoria atual inclui e-mail ou nome
 completo - `auth.routes.ts` já extrai só o domínio do e-mail
-(`emailDomain`) para o que precisa logar. O padrão de redação não cobre
-`email`/`phone` por nome de campo (nit - rede de segurança ausente para um
-futuro call site que logue um objeto com esses campos; nenhuma violação
-viva encontrada).
+(`emailDomain`) para o que precisa logar. O nit (padrão sem `email`/`phone`)
+foi corrigido na sessão seguinte: `email`, `phone`, `document` e `address`
+entraram no padrão de redação (não `name` - também `spanName`, o `.name` de
+um erro, o nome de categoria ou organização), com `logger.test.ts` cobrindo
+cada chave sensível, o caso aninhado, o caso em array e a garantia de que
+`name` continua visível.
 
 **Varredura de segredo**: `git log --all -p` contra os padrões usuais (chaves
 AWS, blocos de chave privada, tokens `sk-`/`ghp_`/`xox`) não encontrou nada;
@@ -248,7 +251,6 @@ pacotes), `storybook:test` (178 testes), `test:e2e` (15 specs, duas rodadas
 limpas) e `bun run build` + `docker compose build` (`fifilo-api`,
 `fifilo-web`) - todos verdes na revisão que fecha esta fase.
 
-**Conclusão**: um bloqueador potencial (NFR-05) achado e corrigido na própria
-sessão da auditoria, dois nits registrados sem correção (tags do OpenAPI,
-padrão de redação de log) por não representarem violação viva nem risco ao
-Marco 2. Portão do Marco 2 fechado.
+**Conclusão**: um achado real (NFR-05, defeito) e dois nits (tags do OpenAPI,
+padrão de redação de log) - todos corrigidos, o primeiro na própria sessão da
+auditoria, os dois últimos na sessão seguinte. Portão do Marco 2 fechado.

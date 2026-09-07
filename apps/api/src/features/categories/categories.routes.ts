@@ -37,7 +37,7 @@ export const createCategoryRoutes = ({
   categoryRepository = createCategoryRepository(),
   resolveActor,
 }: CategoryRouteDependencies = {}) =>
-  new Elysia({ prefix: '/api/categories' })
+  new Elysia({ detail: { tags: ['Categories'] }, prefix: '/api/categories' })
     .onError(mapValidationError)
     .use(createAuthGuard({ resolveActor }))
     .get(

@@ -29,7 +29,7 @@ export const createExportRoutes = ({
   exportReader = createExportReader(),
   resolveActor,
 }: ExportRouteDependencies = {}) =>
-  new Elysia({ prefix: '/api/export' })
+  new Elysia({ detail: { tags: ['Export'] }, prefix: '/api/export' })
     .onError(mapValidationError)
     .use(createAuthGuard({ resolveActor }))
     .get(

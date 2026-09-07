@@ -45,7 +45,7 @@ export const createSettingsRoutes = ({
   resolveActor,
   settingsRepository = createWorkspaceSettingsRepository(),
 }: SettingsRouteDependencies = {}) =>
-  new Elysia({ prefix: '/api/settings' })
+  new Elysia({ detail: { tags: ['Settings'] }, prefix: '/api/settings' })
     .onError(mapValidationError)
     .use(createAuthGuard({ resolveActor }))
     .get(

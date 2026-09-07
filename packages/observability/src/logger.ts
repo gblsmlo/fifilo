@@ -3,8 +3,18 @@ import pino from 'pino'
 export type LogLevel = 'debug' | 'info' | 'warn' | 'error'
 
 const REDACTED = '[redacted]'
+/**
+ * `email`/`phone`/`document`/`address` cover `security.md`'s Level 3/4
+ * examples (NFR-10) by key name, a fail-safe net for a future call site that
+ * logs one of them directly rather than a domain-scoped extract (the way
+ * `emailDomain` in `auth.routes.ts` already avoids logging a full address).
+ * `name` stays out: it is also `spanName`, an error's own `.name`, a
+ * category or organization name - redacting it would erase useful,
+ * non-sensitive observability data far more often than it would catch a
+ * real leak.
+ */
 const SENSITIVE_KEY_PATTERN =
-  /authorization|cookie|token|secret|password|credential|session|otp|backup|private|key/i
+  /authorization|cookie|token|secret|password|credential|session|otp|backup|private|key|email|phone|document|address/i
 const isDevelopment = process.env.NODE_ENV === 'development'
 
 const logger = pino({
@@ -34,7 +44,7 @@ export type LogEvent = {
   context?: Record<string, unknown>
 }
 
-const sanitizeValue = (value: unknown, depth = 0): unknown => {
+export const sanitizeValue = (value: unknown, depth = 0): unknown => {
   if (depth > 4) {
     return '[truncated]'
   }

@@ -25,6 +25,13 @@ export const createOpenAPIPlugin = () =>
         { name: 'Health', description: 'Service status' },
         { name: 'Auth', description: 'Sign-up and session' },
         { name: 'Users', description: 'Authenticated user' },
+        { name: 'Accounts', description: 'Financial accounts and balances' },
+        { name: 'Categories', description: 'Transaction categories' },
+        { name: 'Transactions', description: 'Income, expenses and transfers' },
+        { name: 'Credit cards', description: 'Cards, installments and invoices' },
+        { name: 'Analytics', description: 'Dashboard projections' },
+        { name: 'Settings', description: 'Workspace settings and user preferences' },
+        { name: 'Export', description: 'Workspace data export' },
       ],
     },
     mapJsonSchema: {

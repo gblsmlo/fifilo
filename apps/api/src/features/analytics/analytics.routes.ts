@@ -51,7 +51,7 @@ export const createAnalyticsRoutes = ({
   analyticsReader = createAnalyticsReader(),
   resolveActor,
 }: AnalyticsRouteDependencies = {}) =>
-  new Elysia({ prefix: '/api/analytics' })
+  new Elysia({ detail: { tags: ['Analytics'] }, prefix: '/api/analytics' })
     .onError(mapValidationError)
     .use(createAuthGuard({ resolveActor }))
     .get(

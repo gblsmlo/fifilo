@@ -145,7 +145,7 @@ export const createTransactionRoutes = ({
   resolveActor,
   transactionRepository = createTransactionRepository(),
 }: TransactionRouteDependencies = {}) =>
-  new Elysia({ prefix: '/api/transactions' })
+  new Elysia({ detail: { tags: ['Transactions'] }, prefix: '/api/transactions' })
     .onError(mapValidationError)
     .use(createAuthGuard({ resolveActor }))
     .get(

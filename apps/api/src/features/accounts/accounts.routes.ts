@@ -45,7 +45,7 @@ export const createAccountRoutes = ({
   resolveActor,
   settingsRepository = createWorkspaceSettingsRepository(),
 }: AccountRouteDependencies = {}) =>
-  new Elysia({ prefix: '/api/accounts' })
+  new Elysia({ detail: { tags: ['Accounts'] }, prefix: '/api/accounts' })
     .onError(mapValidationError)
     .use(createAuthGuard({ resolveActor }))
     .get(

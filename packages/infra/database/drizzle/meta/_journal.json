@@ -43,6 +43,13 @@
       "when": 1788729884996,
       "tag": "0005_blushing_hellion",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1788750179498,
+      "tag": "0006_nosy_trauma",
+      "breakpoints": true
     }
   ]
 }

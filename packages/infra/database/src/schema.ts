@@ -538,6 +538,101 @@ export const userPreferences = pgTable(
   (table) => [primaryKey({ columns: [table.organizationId, table.userId] })],
 )
 
+/**
+ * One row per AI execution (Fase 07 § Persistência) - `kind` is a free-text
+ * label Fase 08 onward gives meaning to (`chat`, `insight`, ...); this fase
+ * ships no producer of its own. `actorId` is nullable because a run can
+ * originate from something other than a signed-in user (a scheduled job),
+ * mirroring `actorType`'s own `'user' | 'system'` convention from the audit
+ * event shape.
+ */
+export const aiRuns = pgTable(
+  'ai_runs',
+  {
+    organizationId: text('organization_id')
+      .notNull()
+      .references(() => organizations.id, { onDelete: 'cascade' }),
+    id: text('id').notNull(),
+    actorId: text('actor_id').references(() => users.id),
+    actorType: text('actor_type').notNull().default('user'),
+    kind: text('kind').notNull(),
+    provider: text('provider').notNull(),
+    model: text('model').notNull(),
+    status: text('status').notNull(),
+    inputTokens: integer('input_tokens').notNull().default(0),
+    outputTokens: integer('output_tokens').notNull().default(0),
+    costMinor: bigint('cost_minor', { mode: 'number' }).notNull().default(0),
+    currency: char('currency', { length: 3 }).notNull().default('BRL'),
+    startedAt: timestamp('started_at', { withTimezone: true }).notNull(),
+    finishedAt: timestamp('finished_at', { withTimezone: true }),
+    durationMs: integer('duration_ms'),
+    error: text('error'),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.organizationId, table.id] }),
+    index('ai_runs_org_started_idx').on(table.organizationId, desc(table.startedAt)),
+  ],
+)
+
+/**
+ * `(organization_id, period)` - `period` is a billing-period label
+ * (`YYYY-MM`), the use case's own concern, not this table's; the AI vendor
+ * bill does not follow `workspace_settings.monthStartDay`, only the
+ * workspace's own bookkeeping does. `limitMinor` is nullable: spend is
+ * tracked from the first run regardless of whether a limit was ever set
+ * (Fase 07 § Guardrails #3 names both states - "sem limite, um laço com
+ * defeito vira fatura" is the unlimited case, not an error one), and the
+ * row is lazily created on first spend the same way `workspace_settings`
+ * is on first save. `consumedMinor` updates through the same `version`
+ * optimistic-concurrency contract as every other mutable row in this schema
+ * (Decision 020's sibling, NFR-04).
+ */
+export const aiBudgets = pgTable(
+  'ai_budgets',
+  {
+    organizationId: text('organization_id')
+      .notNull()
+      .references(() => organizations.id, { onDelete: 'cascade' }),
+    period: text('period').notNull(),
+    limitMinor: bigint('limit_minor', { mode: 'number' }),
+    consumedMinor: bigint('consumed_minor', { mode: 'number' }).notNull().default(0),
+    currency: char('currency', { length: 3 }).notNull().default('BRL'),
+    version: integer('version').notNull().default(1),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [primaryKey({ columns: [table.organizationId, table.period] })],
+)
+
+/**
+ * One row per workspace, lazily created like `workspace_settings` - absent
+ * means "not killed" (Fase 07 § Guardrails #4). Toggling it is not a route
+ * this fase ships (no visible functionality); the row exists for whichever
+ * fase adds the switch, and for the guard every AI call already checks.
+ */
+export const aiWorkspaceKillSwitches = pgTable('ai_workspace_kill_switches', {
+  organizationId: text('organization_id')
+    .primaryKey()
+    .references(() => organizations.id, { onDelete: 'cascade' }),
+  enabled: boolean('enabled').notNull().default(false),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedBy: text('updated_by').references(() => users.id),
+})
+
+/**
+ * Not tenant data - one global row, no `organization_id`, no RLS (the same
+ * reason `organizations` itself carries none). `id` is always the literal
+ * `'global'`; the primary key exists to make "exactly one row" an upsert
+ * target, not because more than one could ever mean something.
+ */
+export const aiGlobalKillSwitch = pgTable('ai_global_kill_switch', {
+  id: text('id').primaryKey().default('global'),
+  enabled: boolean('enabled').notNull().default(false),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedBy: text('updated_by').references(() => users.id),
+})
+
 export const financialAccountsRelations = relations(financialAccounts, ({ many, one }) => ({
   creditCardDetails: one(creditCardDetails, {
     fields: [financialAccounts.organizationId, financialAccounts.id],
@@ -634,6 +729,10 @@ export const authSchema = {
 
 export const databaseSchema = {
   ...authSchema,
+  aiBudgets,
+  aiGlobalKillSwitch,
+  aiRuns,
+  aiWorkspaceKillSwitches,
   cardInvoices,
   categories,
   creditCardDetails,

@@ -12,6 +12,7 @@ bug stays when its cause and prevention are useful knowledge. Cite a record as
 | ID | State | Defect | Main evidence |
 | --- | --- | --- | --- |
 | 001 | Resolved | [the declared toolchain and the Compose stack did not reproduce from a clean checkout](001-pinned-toolchain-and-compose-not-reproducible.md) | the gate rejected an installed Node, PostgreSQL came up with credentials no application read, and two Playwright versions demanded two browser builds |
+| 002 | Resolved | [creating a transaction or an installment purchase carried no idempotency guarantee](002-idempotency-not-enforced-for-transaction-and-installment-creation.md) | `POST /api/transactions` treated `Idempotency-Key` as optional and `POST /api/transactions/installments` never read it at all, unlike `pay` |
 
 ## Recording a new bug
 

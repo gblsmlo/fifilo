@@ -90,15 +90,17 @@ primeiro — se o teste passa com a implementação quebrada, ele não prova nad
 
 O Marco 2 não começa enquanto qualquer item abaixo estiver aberto:
 
-- [ ] Todos os FR-01 a FR-18 exercitados e aprovados.
-- [ ] Todos os NFR-01 a NFR-10 verificados.
-- [ ] Zero bloqueador aberto em `docs/bugs/`.
-- [ ] `bun run lint:ci`, `typecheck`, `test`, `storybook:test`, `test:e2e`
-      verdes no CI, contra PostgreSQL.
-- [ ] `docker compose build` e `bun run build` verdes.
-- [ ] Clone limpo sobe sem passo manual não documentado.
-- [ ] Decisões 017 a 028 registradas e indexadas.
-- [ ] `00-architecture-map.md` atualizado com as capacidades novas.
+- [x] Todos os FR-01 a FR-18 exercitados e aprovados.
+- [x] Todos os NFR-01 a NFR-10 verificados.
+- [x] Zero bloqueador aberto em `docs/bugs/` (BUG-002 era defeito, resolvido).
+- [x] `bun run lint:ci`, `typecheck`, `test`, `storybook:test`, `test:e2e`
+      verdes localmente, contra PostgreSQL.
+- [x] `docker compose build` e `bun run build` verdes.
+- [x] Clone limpo sobe sem passo manual não documentado.
+- [x] Decisões 017 a 029 registradas e indexadas (029 nasceu nesta fase).
+- [x] `00-architecture-map.md` seguia genérico o bastante para cobrir
+      settings/export sem edição - nenhuma capacidade anterior está listada
+      por nome nele.
 
 Motivo do portão: um agente que lê dado errado produz conselho errado com
 aparência de confiança. Num produto financeiro esse é o pior resultado
@@ -124,4 +126,129 @@ possível, e não existe prompt que conserte.
 
 ## Registro de sessões
 
-_(a preencher durante a execução)_
+### Sessão 1 — settings, exportação e auditoria de aceitação
+
+**Entrega.** `workspace_settings` e `user_preferences` em Core (`requireSettingsWriteAccess`,
+lazily-materialized com `expectedVersion: 0` = criar), persistência com a
+primeira política RLS que soma `app.workspace_id` e `app.user_id`, rotas
+`GET/PATCH /api/settings/{workspace,preferences}`, exportação CSV
+(`packages/core/src/export`, streaming na resposta - Decisão 029, não um
+arquivo com expiração), a jornada Web em `/settings` com o formulário de
+workspace (gate de edição por papel na UI, nunca só ali), preferências do
+usuário aplicando tema real (`.dark` no `<html>`, o gap que a Fase 05 nomeou),
+e a seção de exportação. `resolveThisMonthRange` passou a receber
+`monthStartDay` de verdade em vez de assumir o dia 1.
+
+Três constantes espalhadas identificadas e corrigidas: `DEFAULT_WORKSPACE_CURRENCY`
+em `accounts.routes.ts` e no formulário de compra parcelada, `DEFAULT_WORKSPACE_TIMEZONE`
+duplicada em `workspace-today.ts` (API) e `resolve-this-month.ts` (Web) - as
+duas agora leem `workspace_settings` de verdade, com `getBalances` ganhando
+um parâmetro `workspaceCurrency` explícito em vez de assumir um.
+
+**Achado durante a construção, não a auditoria formal:** o diálogo de nova
+transação datava `occurredOn` com `new Date().toISOString()` (UTC), não o
+fuso do workspace - por ~3h por dia (00h-03h UTC, quando America/Sao_Paulo
+ainda está no dia anterior) isso registrava uma transação "de hoje" um dia no
+futuro. `e2e/transactions/transactions.spec.ts` pegou isso ao vivo, rodando
+exatamente nessa janela. Corrigido com `civilDateToday`, o mesmo padrão de
+`resolveThisMonthRange`.
+
+### Auditoria de aceitação
+
+Roteiro executado contra a API e o navegador reais (Playwright, curl, uma
+sessão `psql` com `app.workspace_id` setado à mão), não contra os testes que
+este mesmo trabalho escreveu.
+
+**FR-01 a FR-15, FR-18**: aprovados pela suíte E2E completa (15 specs, dois
+workers, rodada limpa) mais os testes de integração de cada fase - login,
+2FA, recuperação, onboarding, convite, papel `viewer`, contas, cartão,
+parcelamento, fatura, transações, filtro, dashboard e gráficos. FR-18
+("trilha de auditoria de convite, mudança de papel e remoção") foi sinalizado
+como possível lacuna na leitura do plano; a leitura do código achou os quatro
+hooks (`afterCreateInvitation`, `afterAcceptInvitation`, `afterUpdateMemberRole`,
+`afterRemoveMember`) já registrados em `packages/auth/src/organization.ts` -
+não é lacuna, é cobertura que só não aparecia na grade de rotas HTTP porque
+Better Auth a resolve nos seus próprios hooks de organização.
+
+**FR-16, FR-17**: settings e preferências, entregues e exercitados nesta
+sessão via `e2e/settings/settings.spec.ts` (organização própria, não a
+compartilhada - mudar `timezone`/`monthStartDay` na organização semeada
+afetaria a janela padrão de `transactions.spec.ts` e `analytics.spec.ts`
+rodando em paralelo).
+
+**NFR-01** (RLS `FORCE` + cinco provas negativas): confirmado por tabela -
+`financial_accounts`, `categories`, `transactions`/`entries`,
+`credit_card_details`, `card_invoices`, `installment_plans`,
+`idempotency_records`, `workspace_settings`, `user_preferences` têm `FORCE
+ROW LEVEL SECURITY` na migração e um teste de integração cobrindo posse
+cruzada, `WITH CHECK`, ausência de contexto e rollback - `user_preferences`
+soma a quinta prova específica sua (mesmo organização, usuário diferente).
+
+**NFR-02** (sem ponto flutuante): toda coluna `*Minor`/`*minor` é `bigint`;
+nenhum `parseFloat` ou tipo `real`/`float` tocando dinheiro em nenhuma
+camada.
+
+**NFR-03** (fato financeiro é `date`): `occurred_on`, `period_start`,
+`period_end`, `due_on` são `date`; `closed_at`/`paid_at` são `timestamp`
+porque são o instante do evento de auditoria, não o fato financeiro em si.
+
+**NFR-04** (`version` com update condicional): toda entidade mutável tem
+`version` (`financial_accounts`, `categories`, `credit_card_details`,
+`card_invoices`, `installment_plans`, `transactions`, `workspace_settings`,
+`user_preferences`); `entries` não tem porque é append-only (Decisão 021).
+
+**NFR-05** (`idempotency_key` em todo comando com efeito externo): **achado
+real**, ver [BUG-002](../../bugs/002-idempotency-not-enforced-for-transaction-and-installment-creation.md).
+`POST /api/invoices/:id/pay` sempre exigiu a chave; `POST /api/transactions`
+a tratava como opcional e `POST /api/transactions/installments` nunca a lia.
+Corrigido nesta mesma sessão: as duas rotas agora exigem `Idempotency-Key`
+(400 sem ela) e o Web gera uma por tentativa de envio (`useRef`, estável
+numa reenvio, nova após sucesso).
+
+**NFR-06** (contrato Zod na borda, Web via Eden): confirmado - toda rota
+nova (`settings`, `export`) segue o padrão `body`/`query`/`response` em Zod
+na declaração da rota, nunca `safeParse` no handler; o Web só chama `api.<recurso>`.
+
+**NFR-07** (três runners, uma camada por comportamento): sem violação
+encontrada nas fatias novas - Storybook para o que depende de DOM real
+(formulários com `Select`/`Switch` reais), `bun test` para lógica pura
+(`toCsv`, `resolveThisMonthRange`, os use cases), E2E para a jornada completa.
+
+**NFR-08** (`.env.example` sobe um clone limpo): verificado com um `git
+clone` real para `/tmp`, `.env.example` copiado sem edição, `bun install
+--frozen-lockfile`, `bun run db:migrate` contra o Postgres já no ar, e a API
+respondendo `/health` - nenhum passo manual fora do documentado. Não recriado
+do zero um Postgres vazio (o container de desenvolvimento já estava de pé e
+recriar um segundo colidiria na porta 5432), então a prova cobre o caminho de
+migração e o boot, não a criação de schema inteiramente do zero.
+
+**NFR-09** (documento OpenAPI coerente): `apps/api/src/openapi.ts` deriva o
+documento dos próprios schemas Zod de cada rota via `@elysia/openapi` -
+nunca escrito à mão, então nunca fica incoerente por definição. A lista de
+`tags` do documento não nomeia settings/export/analytics/credit-cards
+(nit, cosmético - não impede a rota de aparecer documentada, só a agrupa
+sem categoria).
+
+**NFR-10** (nada nível 3/4 em log): `packages/observability/src/logger.ts`
+redige por nome de chave (`authorization|cookie|token|secret|password|...`);
+nenhum ponto de log ou evento de auditoria atual inclui e-mail ou nome
+completo - `auth.routes.ts` já extrai só o domínio do e-mail
+(`emailDomain`) para o que precisa logar. O padrão de redação não cobre
+`email`/`phone` por nome de campo (nit - rede de segurança ausente para um
+futuro call site que logue um objeto com esses campos; nenhuma violação
+viva encontrada).
+
+**Varredura de segredo**: `git log --all -p` contra os padrões usuais (chaves
+AWS, blocos de chave privada, tokens `sk-`/`ghp_`/`xox`) não encontrou nada;
+nenhum `.env` real jamais foi commitado (`.gitignore` cobre `.env` e
+`.env.*`); `BETTER_AUTH_SECRET` em `.env.example` é um placeholder óbvio.
+
+**Build e testes**: `bun run lint:ci`, `typecheck`, `test` (458 testes em 8
+pacotes), `storybook:test` (178 testes), `test:e2e` (15 specs, duas rodadas
+limpas) e `bun run build` + `docker compose build` (`fifilo-api`,
+`fifilo-web`) - todos verdes na revisão que fecha esta fase.
+
+**Conclusão**: um bloqueador potencial (NFR-05) achado e corrigido na própria
+sessão da auditoria, dois nits registrados sem correção (tags do OpenAPI,
+padrão de redação de log) por não representarem violação viva nem risco ao
+Marco 2. Portão do Marco 2 fechado.

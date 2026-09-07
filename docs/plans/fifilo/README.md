@@ -54,7 +54,7 @@ produto inteiro sem IA.
 | 03 | [Cartão de crédito](fase-03-cartao-de-credito.md) | Concluída |
 | 04 | [Workspace compartilhado](fase-04-workspace-compartilhado.md) | Concluída |
 | 05 | [Analytics e gráficos](fase-05-analytics-e-graficos.md) | Concluída |
-| 06 | [Settings, aceitação e entrega](fase-06-settings-e-aceitacao.md) | Planejada |
+| 06 | [Settings, aceitação e entrega](fase-06-settings-e-aceitacao.md) | Concluída |
 
 ### Marco 2 — Inteligência
 

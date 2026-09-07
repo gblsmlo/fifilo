@@ -1,4 +1,6 @@
-import { resolveThisMonthRange } from '@features/transactions'
+import { workspaceSettingsQueryOptions } from '@features/settings'
+import { DEFAULT_WORKSPACE_TIMEZONE, resolveThisMonthRange } from '@features/transactions'
+import { useQuery } from '@tanstack/react-query'
 
 import { BalanceEvolutionSection } from '../components/balance-evolution-section'
 import { ConsolidatedBalanceSection } from '../components/consolidated-balance-section'
@@ -22,7 +24,12 @@ interface AnalyticsDashboardProps {
  * (Decision 027) - it never queries `entries` or `transactions` itself.
  */
 export function AnalyticsDashboard({ onSearchChange, search }: Readonly<AnalyticsDashboardProps>) {
-  const thisMonth = resolveThisMonthRange()
+  const settingsQuery = useQuery(workspaceSettingsQueryOptions())
+  const thisMonth = resolveThisMonthRange(
+    new Date(),
+    settingsQuery.data?.timezone ?? DEFAULT_WORKSPACE_TIMEZONE,
+    settingsQuery.data?.monthStartDay ?? 1,
+  )
   const from = search.from ?? thisMonth.from
   const to = search.to ?? thisMonth.to
 

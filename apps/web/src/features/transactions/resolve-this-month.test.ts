@@ -46,4 +46,30 @@ describe('resolveThisMonthRange', () => {
 
     expect(resolveThisMonthRange(now)).toEqual({ from: '2026-01-01', to: '2026-01-31' })
   })
+
+  test('a monthStartDay other than 1 shifts the window (Fase 06 § Modelagem)', () => {
+    // 2026-01-20: on/after the 15th, so the financial month already started
+    // this calendar month and runs into the 14th of next month.
+    const afterCutover = new Date('2026-01-20T12:00:00.000Z')
+    expect(resolveThisMonthRange(afterCutover, 'America/Sao_Paulo', 15)).toEqual({
+      from: '2026-01-15',
+      to: '2026-02-14',
+    })
+
+    // 2026-01-10: before the 15th, so the financial month started last
+    // calendar month and runs into today's month.
+    const beforeCutover = new Date('2026-01-10T12:00:00.000Z')
+    expect(resolveThisMonthRange(beforeCutover, 'America/Sao_Paulo', 15)).toEqual({
+      from: '2025-12-15',
+      to: '2026-01-14',
+    })
+  })
+
+  test('a monthStartDay window spans a year boundary correctly', () => {
+    const now = new Date('2026-01-05T12:00:00.000Z')
+    expect(resolveThisMonthRange(now, 'America/Sao_Paulo', 20)).toEqual({
+      from: '2025-12-20',
+      to: '2026-01-19',
+    })
+  })
 })

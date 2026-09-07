@@ -6,6 +6,7 @@ import { type FieldValues, type UseFormReturn, useForm } from 'react-hook-form'
 import { transactionFeedback } from '../feedback'
 import { createTransaction } from '../http/create-transaction'
 import { TransactionRequestError } from '../http/errors'
+import { civilDateToday } from '../resolve-this-month'
 import {
   type ExpenseFormInput,
   type ExpenseFormValues,
@@ -20,6 +21,8 @@ import {
 
 export interface UseCreateTransactionFormParams {
   onCreated?: () => void
+  /** `workspace_settings.timezone` (Fase 06 § Modelagem) - defaults to the workspace's own default while it has not loaded yet, never the viewer's UTC clock. */
+  timezone?: string
 }
 
 /** Empty notes go through as `undefined` so the API's `?? null` default applies, not a stored empty string. */
@@ -53,7 +56,7 @@ function useSubmitTransaction<Values extends FieldValues>(
   })
 }
 
-export function useCreateExpenseForm({ onCreated }: UseCreateTransactionFormParams = {}) {
+export function useCreateExpenseForm({ onCreated, timezone }: UseCreateTransactionFormParams = {}) {
   const form = useForm<ExpenseFormInput, unknown, ExpenseFormValues>({
     defaultValues: {
       accountId: '',
@@ -62,7 +65,7 @@ export function useCreateExpenseForm({ onCreated }: UseCreateTransactionFormPara
       description: '',
       kind: 'expense',
       notes: '',
-      occurredOn: new Date().toISOString().slice(0, 10),
+      occurredOn: civilDateToday(timezone),
     },
     mode: 'onSubmit',
     resolver: zodResolver(expenseFormSchema),
@@ -71,7 +74,7 @@ export function useCreateExpenseForm({ onCreated }: UseCreateTransactionFormPara
   return { form, onSubmit: useSubmitTransaction(form, onCreated) }
 }
 
-export function useCreateIncomeForm({ onCreated }: UseCreateTransactionFormParams = {}) {
+export function useCreateIncomeForm({ onCreated, timezone }: UseCreateTransactionFormParams = {}) {
   const form = useForm<IncomeFormInput, unknown, IncomeFormValues>({
     defaultValues: {
       accountId: '',
@@ -80,7 +83,7 @@ export function useCreateIncomeForm({ onCreated }: UseCreateTransactionFormParam
       description: '',
       kind: 'income',
       notes: '',
-      occurredOn: new Date().toISOString().slice(0, 10),
+      occurredOn: civilDateToday(timezone),
     },
     mode: 'onSubmit',
     resolver: zodResolver(incomeFormSchema),
@@ -89,7 +92,10 @@ export function useCreateIncomeForm({ onCreated }: UseCreateTransactionFormParam
   return { form, onSubmit: useSubmitTransaction(form, onCreated) }
 }
 
-export function useCreateTransferForm({ onCreated }: UseCreateTransactionFormParams = {}) {
+export function useCreateTransferForm({
+  onCreated,
+  timezone,
+}: UseCreateTransactionFormParams = {}) {
   const form = useForm<TransferFormInput, unknown, TransferFormValues>({
     defaultValues: {
       amountMinor: 0,
@@ -97,7 +103,7 @@ export function useCreateTransferForm({ onCreated }: UseCreateTransactionFormPar
       fromAccountId: '',
       kind: 'transfer',
       notes: '',
-      occurredOn: new Date().toISOString().slice(0, 10),
+      occurredOn: civilDateToday(timezone),
       toAccountId: '',
     },
     mode: 'onSubmit',

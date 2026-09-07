@@ -1,5 +1,6 @@
 import { accountsQueryOptions } from '@features/accounts'
 import { categoriesQueryOptions } from '@features/categories'
+import { workspaceSettingsQueryOptions } from '@features/settings'
 import type { TransactionsPageResponse } from '@fifilo/core/transactions'
 import { Button } from '@fifilo/ui/components/button'
 import { Spinner } from '@fifilo/ui/components/spinner'
@@ -10,7 +11,7 @@ import { TransactionList } from '../components/transaction-list'
 import { useDeleteTransaction } from '../hooks/use-delete-transaction'
 import { TransactionRequestError } from '../http/errors'
 import { transactionsQueryOptions } from '../query-options'
-import { resolveThisMonthRange } from '../resolve-this-month'
+import { DEFAULT_WORKSPACE_TIMEZONE, resolveThisMonthRange } from '../resolve-this-month'
 import type { TransactionsSearch } from '../route-search'
 
 const selectClassName =
@@ -30,7 +31,12 @@ interface TransactionsPageProps {
 
 export function TransactionsPage({ onSearchChange, search }: Readonly<TransactionsPageProps>) {
   const [dialogOpen, setDialogOpen] = useState(false)
-  const thisMonth = resolveThisMonthRange()
+  const settingsQuery = useQuery(workspaceSettingsQueryOptions())
+  const thisMonth = resolveThisMonthRange(
+    new Date(),
+    settingsQuery.data?.timezone ?? DEFAULT_WORKSPACE_TIMEZONE,
+    settingsQuery.data?.monthStartDay ?? 1,
+  )
   const from = search.from ?? thisMonth.from
   const to = search.to ?? thisMonth.to
 

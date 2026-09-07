@@ -1,5 +1,6 @@
 import { accountsQueryOptions } from '@features/accounts'
 import { categoriesQueryOptions } from '@features/categories'
+import { workspaceSettingsQueryOptions } from '@features/settings'
 import { Dialog } from '@fifilo/patterns/dialog'
 import { Tabs, TabsList, TabsPanel, TabsTab } from '@fifilo/ui/components/tabs'
 import { useQuery } from '@tanstack/react-query'
@@ -11,6 +12,7 @@ import {
   useCreateIncomeForm,
   useCreateTransferForm,
 } from '../../hooks/use-create-transaction-form'
+import { DEFAULT_WORKSPACE_TIMEZONE } from '../../resolve-this-month'
 import { IncomeExpenseFormFields, TransferFormFields } from './transaction-form-fields'
 
 type TransactionTab = 'expense' | 'income' | 'transfer'
@@ -35,15 +37,17 @@ export function TransactionDialog({ onOpenChange, open }: Readonly<TransactionDi
   const [tab, setTab] = useState<TransactionTab>('expense')
   const accountsQuery = useQuery(accountsQueryOptions())
   const categoriesQuery = useQuery(categoriesQueryOptions())
+  const settingsQuery = useQuery(workspaceSettingsQueryOptions())
+  const timezone = settingsQuery.data?.timezone ?? DEFAULT_WORKSPACE_TIMEZONE
 
   const close = () => onOpenChange(false)
   const accountOptions = (accountsQuery.data ?? [])
     .filter((account) => !account.archivedAt)
     .map((account) => ({ id: account.id, name: account.name }))
 
-  const expenseForm = useCreateExpenseForm({ onCreated: close })
-  const incomeForm = useCreateIncomeForm({ onCreated: close })
-  const transferForm = useCreateTransferForm({ onCreated: close })
+  const expenseForm = useCreateExpenseForm({ onCreated: close, timezone })
+  const incomeForm = useCreateIncomeForm({ onCreated: close, timezone })
+  const transferForm = useCreateTransferForm({ onCreated: close, timezone })
 
   const categoryOptionsFor = (kind: 'expense' | 'income') =>
     (categoriesQuery.data ?? [])

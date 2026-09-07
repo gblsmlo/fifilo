@@ -33,7 +33,11 @@ describe('getBalances', () => {
     })
 
     const result = await getBalances(
-      { asOf: '2026-01-31', organizationId: 'org_a' },
+      {
+        asOf: '2026-01-31',
+        organizationId: 'org_a',
+        workspaceCurrency: DEFAULT_WORKSPACE_CURRENCY,
+      },
       repository,
       entries,
     )
@@ -64,7 +68,11 @@ describe('getBalances', () => {
     const entries = createFakeEntryReader({})
 
     const result = await getBalances(
-      { asOf: '2026-01-31', organizationId: 'org_a' },
+      {
+        asOf: '2026-01-31',
+        organizationId: 'org_a',
+        workspaceCurrency: DEFAULT_WORKSPACE_CURRENCY,
+      },
       repository,
       entries,
     )
@@ -85,7 +93,11 @@ describe('getBalances', () => {
     const entries = createFakeEntryReader({})
 
     const result = await getBalances(
-      { asOf: '2026-01-31', organizationId: 'org_a' },
+      {
+        asOf: '2026-01-31',
+        organizationId: 'org_a',
+        workspaceCurrency: DEFAULT_WORKSPACE_CURRENCY,
+      },
       repository,
       entries,
     )
@@ -107,7 +119,11 @@ describe('getBalances', () => {
     })
 
     const result = await getBalances(
-      { asOf: '2026-01-31', organizationId: 'org_a' },
+      {
+        asOf: '2026-01-31',
+        organizationId: 'org_a',
+        workspaceCurrency: DEFAULT_WORKSPACE_CURRENCY,
+      },
       repository,
       entries,
     )

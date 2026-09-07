@@ -1,7 +1,6 @@
 import { type DomainError, validationError } from '../../errors'
-import { type Money, money } from '../../primitives'
+import { type CurrencyCode, type Money, money } from '../../primitives'
 import { type Result, err, ok } from '../../result'
-import { DEFAULT_WORKSPACE_CURRENCY } from '../account'
 import type { AccountBalance } from '../balance'
 import { consolidateBalances } from '../balance'
 import type { AccountRepository, EntryReader } from '../ports'
@@ -9,6 +8,8 @@ import type { AccountRepository, EntryReader } from '../ports'
 export type GetBalancesQuery = {
   asOf: string
   organizationId: string
+  /** `workspace_settings.currency` (Fase 06 § Modelagem) - the caller resolves it, this use case never assumes one. */
+  workspaceCurrency: CurrencyCode
 }
 
 export type AccountBalancesResult = {
@@ -48,7 +49,7 @@ export const getBalances = async (
 
   const consolidated = consolidateBalances(
     balances.map((balance) => balance.balance),
-    DEFAULT_WORKSPACE_CURRENCY,
+    query.workspaceCurrency,
   )
 
   if (!consolidated.ok) {

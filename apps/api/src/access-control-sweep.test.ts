@@ -3,6 +3,7 @@ import { describe, expect, test } from 'bun:test'
 import { type CreateAppDependencies, createApp } from './app'
 import type { ActorResolution } from './features/auth'
 import { createFakeIdempotencyStore } from './features/credit-cards/credit-cards-test-support'
+import { createFakeWorkspaceSettingsRepository } from './features/settings/settings-test-support'
 
 /**
  * Fase 04 § Riscos: "`viewer` vazando por rota esquecida" needs a sweep, not
@@ -11,7 +12,11 @@ import { createFakeIdempotencyStore } from './features/credit-cards/credit-cards
  * the same composition `server.ts` boots (Decision 003's dependency
  * threading makes overriding just `resolveActor`, not every repository,
  * enough: `requireFinancialWriteAccess` is the first statement in every
- * write use case, so a viewer never reaches a repository call at all).
+ * write use case, so a viewer never reaches a *domain* repository call at
+ * all - a create-account or an installment purchase still reads workspace
+ * settings first, to resolve the currency or "today" the command needs
+ * before the use case ever runs, but that read is RLS-protected and no more
+ * privileged than the settings GET route every role can already call).
  *
  * A route with no entry in `REQUEST_FIXTURES` fails loudly instead of being
  * silently skipped - the failure mode this sweep exists to catch.
@@ -30,12 +35,16 @@ const viewer: ActorResolution = {
 const resolveActor = async () => viewer
 
 const dependencies: CreateAppDependencies = {
-  accounts: { resolveActor },
+  accounts: { resolveActor, settingsRepository: createFakeWorkspaceSettingsRepository() },
   categories: { resolveActor },
   // The idempotency store is real by default; a fake one keeps `pay`'s
   // envelope from making its own write attempt against a workspace this
   // sweep never actually creates.
-  creditCards: { idempotencyStore: createFakeIdempotencyStore(), resolveActor },
+  creditCards: {
+    idempotencyStore: createFakeIdempotencyStore(),
+    resolveActor,
+    settingsRepository: createFakeWorkspaceSettingsRepository(),
+  },
   transactions: { resolveActor },
 }
 

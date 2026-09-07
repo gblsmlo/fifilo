@@ -40,6 +40,7 @@ function InstallmentPurchaseFormFrame({
     <FormProvider {...form}>
       <InstallmentPurchaseFormFields
         categoryOptions={categoryOptions}
+        currency='BRL'
         onSubmit={form.handleSubmit(async () => undefined)}
         preview={preview}
       />
@@ -50,6 +51,7 @@ function InstallmentPurchaseFormFrame({
 const meta = {
   args: {
     categoryOptions,
+    currency: 'BRL',
     onSubmit: async () => undefined,
     preview: [],
   },

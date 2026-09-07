@@ -1,5 +1,5 @@
-import { DEFAULT_WORKSPACE_CURRENCY } from '@fifilo/core/accounts'
 import { type InstallmentShare, buildInstallmentShares } from '@fifilo/core/credit-cards'
+import type { CurrencyCode } from '@fifilo/core/primitives'
 import { toastManager } from '@fifilo/ui/components/toast'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useQueryClient } from '@tanstack/react-query'
@@ -22,6 +22,7 @@ export type {
 
 export interface UseCreateInstallmentPurchaseFormParams {
   accountId: string
+  currency: CurrencyCode
   onCreated?: () => void
 }
 
@@ -32,6 +33,7 @@ export interface UseCreateInstallmentPurchaseFormParams {
  */
 export function useCreateInstallmentPurchaseForm({
   accountId,
+  currency,
   onCreated,
 }: UseCreateInstallmentPurchaseFormParams) {
   const queryClient = useQueryClient()
@@ -55,12 +57,12 @@ export function useCreateInstallmentPurchaseForm({
   const preview: InstallmentShare[] = useMemo(() => {
     if (!totalMinor || !installments || installments < 1 || !firstOccurredOn) return []
     const result = buildInstallmentShares(
-      { amountMinor: totalMinor, currency: DEFAULT_WORKSPACE_CURRENCY },
+      { amountMinor: totalMinor, currency },
       installments,
       firstOccurredOn,
     )
     return result.ok ? result.value : []
-  }, [firstOccurredOn, installments, totalMinor])
+  }, [currency, firstOccurredOn, installments, totalMinor])
 
   const onSubmit = form.handleSubmit(async (values) => {
     try {

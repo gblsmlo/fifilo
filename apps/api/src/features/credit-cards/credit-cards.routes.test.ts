@@ -3,6 +3,7 @@ import { generateEntityId } from '@fifilo/core/primitives'
 import { Elysia } from 'elysia'
 
 import type { ActorResolution } from '../auth'
+import { createFakeWorkspaceSettingsRepository } from '../settings/settings-test-support'
 import {
   createFakeAccountLookup,
   createFakeCategoryLookup,
@@ -137,7 +138,11 @@ describe('credit card routes', () => {
     const invoiceRepository = createFakeInvoiceRepository([
       seedInvoice({ accountId, organizationId: ORG_A }),
     ])
-    const routes = createCreditCardRoutes({ invoiceRepository, resolveActor: async () => actor })
+    const routes = createCreditCardRoutes({
+      invoiceRepository,
+      resolveActor: async () => actor,
+      settingsRepository: createFakeWorkspaceSettingsRepository(),
+    })
 
     const response = await request(routes, `/api/credit-cards/${accountId}/invoices`)
 
@@ -147,7 +152,10 @@ describe('credit card routes', () => {
   })
 
   test('GET /api/credit-cards/:id/invoices/:invoiceId answers 404 for an unknown invoice', async () => {
-    const routes = createCreditCardRoutes({ resolveActor: async () => actor })
+    const routes = createCreditCardRoutes({
+      resolveActor: async () => actor,
+      settingsRepository: createFakeWorkspaceSettingsRepository(),
+    })
 
     const response = await request(routes, '/api/credit-cards/acc_1/invoices/inv_unknown')
 
@@ -208,6 +216,7 @@ describe('credit card routes', () => {
       idempotencyStore: createFakeIdempotencyStore(),
       invoiceRepository,
       resolveActor: async () => actor,
+      settingsRepository: createFakeWorkspaceSettingsRepository(),
       transactionRepository,
     })
 
@@ -252,6 +261,7 @@ describe('credit card routes', () => {
       installmentPlanRepository,
       invoiceRepository,
       resolveActor: async () => actor,
+      settingsRepository: createFakeWorkspaceSettingsRepository(),
     })
 
     const response = await request(

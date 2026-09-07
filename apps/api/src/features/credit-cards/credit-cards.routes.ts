@@ -23,6 +23,8 @@ import {
   payInvoiceRequestSchema,
 } from '@fifilo/core/credit-cards'
 import type { EntityId } from '@fifilo/core/primitives'
+import type { WorkspaceSettingsRepository } from '@fifilo/core/settings'
+import { getWorkspaceSettings } from '@fifilo/core/settings'
 import type {
   AccountLookup,
   CategoryLookup,
@@ -41,6 +43,7 @@ import { createDrizzleIdempotencyStore } from '../../libs/idempotency-persistenc
 import { workspaceToday } from '../../libs/workspace-today'
 import type { ActorResolver } from '../auth'
 import { createAuthGuard, requireActorContext } from '../auth'
+import { createWorkspaceSettingsRepository } from '../settings/repository'
 import {
   createAccountLookup,
   createCategoryLookup,
@@ -86,6 +89,7 @@ export type CreditCardRouteDependencies = {
   invoiceItemLookup?: InvoiceItemReader
   invoiceRepository?: InvoiceRepository
   resolveActor?: ActorResolver
+  settingsRepository?: WorkspaceSettingsRepository
   transactionRepository?: TransactionRepository
 }
 
@@ -109,9 +113,21 @@ export const createCreditCardRoutes = ({
   invoiceItemLookup = createInvoiceItemLookup(),
   invoiceRepository = createInvoiceRepository(),
   resolveActor,
+  settingsRepository = createWorkspaceSettingsRepository(),
   transactionRepository = createTransactionRepository(),
-}: CreditCardRouteDependencies = {}) =>
-  new Elysia()
+}: CreditCardRouteDependencies = {}) => {
+  // The workspace's own timezone resolves "today" (Decision 018);
+  // `getWorkspaceSettings` never fails, so there is no error branch to thread
+  // through the four call sites below.
+  const resolveToday = async (organizationId: string): Promise<string> => {
+    const settings = await getWorkspaceSettings({ organizationId }, settingsRepository)
+    // `getWorkspaceSettings`'s error type is `never`; this satisfies the
+    // type-level narrowing `.value` needs.
+    if (!settings.ok) throw new Error('unreachable')
+    return workspaceToday(new Date(), settings.value.timezone)
+  }
+
+  return new Elysia()
     .onError(mapValidationError)
     .use(createAuthGuard({ resolveActor }))
     .post(
@@ -185,7 +201,7 @@ export const createCreditCardRoutes = ({
           {
             accountId: params.id as EntityId,
             organizationId: context.organizationId,
-            today: workspaceToday(),
+            today: await resolveToday(context.organizationId),
           },
           invoiceRepository,
         )
@@ -204,7 +220,7 @@ export const createCreditCardRoutes = ({
           {
             id: params.invoiceId as EntityId,
             organizationId: context.organizationId,
-            today: workspaceToday(),
+            today: await resolveToday(context.organizationId),
           },
           invoiceRepository,
           invoiceItemLookup,
@@ -269,7 +285,7 @@ export const createCreditCardRoutes = ({
               id: params.id as EntityId,
               organizationId: context.organizationId,
               role: toWorkspaceRole(context.role),
-              today: workspaceToday(),
+              today: await resolveToday(context.organizationId),
               userId: context.userId as EntityId,
             },
             invoiceRepository,
@@ -342,7 +358,7 @@ export const createCreditCardRoutes = ({
             notes: body.notes ?? null,
             organizationId: context.organizationId,
             role: toWorkspaceRole(context.role),
-            today: workspaceToday(),
+            today: await resolveToday(context.organizationId),
             totalMinor: body.totalMinor,
             userId: context.userId as EntityId,
           },
@@ -370,3 +386,4 @@ export const createCreditCardRoutes = ({
         },
       },
     )
+}

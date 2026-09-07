@@ -168,6 +168,7 @@ export function CreditCardPage({ accountId }: Readonly<CreditCardPageProps>) {
             <InstallmentPurchaseForm
               accountId={accountId}
               categoryOptions={categoryOptions}
+              currency={account?.currency ?? 'BRL'}
               onCreated={() => invoicesQuery.refetch()}
             />
           </CardContent>

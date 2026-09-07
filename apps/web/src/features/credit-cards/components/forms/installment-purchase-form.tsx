@@ -1,4 +1,5 @@
 import type { InstallmentShare } from '@fifilo/core/credit-cards'
+import type { CurrencyCode } from '@fifilo/core/primitives'
 import { Button } from '@fifilo/ui/components/button'
 import { Field, FieldControl, FieldError, FieldLabel } from '@fifilo/ui/components/field'
 import { Form } from '@fifilo/ui/components/form'
@@ -23,20 +24,27 @@ const selectClassName =
 interface InstallmentPurchaseFormProps {
   accountId: string
   categoryOptions: readonly SelectOption[]
+  currency: CurrencyCode
   onCreated?: () => void
 }
 
 export function InstallmentPurchaseForm({
   accountId,
   categoryOptions,
+  currency,
   onCreated,
 }: Readonly<InstallmentPurchaseFormProps>) {
-  const { form, onSubmit, preview } = useCreateInstallmentPurchaseForm({ accountId, onCreated })
+  const { form, onSubmit, preview } = useCreateInstallmentPurchaseForm({
+    accountId,
+    currency,
+    onCreated,
+  })
 
   return (
     <FormProvider {...form}>
       <InstallmentPurchaseFormFields
         categoryOptions={categoryOptions}
+        currency={currency}
         onSubmit={onSubmit}
         preview={preview}
       />
@@ -46,12 +54,14 @@ export function InstallmentPurchaseForm({
 
 interface InstallmentPurchaseFormFieldsProps {
   categoryOptions: readonly SelectOption[]
+  currency: CurrencyCode
   onSubmit: ReturnType<typeof useCreateInstallmentPurchaseForm>['onSubmit']
   preview: readonly InstallmentShare[]
 }
 
 export function InstallmentPurchaseFormFields({
   categoryOptions,
+  currency,
   onSubmit,
   preview,
 }: Readonly<InstallmentPurchaseFormFieldsProps>) {
@@ -124,7 +134,7 @@ export function InstallmentPurchaseFormFields({
                 <span>
                   {share.installmentNumber}/{preview.length} — {share.occurredOn}
                 </span>
-                <span>{formatMoney({ amountMinor: share.amountMinor, currency: 'BRL' })}</span>
+                <span>{formatMoney({ amountMinor: share.amountMinor, currency })}</span>
               </li>
             ))}
           </ul>

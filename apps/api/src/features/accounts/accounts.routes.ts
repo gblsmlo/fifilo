@@ -1,7 +1,6 @@
 import { toWorkspaceRole } from '@fifilo/core/access-control'
 import type { AccountRepository, EntryReader } from '@fifilo/core/accounts'
 import {
-  DEFAULT_WORKSPACE_CURRENCY,
   accountBalancesResponseSchema,
   accountResponseSchema,
   archiveAccount,
@@ -14,6 +13,8 @@ import {
   updateAccountRequestSchema,
 } from '@fifilo/core/accounts'
 import type { EntityId } from '@fifilo/core/primitives'
+import type { WorkspaceSettingsRepository } from '@fifilo/core/settings'
+import { getWorkspaceSettings } from '@fifilo/core/settings'
 import type { AuditEvent } from '@fifilo/observability/runtime'
 import { auditEvent as recordAuditEvent } from '@fifilo/observability/runtime'
 import { Elysia } from 'elysia'
@@ -23,6 +24,7 @@ import { errorStatuses, mapValidationError } from '../../libs/http-errors'
 import { workspaceToday } from '../../libs/workspace-today'
 import type { ActorResolver } from '../auth'
 import { createAuthGuard, requireActorContext } from '../auth'
+import { createWorkspaceSettingsRepository } from '../settings/repository'
 import { toAccountBalancesResponse, toAccountResponse } from './accounts.mapper'
 import { createAccountRepository, createEntryReader } from './repository'
 
@@ -33,6 +35,7 @@ export type AccountRouteDependencies = {
   auditEvent?: (event: AuditEvent) => void
   entryReader?: EntryReader
   resolveActor?: ActorResolver
+  settingsRepository?: WorkspaceSettingsRepository
 }
 
 export const createAccountRoutes = ({
@@ -40,6 +43,7 @@ export const createAccountRoutes = ({
   auditEvent = recordAuditEvent,
   entryReader = createEntryReader(),
   resolveActor,
+  settingsRepository = createWorkspaceSettingsRepository(),
 }: AccountRouteDependencies = {}) =>
   new Elysia({ prefix: '/api/accounts' })
     .onError(mapValidationError)
@@ -63,8 +67,20 @@ export const createAccountRoutes = ({
       '/balances',
       async ({ actorContext, set }) => {
         const context = requireActorContext(actorContext)
+        // `getWorkspaceSettings` never fails (Result<T, never>); the workspace's
+        // own timezone resolves "today" before any read runs (Decision 018).
+        const settings = await getWorkspaceSettings(
+          { organizationId: context.organizationId },
+          settingsRepository,
+        )
+        if (!settings.ok) return settings.error
+
         const result = await getBalances(
-          { asOf: workspaceToday(), organizationId: context.organizationId },
+          {
+            asOf: workspaceToday(new Date(), settings.value.timezone),
+            organizationId: context.organizationId,
+            workspaceCurrency: settings.value.currency,
+          },
           accountRepository,
           entryReader,
         )
@@ -85,10 +101,18 @@ export const createAccountRoutes = ({
       '/',
       async ({ actorContext, body, set }) => {
         const context = requireActorContext(actorContext)
+        // A workspace that never opened Settings still resolves a currency
+        // (Fase 06 § Modelagem) - `getWorkspaceSettings` never fails.
+        const settings = await getWorkspaceSettings(
+          { organizationId: context.organizationId },
+          settingsRepository,
+        )
+        if (!settings.ok) return settings.error
+
         const result = await createAccount(
           {
             color: body.color ?? null,
-            currency: DEFAULT_WORKSPACE_CURRENCY,
+            currency: settings.value.currency,
             icon: body.icon ?? null,
             institution: body.institution ?? null,
             kind: body.kind,

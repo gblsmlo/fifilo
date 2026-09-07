@@ -3,6 +3,7 @@ import { generateEntityId } from '@fifilo/core/primitives'
 import { Elysia } from 'elysia'
 
 import type { ActorResolution } from '../auth'
+import { createFakeWorkspaceSettingsRepository } from '../settings/settings-test-support'
 import { createAccountRoutes } from './accounts.routes'
 import { createFakeAccountRepository, createFakeEntryReader } from './accounts-test-support'
 
@@ -50,6 +51,7 @@ describe('accounts routes', () => {
       accountRepository,
       entryReader: createFakeEntryReader(),
       resolveActor: async () => actor,
+      settingsRepository: createFakeWorkspaceSettingsRepository(),
     })
 
     const response = await request(
@@ -66,7 +68,11 @@ describe('accounts routes', () => {
 
   test('POST / answers 409 for a name already used in the workspace', async () => {
     const accountRepository = createFakeAccountRepository()
-    const routes = createAccountRoutes({ accountRepository, resolveActor: async () => actor })
+    const routes = createAccountRoutes({
+      accountRepository,
+      resolveActor: async () => actor,
+      settingsRepository: createFakeWorkspaceSettingsRepository(),
+    })
 
     await request(routes, '', jsonRequest({ kind: 'checking', name: 'Main checking' }))
     const response = await request(
@@ -82,7 +88,10 @@ describe('accounts routes', () => {
   })
 
   test('POST / answers 400 when an opening balance has no date', async () => {
-    const routes = createAccountRoutes({ resolveActor: async () => actor })
+    const routes = createAccountRoutes({
+      resolveActor: async () => actor,
+      settingsRepository: createFakeWorkspaceSettingsRepository(),
+    })
 
     const response = await request(
       routes,
@@ -216,6 +225,7 @@ describe('accounts routes', () => {
       accountRepository,
       entryReader,
       resolveActor: async () => actor,
+      settingsRepository: createFakeWorkspaceSettingsRepository(),
     })
 
     const response = await request(routes, '/balances')

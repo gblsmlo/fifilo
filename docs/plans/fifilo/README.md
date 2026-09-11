@@ -62,7 +62,7 @@ Só começa com o Marco 1 fechado. Referência de plataforma: [Multica](https://
 
 | Fase | Título | Estado |
 | ---: | --- | --- |
-| 07 | [Fundação de IA](fase-07-fundacao-de-ia.md) | Planejada |
+| 07 | [Fundação de IA](fase-07-fundacao-de-ia.md) | Bloqueada (chave de provedor pendente) |
 | 08 | [Chat financeiro](fase-08-chat-financeiro.md) | Planejada |
 | 09 | [Insights e relatórios](fase-09-insights-e-relatorios.md) | Planejada |
 | 10 | [Memória e RAG](fase-10-memoria-e-rag.md) | Planejada |

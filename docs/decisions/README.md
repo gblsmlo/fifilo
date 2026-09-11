@@ -52,6 +52,10 @@ the successor exists; the successor adds its own row here.
 | 027 | [Recharts is the chart library, chosen on four criteria](027-recharts-is-the-chart-library.md) | active |
 | 028 | [an analytics projection is a Core use case; no analytical query is born in the route or the Web](028-analytics-projection-is-a-core-use-case.md) | active |
 | 029 | [the workspace export streams its CSV in the response body; no server-side file, no expiration job](029-export-streams-the-csv-in-the-response.md) | active |
+| 030 | [the model provider sits behind a port; the product never implements an agent loop](030-model-provider-behind-a-port.md) | active |
+| 031 | [Anthropic API and OpenRouter ship together as the two initial adapters](031-anthropic-and-openrouter-ship-together.md) | active |
+| 032 | [level 3 and 4 personal data never reaches a model provider as plain text](032-personal-data-is-redacted-before-reaching-a-provider.md) | active |
+| 033 | [every AI execution carries a budget check, a kill-switch check and an audit trail](033-every-ai-run-has-budget-kill-switch-and-audit.md) | active |
 
 ## Historical
 

@@ -117,17 +117,21 @@ Mais dois específicos deste domínio:
 
 ## Critério de conclusão
 
-- [ ] Port com adaptador de stub, adaptador Anthropic e adaptador OpenRouter,
+- [x] Port com adaptador de stub, adaptador Anthropic e adaptador OpenRouter,
       os três passando na mesma suíte de contrato.
-- [ ] Teste de recusa sem contexto de workspace.
-- [ ] Teste de redação: entrada com nome, e-mail e documento; nada disso
+- [x] Teste de recusa sem contexto de workspace.
+- [x] Teste de redação: entrada com nome, e-mail e documento; nada disso
       aparece no payload que sai.
-- [ ] Teste de orçamento estourado.
-- [ ] Kill switch desliga e o produto continua de pé.
-- [ ] Contabilidade de token conferida contra uma chamada real a cada
-      provedor - custo por token difere entre Anthropic API e OpenRouter, e
-      OpenRouter difere por modelo dentro de si mesmo.
-- [ ] Cinco provas negativas de RLS em `ai_runs` e `ai_budgets`.
+- [x] Teste de orçamento estourado.
+- [x] Kill switch desliga e o produto continua de pé.
+- [ ] **Bloqueado.** Contabilidade de token conferida contra uma chamada real a
+      cada provedor - nem `ANTHROPIC_API_KEY` nem `OPENROUTER_API_KEY` existem
+      neste ambiente. `mapAnthropicEvent` e o parsing SSE do OpenRouter estão
+      testados contra eventos sintéticos de formato documentado e um
+      transporte mockado, respectivamente - o único item que uma chamada real
+      ainda prova é a integração de fato com o provedor, não a lógica de
+      mapeamento em si. Ver Registro de sessões.
+- [x] Cinco provas negativas de RLS em `ai_runs` e `ai_budgets`.
 
 ## Decisões a registrar
 
@@ -136,10 +140,10 @@ Numeração a partir de 030: a Fase 06 já consumiu a 029
 
 | # | Decisão |
 | ---: | --- |
-| 030 | o provedor de modelo fica atrás de um port; o produto não implementa loop de agente |
-| 031 | Anthropic API e OpenRouter entram juntos como os dois adaptadores iniciais, não um-depois-o-outro |
-| 032 | dado nível 3 e 4 não sai para provedor externo; sai agregado e referência |
-| 033 | toda execução de IA tem orçamento, kill switch e trilha de auditoria |
+| 030 | [o provedor de modelo fica atrás de um port; o produto não implementa loop de agente](../../decisions/030-model-provider-behind-a-port.md) |
+| 031 | [Anthropic API e OpenRouter entram juntos como os dois adaptadores iniciais, não um-depois-o-outro](../../decisions/031-anthropic-and-openrouter-ship-together.md) |
+| 032 | [dado nível 3 e 4 não sai para provedor externo; sai agregado e referência](../../decisions/032-personal-data-is-redacted-before-reaching-a-provider.md) |
+| 033 | [toda execução de IA tem orçamento, kill switch e trilha de auditoria](../../decisions/033-every-ai-run-has-budget-kill-switch-and-audit.md) |
 
 ## Fatias de commit
 
@@ -152,4 +156,54 @@ Numeração a partir de 030: a Fase 06 já consumiu a 029
 
 ## Registro de sessões
 
-_(a preencher durante a execução)_
+### Sessão 1 — port, taxonomia, os dois adaptadores e os quatro guardrails
+
+**Entrega.** `packages/ai` (o port `AgentBackend`, a taxonomia de mensagem,
+`withRequiredContext`/`withTimeout`/`capErrorBuffer` compostos em
+`withGuardrails`, `redactPersonalData`, e os três adaptadores - stub,
+Anthropic, OpenRouter) e `packages/core/src/ai` (`checkBudget`,
+`recordSpend`, `checkKillSwitch`, `setWorkspaceKillSwitch`, `setBudgetLimit`,
+`startRun`, `finishRun`, com `requireAiBudgetWriteAccess` e
+`requireAiKillSwitchAccess` juntando-se a `requireSettingsWriteAccess` e
+`requireExportAccess` sob o mesmo predicado dono-ou-admin). Persistência para
+`ai_runs`, `ai_budgets` (RLS `FORCE` padrão), `ai_workspace_kill_switches`
+(idem) e `ai_global_kill_switch` (sem `organization_id`, sem RLS - não é
+dado de tenant). `apps/api/src/features/ai` compõe tudo em `guardAiRun`
+(kill switch, depois orçamento) e `recordRunOutcome` (finaliza a execução,
+registra o gasto, emite o evento de auditoria) - nenhuma rota ainda, por
+desenho da fase.
+
+**O que não foi possível verificar.** Nem `ANTHROPIC_API_KEY` nem
+`OPENROUTER_API_KEY` existiam neste ambiente em nenhum momento desta sessão.
+Toda a lógica de mapeamento (`mapAnthropicEvent` contra eventos sintéticos
+com o formato documentado da Anthropic; o parsing SSE e a acumulação de
+tool calls do OpenRouter contra um transporte `fetch` mockado) está testada
+e correta até onde a documentação de cada provedor permite verificar sem uma
+chamada real. `runBackendContract`'s afirmação de chamada ao vivo pula
+(`test.skipIf`) quando a chave do respectivo provedor está ausente, em vez
+de falhar a suíte inteira por um serviço pago de terceiro que nada mais
+neste repositório exige para subir - a mesma filosofia de
+"opcional individualmente" que `packages/infra/env` já aplica às duas
+variáveis. **Isto permanece um item aberto do critério de conclusão** até
+que uma chave real exista e uma chamada de fato rode contra os dois
+provedores.
+
+**Achado de ambiente, não do código.** A porta 5432 do Postgres local estava
+ocupada por um container de outro projeto (`gateway-postgres`, não
+relacionado ao Fifilo) nesta máquina. Resolvido localmente com um
+`docker-compose.override.yml` temporário (fora do controle de versão,
+usando a tag `!override` do Compose Spec para substituir a lista `ports` em
+vez de concatená-la) subindo o Postgres do Fifilo na porta 5434, com
+`.env` (não versionado) apontando para ela. Nenhuma mudança em arquivo
+versionado; um ambiente diferente não herda este problema.
+
+**Validação.** `bun run lint:ci`, `typecheck` e `test` (562 testes em 9
+pacotes, incluindo os 34 de `@fifilo/ai`) verdes. `bun run test:e2e` não
+precisou rodar - nenhuma jornada de usuário mudou nesta fase.
+
+**Estado da fase.** Todo o critério de conclusão está satisfeito exceto a
+contabilidade de token contra uma chamada real, bloqueada por credenciais
+que não existem neste ambiente. A fase fica **Bloqueada** no `README.md` do
+roadmap, não **Concluída** - o Portão do Marco 2 já estava fechado pela Fase
+06; esta fase não o reabre nem o mantém fechado por si mesma, mas o próprio
+critério desta fase permanece aberto até a chamada real acontecer.

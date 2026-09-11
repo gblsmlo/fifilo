@@ -50,6 +50,13 @@
       "when": 1788750179498,
       "tag": "0006_nosy_trauma",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1789090396371,
+      "tag": "0007_shocking_boom_boom",
+      "breakpoints": true
     }
   ]
 }

@@ -633,6 +633,74 @@ export const aiGlobalKillSwitch = pgTable('ai_global_kill_switch', {
   updatedBy: text('updated_by').references(() => users.id),
 })
 
+/**
+ * Scoped by `(organization_id, created_by)` (Fase 08 § Modelagem): each
+ * member's own chat history, not a shared workspace inbox -
+ * `conversations_org_created_by_idx` is what `listConversations` reads
+ * through. `provider_session_id` is written as soon as the provider emits
+ * one, before the run finishes ("pinning," copied from Multica) - a crash
+ * mid-run leaves a usable pointer instead of an orphaned conversation.
+ */
+export const conversations = pgTable(
+  'conversations',
+  {
+    organizationId: text('organization_id')
+      .notNull()
+      .references(() => organizations.id, { onDelete: 'cascade' }),
+    id: text('id').notNull(),
+    createdBy: text('created_by')
+      .notNull()
+      .references(() => users.id),
+    title: text('title'),
+    providerSessionId: text('provider_session_id'),
+    archivedAt: timestamp('archived_at', { withTimezone: true }),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.organizationId, table.id] }),
+    index('conversations_org_created_by_idx').on(table.organizationId, table.createdBy),
+  ],
+)
+
+/**
+ * `author_type` (`member | agent`) is copied directly from Multica's own
+ * `assignee_type`/`author_type` (Fase 08 § Modelagem): the agent
+ * participates as a first-class author in the same table, not a special
+ * case bolted onto a member-only shape - one query, one ordering, for both.
+ * `content` is `jsonb` because a message's shape depends on its own kind
+ * (text, tool call, tool result) - Core's own `MessageContent` discriminated
+ * union, never re-typed here.
+ */
+export const messages = pgTable(
+  'messages',
+  {
+    organizationId: text('organization_id')
+      .notNull()
+      .references(() => organizations.id, { onDelete: 'cascade' }),
+    id: text('id').notNull(),
+    conversationId: text('conversation_id').notNull(),
+    authorType: text('author_type').notNull(),
+    authorId: text('author_id').references(() => users.id),
+    role: text('role').notNull(),
+    content: jsonb('content').notNull(),
+    toolCallId: text('tool_call_id'),
+    tokenUsage: jsonb('token_usage'),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.organizationId, table.id] }),
+    foreignKey({
+      columns: [table.organizationId, table.conversationId],
+      foreignColumns: [conversations.organizationId, conversations.id],
+    }),
+    index('messages_org_conversation_created_idx').on(
+      table.organizationId,
+      table.conversationId,
+      table.createdAt,
+    ),
+  ],
+)
+
 export const financialAccountsRelations = relations(financialAccounts, ({ many, one }) => ({
   creditCardDetails: one(creditCardDetails, {
     fields: [financialAccounts.organizationId, financialAccounts.id],
@@ -735,11 +803,13 @@ export const databaseSchema = {
   aiWorkspaceKillSwitches,
   cardInvoices,
   categories,
+  conversations,
   creditCardDetails,
   entries,
   financialAccounts,
   idempotencyRecords,
   installmentPlans,
+  messages,
   notificationOutbox,
   transactions,
   userPreferences,

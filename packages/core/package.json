@@ -8,6 +8,7 @@
     "./accounts": "./src/accounts/index.ts",
     "./ai": "./src/ai/index.ts",
     "./analytics": "./src/analytics/index.ts",
+    "./assistant": "./src/assistant/index.ts",
     "./categories": "./src/categories/index.ts",
     "./contracts/*": "./src/contracts/*.ts",
     "./credit-cards": "./src/credit-cards/index.ts",

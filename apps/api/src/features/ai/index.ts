@@ -6,6 +6,8 @@
  */
 export type { GuardAiRunError, GuardAiRunQuery } from './guard-run'
 export { guardAiRun } from './guard-run'
+export type { RecordRunOutcomeCommand } from './record-run-outcome'
+export { recordRunOutcome } from './record-run-outcome'
 export {
   createAiBudgetRepository,
   createAiKillSwitchRepository,

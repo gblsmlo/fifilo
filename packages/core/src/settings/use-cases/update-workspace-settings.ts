@@ -47,7 +47,10 @@ export const updateWorkspaceSettings = async (
     )
   }
 
-  if (command.patch.currency !== undefined) {
+  const currentSettings = await repository.findByOrganizationId(command.organizationId)
+  const currentCurrency = currentSettings?.currency ?? 'BRL'
+
+  if (command.patch.currency !== undefined && command.patch.currency !== currentCurrency) {
     const hasAccounts = await accounts.hasAny(command.organizationId)
     if (hasAccounts) {
       return err(

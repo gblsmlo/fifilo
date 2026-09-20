@@ -71,6 +71,35 @@ describe('updateWorkspaceSettings', () => {
     if (!result.ok) expect(result.error.code).toBe('currency_locked')
   })
 
+  test('keeps the current currency while changing another setting after an account exists', async () => {
+    const repository = createFakeWorkspaceSettingsRepository([
+      {
+        currency: 'BRL',
+        locale: 'pt-BR',
+        monthStartDay: 1,
+        organizationId: 'org_1',
+        timezone: 'America/Sao_Paulo',
+        updatedAt: new Date(),
+        version: 1,
+        weekStartsOn: 'monday',
+      },
+    ])
+    const accounts = createFakeWorkspaceAccountsLookup(['org_1'])
+
+    const result = await updateWorkspaceSettings(
+      {
+        expectedVersion: 1,
+        organizationId: 'org_1',
+        patch: { currency: 'BRL', timezone: 'America/Recife' },
+        role: 'owner',
+      },
+      repository,
+      accounts,
+    )
+
+    expect(result.ok).toBe(true)
+  })
+
   test('changing currency before any account exists is allowed', async () => {
     const repository = createFakeWorkspaceSettingsRepository()
     const accounts = createFakeWorkspaceAccountsLookup()

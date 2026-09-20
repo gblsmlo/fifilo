@@ -1,33 +1,20 @@
 import { accountsQueryOptions } from '@features/accounts'
 import { categoriesQueryOptions } from '@features/categories'
 import { workspaceSettingsQueryOptions } from '@features/settings'
-import type { TransactionsPageResponse } from '@fifilo/core/transactions'
-import { Button } from '@fifilo/ui/components/button'
-import { Input } from '@fifilo/ui/components/input'
-import {
-  Select,
-  SelectItem,
-  SelectPopup,
-  SelectTrigger,
-  SelectValue,
-} from '@fifilo/ui/components/select'
-import { Spinner } from '@fifilo/ui/components/spinner'
+import type { TransactionResponse, TransactionsPageResponse } from '@fifilo/core/transactions'
+import { type CollectionDefinition, CollectionProvider } from '@fifilo/patterns/collection-views'
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query'
-import { useState } from 'react'
+import { Page } from '@web/components/page'
+import { useMemo, useState } from 'react'
 import { TransactionDialog } from '../components/forms/transaction-dialog'
-import { TransactionList } from '../components/transaction-list'
+import { TransactionGrid } from '../components/transaction-grid'
+import { TransactionsToolbar } from '../components/transactions-toolbar'
 import { useDeleteTransaction } from '../hooks/use-delete-transaction'
+import { useUpdateTransaction } from '../hooks/use-update-transaction'
 import { TransactionRequestError } from '../http/errors'
 import { transactionsQueryOptions } from '../query-options'
 import { DEFAULT_WORKSPACE_TIMEZONE, resolveThisMonthRange } from '../resolve-this-month'
 import type { TransactionsSearch } from '../route-search'
-
-const KIND_OPTIONS = [
-  { label: 'Todos os tipos', value: '' },
-  { label: 'Despesa', value: 'expense' },
-  { label: 'Receita', value: 'income' },
-  { label: 'Transferência', value: 'transfer' },
-] as const
 
 interface TransactionsPageProps {
   onSearchChange: (next: TransactionsSearch) => void
@@ -59,88 +46,51 @@ export function TransactionsPage({ onSearchChange, search }: Readonly<Transactio
   )
 
   const deleteTransaction = useDeleteTransaction()
+  const updateTransaction = useUpdateTransaction()
 
-  const accountNamesById = new Map(
-    (accountsQuery.data ?? []).map((account) => [account.id, account.name]),
+  const accounts = accountsQuery.data ?? []
+  const categories = categoriesQuery.data ?? []
+  const transactions = useMemo(
+    () =>
+      transactionsQuery.data?.pages.flatMap((page: TransactionsPageResponse) => page.items) ?? [],
+    [transactionsQuery.data],
   )
-  const categoryNamesById = new Map(
-    (categoriesQuery.data ?? []).map((category) => [category.id, category.name]),
+  const collection = useMemo<CollectionDefinition<TransactionResponse>>(
+    () => ({
+      getKey: (transaction) => transaction.id,
+      getLabel: (transaction) => transaction.description,
+      groupings: [],
+      items: transactions,
+    }),
+    [transactions],
   )
 
   return (
-    <section className='mx-auto flex w-full max-w-5xl flex-col gap-6 p-6'>
-      <div className='flex items-start justify-between gap-4'>
-        <div className='space-y-2'>
-          <h1 className='font-semibold text-3xl tracking-tight'>Transações</h1>
-          <p className='text-muted-foreground'>
-            Receitas, despesas e transferências do workspace no período selecionado.
-          </p>
-        </div>
-        <Button onClick={() => setDialogOpen(true)} type='button'>
-          Nova transação
-        </Button>
-      </div>
+    <Page width='lg'>
+      <Page.Header
+        align='start'
+        description='Receitas, despesas e transferências do workspace no período selecionado.'
+        title='Transações'
+      />
 
-      <form className='flex flex-wrap items-end gap-3' onSubmit={(event) => event.preventDefault()}>
-        <label className='flex flex-col gap-1 text-sm' htmlFor='transactions-from'>
-          <span>De</span>
-          <Input
-            id='transactions-from'
-            onChange={(event) =>
-              onSearchChange({ ...search, from: event.target.value || undefined })
-            }
-            type='date'
-            value={from}
-          />
-        </label>
-        <label className='flex flex-col gap-1 text-sm' htmlFor='transactions-to'>
-          <span>Até</span>
-          <Input
-            id='transactions-to'
-            onChange={(event) => onSearchChange({ ...search, to: event.target.value || undefined })}
-            type='date'
-            value={to}
-          />
-        </label>
-        <div className='flex flex-col gap-1 text-sm'>
-          <span>Tipo</span>
-          <Select
-            onValueChange={(value) =>
-              onSearchChange({
-                ...search,
-                kind: (value === 'none' ? undefined : value) as TransactionsSearch['kind'],
-              })
-            }
-            value={search.kind ?? 'none'}
-          >
-            <SelectTrigger aria-label='Tipo'>
-              <SelectValue placeholder='Todos os tipos'>
-                {(value) =>
-                  KIND_OPTIONS.find((option) => (option.value || 'none') === value)?.label ?? value
-                }
-              </SelectValue>
-            </SelectTrigger>
-            <SelectPopup>
-              {KIND_OPTIONS.map((option) => (
-                <SelectItem key={option.value || 'none'} value={option.value || 'none'}>
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectPopup>
-          </Select>
-        </div>
-      </form>
+      <CollectionProvider
+        collection={collection}
+        defaultPreferences={{ groupBy: null, view: 'datagrid' }}
+      >
+        <TransactionsToolbar
+          accounts={accounts}
+          categories={categories}
+          from={from}
+          onCreate={() => setDialogOpen(true)}
+          onSearchChange={onSearchChange}
+          search={search}
+          to={to}
+        />
 
-      {transactionsQuery.isPending ? (
-        <div className='flex justify-center py-12'>
-          <Spinner aria-label='Carregando transações' />
-        </div>
-      ) : null}
-
-      {!transactionsQuery.isPending ? (
-        <TransactionList
-          accountNamesById={accountNamesById}
-          categoryNamesById={categoryNamesById}
+        <TransactionGrid
+          accounts={accounts}
+          categories={categories}
+          collection={collection}
           error={
             transactionsQuery.isError
               ? {
@@ -159,16 +109,15 @@ export function TransactionsPage({ onSearchChange, search }: Readonly<Transactio
           hasNextPage={transactionsQuery.hasNextPage}
           isDeleting={deleteTransaction.isPending}
           isFetchingNextPage={transactionsQuery.isFetchingNextPage}
+          isPending={transactionsQuery.isPending}
+          onChange={(transaction, change) => updateTransaction.mutate({ change, transaction })}
           onDelete={(id) => deleteTransaction.mutate(id)}
           onLoadMore={() => transactionsQuery.fetchNextPage()}
-          transactions={
-            transactionsQuery.data?.pages.flatMap((page: TransactionsPageResponse) => page.items) ??
-            []
-          }
+          transactions={transactions}
         />
-      ) : null}
+      </CollectionProvider>
 
       <TransactionDialog onOpenChange={setDialogOpen} open={dialogOpen} />
-    </section>
+    </Page>
   )
 }

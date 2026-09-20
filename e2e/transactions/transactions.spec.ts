@@ -19,20 +19,20 @@ test.describe('@transactions categories and transactions', () => {
     await page.goto('/accounts')
     await page.getByLabel('Nome').fill(checkingName)
     await page.getByRole('button', { name: 'Criar conta' }).click()
-    await expect(page.locator('[data-slot="card"]', { hasText: checkingName })).toBeVisible()
+    await expect(page.getByRole('row', { name: checkingName })).toBeVisible()
 
     await page.getByLabel('Nome').fill(walletName)
     await page.getByRole('combobox', { name: 'Tipo' }).click()
     await page.getByRole('option', { name: 'Carteira' }).click()
     await page.getByRole('button', { name: 'Criar conta' }).click()
-    await expect(page.locator('[data-slot="card"]', { hasText: walletName })).toBeVisible()
+    await expect(page.getByRole('row', { name: walletName })).toBeVisible()
 
     await page.goto('/categories')
     await page.getByLabel('Nome').fill(categoryName)
     await page.getByRole('button', { name: 'Criar categoria' }).click()
-    // `[data-slot="card"]` alone would also match the "Nova categoria" card:
-    // the category just created is now an option in its own parent select.
-    await expect(page.locator('[data-slot="card-title"]', { hasText: categoryName })).toBeVisible()
+    // The row, not the page text: the category just created is now also an
+    // option in the "Nova categoria" parent select.
+    await expect(page.getByRole('row', { name: categoryName })).toBeVisible()
 
     await page.goto('/transactions')
     await page.getByRole('button', { name: 'Nova transação' }).click()
@@ -69,27 +69,37 @@ test.describe('@transactions categories and transactions', () => {
     // R$ 50,00 expense + R$ 20,00 out on the checking account: -R$ 70,00.
     // R$ 20,00 in on the wallet.
     await page.goto('/accounts')
-    const checkingCard = page.locator('[data-slot="card"]', { hasText: checkingName })
-    const walletCard = page.locator('[data-slot="card"]', { hasText: walletName })
-    await expect(checkingCard.getByText('70,00')).toBeVisible()
-    await expect(walletCard.getByText('20,00')).toBeVisible()
+    const checkingRow = page.getByRole('row', { name: checkingName })
+    const walletRow = page.getByRole('row', { name: walletName })
+    await expect(checkingRow.getByText('70,00')).toBeVisible()
+    await expect(walletRow.getByText('20,00')).toBeVisible()
 
     // The period filter: a range that excludes today hides both transactions;
     // reloading the page must keep showing the same (empty) range from the URL.
     await page.goto('/transactions')
     await expect(page.getByText(expenseDescription)).toBeVisible()
 
-    // Exact match: "De" and "Até" are short enough to otherwise substring-match
-    // unrelated labels (implicit <label> wrapping folds descendant option text
-    // into the accessible name too - "Despesa" contains "De", "sidebar" "de").
-    await page.getByLabel('De', { exact: true }).fill('2020-01-01')
-    await page.getByLabel('Até', { exact: true }).fill('2020-01-31')
+    // Every filter, the period included, hangs off the single view-settings
+    // trigger; the period is a range calendar with presets.
+    const pickLastYear = async () => {
+      await page.getByRole('button', { name: /^Exibição/ }).click()
+      await page.getByRole('menuitem', { name: 'Período' }).click()
+      await page.getByRole('button', { name: 'Ano passado' }).click()
+      await page.keyboard.press('Escape')
+      await page.keyboard.press('Escape')
+    }
+
+    await pickLastYear()
     await expect(page.getByText('Nenhuma transação no período')).toBeVisible()
     await expect(page.getByText(expenseDescription)).toHaveCount(0)
 
+    // The range is URL state: reloading reproduces the same (empty) period.
+    const lastYear = new Date().getFullYear() - 1
+    await expect(page).toHaveURL(new RegExp(`from=${lastYear}-01-01`))
+    await expect(page).toHaveURL(new RegExp(`to=${lastYear}-12-31`))
+
     await page.reload()
-    await expect(page.getByLabel('De', { exact: true })).toHaveValue('2020-01-01')
-    await expect(page.getByLabel('Até', { exact: true })).toHaveValue('2020-01-31')
     await expect(page.getByText('Nenhuma transação no período')).toBeVisible()
+    await expect(page.getByText(expenseDescription)).toHaveCount(0)
   })
 })

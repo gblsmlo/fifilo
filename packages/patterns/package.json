@@ -7,20 +7,41 @@
     "typecheck": "tsc -p tsconfig.json"
   },
   "dependencies": {
+    "@dnd-kit/abstract": "0.5.0",
+    "@dnd-kit/collision": "0.5.0",
+    "@dnd-kit/dom": "0.5.0",
+    "@dnd-kit/helpers": "0.5.0",
+    "@dnd-kit/react": "0.5.0",
     "@fifilo/ui": "workspace:*",
+    "@tanstack/react-table": "8.21.3",
+    "@tanstack/react-virtual": "3.14.2",
+    "class-variance-authority": "catalog:",
     "lucide-react": "catalog:",
-    "recharts": "^3.10.1"
+    "react-day-picker": "10.0.1",
+    "react-phone-number-input": "^3.4.18",
+    "recharts": "^3.10.1",
+    "zod": "^4.1.12"
   },
   "exports": {
     "./charts/ranked-bar-chart": "./src/charts/ranked-bar-chart.tsx",
     "./charts/trend-line-chart": "./src/charts/trend-line-chart.tsx",
+    "./collection-views": "./src/collection-views/index.ts",
+    "./collection-views/README.md": "./src/collection-views/README.md",
+    "./collection-views/datagrid": "./src/collection-views/datagrid/index.ts",
     "./confirm-dialog": "./src/confirm-dialog.tsx",
+    "./data-table": "./src/data-table/index.ts",
     "./destructive-dialog": "./src/destructive-dialog.tsx",
     "./dialog": "./src/dialog/index.ts",
+    "./editable-text": "./src/editable-text.tsx",
     "./password-strength": "./src/password-strength.tsx",
+    "./phone-input": "./src/phone-input/index.ts",
+    "./properties": "./src/properties/index.ts",
+    "./range-calendar": "./src/range-calendar/index.ts",
     "./settings": "./src/settings/index.ts",
+    "./stat": "./src/stat/index.ts",
     "./state-kinds": "./src/state-kinds.ts",
-    "./state-surface": "./src/state-surface.tsx"
+    "./state-surface": "./src/state-surface.tsx",
+    "./widget": "./src/widget/index.ts"
   },
   "peerDependencies": {
     "@base-ui/react": "catalog:",

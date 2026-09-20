@@ -21,6 +21,23 @@ export function PopoverTrigger({
   )
 }
 
+const viewportClassName = 'relative size-full overflow-clip'
+
+// Without the Viewport the positioner follows the content, and a ceiling in
+// `--available-height` would feed back into Floating UI: shifting changes the
+// available height, which changes the popup height, which shifts it again. The
+// ceiling is the window, which does not depend on where the popup landed.
+const plainViewportClassName = 'max-h-[calc(100dvh-1rem)] overflow-y-auto'
+
+const transitionViewportClassName =
+  'data-instant:transition-none **:data-current:data-ending-style:opacity-0 **:data-current:data-starting-style:opacity-0 **:data-previous:data-ending-style:opacity-0 **:data-previous:data-starting-style:opacity-0 **:data-current:w-[calc(var(--popup-width)-2*var(--viewport-inline-padding)-2px)] **:data-previous:w-[calc(var(--popup-width)-2*var(--viewport-inline-padding)-2px)] **:data-current:opacity-100 **:data-previous:opacity-100 **:data-current:transition-opacity **:data-previous:transition-opacity'
+
+function viewportPaddingClassName(tooltipStyle: boolean): string {
+  return tooltipStyle
+    ? 'px-(--viewport-inline-padding) py-1 [--viewport-inline-padding:--spacing(2)]'
+    : 'px-(--viewport-inline-padding) py-4 [--viewport-inline-padding:--spacing(4)] has-data-[slot=calendar]:p-2'
+}
+
 export function PopoverPopup({
   children,
   className,
@@ -30,7 +47,9 @@ export function PopoverPopup({
   alignOffset = 0,
   tooltipStyle = false,
   anchor,
+  collisionAvoidance,
   portalProps,
+  viewport = true,
   ...props
 }: PopoverPrimitive.Popup.Props & {
   portalProps?: PopoverPrimitive.Portal.Props
@@ -40,6 +59,15 @@ export function PopoverPopup({
   alignOffset?: PopoverPrimitive.Positioner.Props['alignOffset']
   tooltipStyle?: boolean
   anchor?: PopoverPrimitive.Positioner.Props['anchor']
+  collisionAvoidance?: PopoverPrimitive.Positioner.Props['collisionAvoidance']
+  /**
+   * Base UI's `Viewport` measures the popup once per opening and locks the
+   * positioner to that size, so content can cross-fade between triggers. A
+   * popup whose content grows after opening stays clipped and never
+   * repositions; `false` drops that layer and lets Floating UI see the real
+   * size again.
+   */
+  viewport?: boolean
 }): React.ReactElement {
   return (
     <PopoverPrimitive.Portal {...portalProps}>
@@ -47,6 +75,7 @@ export function PopoverPopup({
         align={align}
         alignOffset={alignOffset}
         anchor={anchor}
+        collisionAvoidance={collisionAvoidance}
         className='z-50 h-(--positioner-height) w-(--positioner-width) max-w-(--available-width) transition-[top,left,right,bottom,transform] data-instant:transition-none'
         data-slot='popover-positioner'
         side={side}
@@ -62,17 +91,31 @@ export function PopoverPopup({
           data-slot='popover-popup'
           {...props}
         >
-          <PopoverPrimitive.Viewport
-            className={cn(
-              'relative size-full max-h-(--available-height) overflow-clip px-(--viewport-inline-padding) py-4 [--viewport-inline-padding:--spacing(4)] has-data-[slot=calendar]:p-2 data-instant:transition-none **:data-current:data-ending-style:opacity-0 **:data-current:data-starting-style:opacity-0 **:data-previous:data-ending-style:opacity-0 **:data-previous:data-starting-style:opacity-0 **:data-current:w-[calc(var(--popup-width)-2*var(--viewport-inline-padding)-2px)] **:data-previous:w-[calc(var(--popup-width)-2*var(--viewport-inline-padding)-2px)] **:data-current:opacity-100 **:data-previous:opacity-100 **:data-current:transition-opacity **:data-previous:transition-opacity',
-              tooltipStyle
-                ? 'py-1 [--viewport-inline-padding:--spacing(2)]'
-                : 'not-data-transitioning:overflow-y-auto',
-            )}
-            data-slot='popover-viewport'
-          >
-            {children}
-          </PopoverPrimitive.Viewport>
+          {viewport ? (
+            <PopoverPrimitive.Viewport
+              className={cn(
+                viewportClassName,
+                'max-h-(--available-height)',
+                transitionViewportClassName,
+                viewportPaddingClassName(tooltipStyle),
+                !tooltipStyle && 'not-data-transitioning:overflow-y-auto',
+              )}
+              data-slot='popover-viewport'
+            >
+              {children}
+            </PopoverPrimitive.Viewport>
+          ) : (
+            <div
+              className={cn(
+                viewportClassName,
+                plainViewportClassName,
+                viewportPaddingClassName(tooltipStyle),
+              )}
+              data-slot='popover-viewport'
+            >
+              {children}
+            </div>
+          )}
         </PopoverPrimitive.Popup>
       </PopoverPrimitive.Positioner>
     </PopoverPrimitive.Portal>

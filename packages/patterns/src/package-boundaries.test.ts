@@ -16,11 +16,16 @@ const sourceFiles = () =>
 describe('@fifilo/patterns package boundaries', () => {
   test('never imports a feature, the core, the router or the API', async () => {
     const violations: string[] = []
+    // The DataGrid is built on TanStack Table and its virtualizer; the router
+    // and the query cache stay out, because they carry the application's
+    // navigation and server state.
     const forbidden = [
       "from '@features/",
       "from '@web/",
       "from '@fifilo/core",
-      "from '@tanstack/",
+      "from '@tanstack/react-router",
+      "from '@tanstack/react-query",
+      "from '@tanstack/react-start",
       "from '@fifilo/api",
     ]
 

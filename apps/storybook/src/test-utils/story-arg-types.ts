@@ -10,6 +10,22 @@
  */
 export const booleanArgType = { control: 'boolean' } as const
 
+export const propertyVariantArgType = {
+  variant: { control: 'inline-radio', options: ['badge', 'plain'] },
+} as const
+
+/** The two booleans every interactive Property shares. */
+export const propertyStateArgTypes = {
+  disabled: booleanArgType,
+  readOnly: booleanArgType,
+} as const
+
+/** Base of the interactive Properties: the variant plus the two states. */
+export const propertyArgTypes = {
+  ...propertyVariantArgType,
+  ...propertyStateArgTypes,
+} as const
+
 export const stateSurfaceKindArgType = {
   kind: {
     control: 'select',

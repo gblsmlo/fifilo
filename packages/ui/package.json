@@ -17,6 +17,7 @@
     "./components/*.test": null,
     "./components/*": "./src/components/*.tsx",
     "./hooks/*": "./src/hooks/*.ts",
+    "./lib/*.test": null,
     "./lib/*": "./src/lib/*.ts"
   },
   "peerDependencies": {

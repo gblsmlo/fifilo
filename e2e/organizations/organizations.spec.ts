@@ -1,5 +1,6 @@
 import { execFileSync } from 'node:child_process'
 import { hashPassword } from 'better-auth/crypto'
+import { accountRow, createAccount } from '../helpers/accounts'
 import { expect, test, wrapPageWithHydrationWait } from '../helpers/app-test'
 
 /**
@@ -54,9 +55,8 @@ test.describe('@organizations viewer role and promotion', () => {
 
     // The owner creates something for the invitee to read later.
     await page.goto('/accounts')
-    await page.getByLabel('Nome').fill(accountName)
-    await page.getByRole('button', { name: 'Criar conta' }).click()
-    await expect(page.getByRole('row', { name: accountName })).toBeVisible()
+    await createAccount(page, { name: accountName })
+    await expect(accountRow(page, accountName)).toBeVisible()
 
     await page.goto('/categories')
     await page.getByLabel('Nome').fill(categoryName)

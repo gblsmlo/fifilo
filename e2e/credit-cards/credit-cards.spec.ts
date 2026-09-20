@@ -1,3 +1,4 @@
+import { accountRow, createAccount } from '../helpers/accounts'
 import { expect, test } from '../helpers/app-test'
 
 /**
@@ -18,16 +19,11 @@ test.describe('@credit-cards credit card and invoice', () => {
     const today = new Date().toISOString().slice(0, 10)
 
     await page.goto('/accounts')
-    await page.getByLabel('Nome').fill(checkingName)
-    await page.getByRole('button', { name: 'Criar conta' }).click()
-    await expect(page.getByRole('row', { name: checkingName })).toBeVisible()
+    await createAccount(page, { name: checkingName })
+    await expect(accountRow(page, checkingName)).toBeVisible()
 
-    await page.getByLabel('Nome').fill(cardName)
-    await page.getByRole('combobox', { name: 'Tipo' }).click()
-    await page.getByRole('option', { name: 'Cartão de crédito' }).click()
-    await page.getByRole('button', { name: 'Criar conta' }).click()
-    const cardAccountRow = page.getByRole('row', { name: cardName })
-    await expect(cardAccountRow).toBeVisible()
+    await createAccount(page, { kind: 'Cartão de crédito', name: cardName })
+    await expect(accountRow(page, cardName)).toBeVisible()
 
     await page.goto('/categories')
     await page.getByLabel('Nome').fill(categoryName)
@@ -35,10 +31,10 @@ test.describe('@credit-cards credit card and invoice', () => {
     await expect(page.getByRole('row', { name: categoryName })).toBeVisible()
 
     await page.goto('/accounts')
-    await page
-      .getByRole('row', { name: cardName })
-      .getByRole('link', { name: 'Gerenciar cartão' })
+    await accountRow(page, cardName)
+      .getByRole('button', { name: `Ações da conta ${cardName}` })
       .click()
+    await page.getByRole('menuitem', { name: 'Gerenciar cartão' }).click()
 
     await page.getByLabel('Dia de fechamento').fill('28')
     await page.getByLabel('Dia de vencimento').fill('10')
@@ -80,6 +76,6 @@ test.describe('@credit-cards credit card and invoice', () => {
     await expect(page.getByTestId('available-limit')).toContainText('4.900,00')
 
     await page.goto('/accounts')
-    await expect(page.getByRole('row', { name: checkingName })).toContainText('100,00')
+    await expect(accountRow(page, checkingName)).toContainText('100,00')
   })
 })

@@ -1,4 +1,5 @@
 import type { Page } from '@playwright/test'
+import { accountRow, createAccount } from '../helpers/accounts'
 import { expect, test } from '../helpers/app-test'
 
 /**
@@ -44,9 +45,8 @@ test.describe('@analytics dashboard', () => {
     const incomeCategoryName = `E2E Dashboard Salário ${stamp}`
 
     await page.goto('/accounts')
-    await page.getByLabel('Nome').fill(checkingName)
-    await page.getByRole('button', { name: 'Criar conta' }).click()
-    await expect(page.getByRole('row', { name: checkingName })).toBeVisible()
+    await createAccount(page, { name: checkingName })
+    await expect(accountRow(page, checkingName)).toBeVisible()
 
     await page.goto('/categories')
     await page.getByLabel('Nome').fill(categoryName)

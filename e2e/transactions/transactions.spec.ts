@@ -1,3 +1,4 @@
+import { accountRow, createAccount } from '../helpers/accounts'
 import { expect, test } from '../helpers/app-test'
 
 /**
@@ -17,15 +18,11 @@ test.describe('@transactions categories and transactions', () => {
     const transferDescription = `E2E Transferência ${stamp}`
 
     await page.goto('/accounts')
-    await page.getByLabel('Nome').fill(checkingName)
-    await page.getByRole('button', { name: 'Criar conta' }).click()
-    await expect(page.getByRole('row', { name: checkingName })).toBeVisible()
+    await createAccount(page, { name: checkingName })
+    await expect(accountRow(page, checkingName)).toBeVisible()
 
-    await page.getByLabel('Nome').fill(walletName)
-    await page.getByRole('combobox', { name: 'Tipo' }).click()
-    await page.getByRole('option', { name: 'Carteira' }).click()
-    await page.getByRole('button', { name: 'Criar conta' }).click()
-    await expect(page.getByRole('row', { name: walletName })).toBeVisible()
+    await createAccount(page, { kind: 'Carteira', name: walletName })
+    await expect(accountRow(page, walletName)).toBeVisible()
 
     await page.goto('/categories')
     await page.getByLabel('Nome').fill(categoryName)
@@ -69,8 +66,8 @@ test.describe('@transactions categories and transactions', () => {
     // R$ 50,00 expense + R$ 20,00 out on the checking account: -R$ 70,00.
     // R$ 20,00 in on the wallet.
     await page.goto('/accounts')
-    const checkingRow = page.getByRole('row', { name: checkingName })
-    const walletRow = page.getByRole('row', { name: walletName })
+    const checkingRow = accountRow(page, checkingName)
+    const walletRow = accountRow(page, walletName)
     await expect(checkingRow.getByText('70,00')).toBeVisible()
     await expect(walletRow.getByText('20,00')).toBeVisible()
 

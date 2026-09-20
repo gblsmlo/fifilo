@@ -126,6 +126,7 @@ const updateTransactionRow = async (
       .set({
         categoryId: patch.categoryId,
         description: patch.description,
+        kind: patch.kind,
         notes: patch.notes,
         occurredOn: patch.occurredOn,
         updatedAt: sql`now()`,

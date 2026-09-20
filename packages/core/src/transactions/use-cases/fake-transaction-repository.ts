@@ -79,6 +79,7 @@ export const createFakeTransactionRepository = (
         ...transaction,
         categoryId: patch.categoryId,
         description: patch.description,
+        kind: patch.kind,
         legs: patch.legs,
         notes: patch.notes,
         occurredOn: patch.occurredOn,

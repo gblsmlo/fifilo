@@ -210,6 +210,7 @@ describe('transactions persistence', () => {
     const patch = {
       categoryId: null,
       description: 'Concurrency check',
+      kind: 'expense' as const,
       legs: [
         {
           accountId: accountA,

@@ -58,7 +58,10 @@ export const createTransactionRequestSchema = z
     path: ['toAccountId'],
   })
 
-/** Editing never changes `kind`: the fields it would need to swap to are disjoint. */
+/**
+ * Editing replaces the whole transaction, `kind` included: the request carries
+ * the fields the new kind needs, and the legs are re-derived from them.
+ */
 export const updateTransactionRequestSchema = z
   .discriminatedUnion('kind', [
     createIncomeRequestSchema.extend({ version: z.int().min(1) }),
@@ -112,7 +115,6 @@ const transactionErrorCodeSchema = z.enum([
   'category_kind_mismatch',
   'category_not_found',
   'currency_mismatch',
-  'transaction_kind_immutable',
   'transaction_not_found',
   'version_conflict',
 ])

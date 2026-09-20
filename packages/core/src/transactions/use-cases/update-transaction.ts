@@ -48,7 +48,6 @@ export type UpdateTransactionError =
       | 'category_kind_mismatch'
       | 'category_not_found'
       | 'currency_mismatch'
-      | 'transaction_kind_immutable'
       | 'transaction_not_found'
       | 'version_conflict'
     >
@@ -84,14 +83,6 @@ export const updateTransaction = async (
 
   const existing = await repository.findById(command.organizationId, command.id)
   if (!existing) return err(notFoundError('transaction_not_found', 'Transaction not found.'))
-  if (existing.kind !== command.kind) {
-    return err(
-      validationError(
-        'transaction_kind_immutable',
-        "A transaction's kind cannot change once created.",
-      ),
-    )
-  }
 
   let legCurrency: CurrencyCode
 
@@ -144,6 +135,7 @@ export const updateTransaction = async (
     {
       categoryId: command.kind === 'transfer' ? null : command.categoryId,
       description: command.description,
+      kind: command.kind,
       legs,
       notes: command.notes,
       occurredOn: command.occurredOn,

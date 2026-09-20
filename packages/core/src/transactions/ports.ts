@@ -21,6 +21,8 @@ export type NewTransactionRecord = {
 export type TransactionUpdatePatch = {
   categoryId: EntityId | null
   description: string
+  /** An income and an expense swap places; a transfer never joins them. */
+  kind: TransactionKind
   legs: ReadonlyArray<PersistableLeg>
   notes: string | null
   occurredOn: string

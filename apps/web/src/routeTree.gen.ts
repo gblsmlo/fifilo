@@ -12,20 +12,22 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as authRouteRouteImport } from './routes/(auth)/route'
 import { Route as authenticatedRouteRouteImport } from './routes/(authenticated)/route'
+import { Route as onboardingRouteRouteImport } from './routes/(onboarding)/route'
 import { Route as authForgottenPasswordRouteImport } from './routes/(auth)/forgotten-password'
 import { Route as authLoginRouteImport } from './routes/(auth)/login'
 import { Route as authResetPasswordRouteImport } from './routes/(auth)/reset-password'
 import { Route as authSignUpRouteImport } from './routes/(auth)/sign-up'
 import { Route as authTwoFactorRouteImport } from './routes/(auth)/two-factor'
-import { Route as authenticatedAcceptInvitationRouteImport } from './routes/(authenticated)/accept-invitation'
 import { Route as authenticatedAccountsRouteImport } from './routes/(authenticated)/accounts'
 import { Route as authenticatedCategoriesRouteImport } from './routes/(authenticated)/categories'
 import { Route as authenticatedDashboardRouteImport } from './routes/(authenticated)/dashboard'
-import { Route as authenticatedOnboardingRouteImport } from './routes/(authenticated)/onboarding'
 import { Route as authenticatedOrganizationRouteImport } from './routes/(authenticated)/organization'
 import { Route as authenticatedSettingsRouteImport } from './routes/(authenticated)/settings'
 import { Route as authenticatedTransactionsRouteImport } from './routes/(authenticated)/transactions'
+import { Route as onboardingAcceptInvitationRouteImport } from './routes/(onboarding)/accept-invitation'
+import { Route as onboardingOnboardingRouteImport } from './routes/(onboarding)/onboarding'
 import { Route as authenticatedCreditCardsAccountIdRouteImport } from './routes/(authenticated)/credit-cards.$accountId'
+import { Route as onboardingOnboardingSetupRouteImport } from './routes/(onboarding)/onboarding.setup'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -38,6 +40,10 @@ const authRouteRoute = authRouteRouteImport.update({
 } as any)
 const authenticatedRouteRoute = authenticatedRouteRouteImport.update({
   id: '/(authenticated)',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const onboardingRouteRoute = onboardingRouteRouteImport.update({
+  id: '/(onboarding)',
   getParentRoute: () => rootRouteImport,
 } as any)
 const authForgottenPasswordRoute = authForgottenPasswordRouteImport.update({
@@ -65,12 +71,6 @@ const authTwoFactorRoute = authTwoFactorRouteImport.update({
   path: '/two-factor',
   getParentRoute: () => authRouteRoute,
 } as any)
-const authenticatedAcceptInvitationRoute =
-  authenticatedAcceptInvitationRouteImport.update({
-    id: '/accept-invitation',
-    path: '/accept-invitation',
-    getParentRoute: () => authenticatedRouteRoute,
-  } as any)
 const authenticatedAccountsRoute = authenticatedAccountsRouteImport.update({
   id: '/accounts',
   path: '/accounts',
@@ -84,11 +84,6 @@ const authenticatedCategoriesRoute = authenticatedCategoriesRouteImport.update({
 const authenticatedDashboardRoute = authenticatedDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
-  getParentRoute: () => authenticatedRouteRoute,
-} as any)
-const authenticatedOnboardingRoute = authenticatedOnboardingRouteImport.update({
-  id: '/onboarding',
-  path: '/onboarding',
   getParentRoute: () => authenticatedRouteRoute,
 } as any)
 const authenticatedOrganizationRoute =
@@ -108,11 +103,28 @@ const authenticatedTransactionsRoute =
     path: '/transactions',
     getParentRoute: () => authenticatedRouteRoute,
   } as any)
+const onboardingAcceptInvitationRoute =
+  onboardingAcceptInvitationRouteImport.update({
+    id: '/accept-invitation',
+    path: '/accept-invitation',
+    getParentRoute: () => onboardingRouteRoute,
+  } as any)
+const onboardingOnboardingRoute = onboardingOnboardingRouteImport.update({
+  id: '/onboarding',
+  path: '/onboarding',
+  getParentRoute: () => onboardingRouteRoute,
+} as any)
 const authenticatedCreditCardsAccountIdRoute =
   authenticatedCreditCardsAccountIdRouteImport.update({
     id: '/credit-cards/$accountId',
     path: '/credit-cards/$accountId',
     getParentRoute: () => authenticatedRouteRoute,
+  } as any)
+const onboardingOnboardingSetupRoute =
+  onboardingOnboardingSetupRouteImport.update({
+    id: '/setup',
+    path: '/setup',
+    getParentRoute: () => onboardingOnboardingRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
@@ -122,15 +134,16 @@ export interface FileRoutesByFullPath {
   '/reset-password': typeof authResetPasswordRoute
   '/sign-up': typeof authSignUpRoute
   '/two-factor': typeof authTwoFactorRoute
-  '/accept-invitation': typeof authenticatedAcceptInvitationRoute
   '/accounts': typeof authenticatedAccountsRoute
   '/categories': typeof authenticatedCategoriesRoute
   '/dashboard': typeof authenticatedDashboardRoute
-  '/onboarding': typeof authenticatedOnboardingRoute
   '/organization': typeof authenticatedOrganizationRoute
   '/settings': typeof authenticatedSettingsRoute
   '/transactions': typeof authenticatedTransactionsRoute
+  '/accept-invitation': typeof onboardingAcceptInvitationRoute
+  '/onboarding': typeof onboardingOnboardingRouteWithChildren
   '/credit-cards/$accountId': typeof authenticatedCreditCardsAccountIdRoute
+  '/onboarding/setup': typeof onboardingOnboardingSetupRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -139,35 +152,38 @@ export interface FileRoutesByTo {
   '/reset-password': typeof authResetPasswordRoute
   '/sign-up': typeof authSignUpRoute
   '/two-factor': typeof authTwoFactorRoute
-  '/accept-invitation': typeof authenticatedAcceptInvitationRoute
   '/accounts': typeof authenticatedAccountsRoute
   '/categories': typeof authenticatedCategoriesRoute
   '/dashboard': typeof authenticatedDashboardRoute
-  '/onboarding': typeof authenticatedOnboardingRoute
   '/organization': typeof authenticatedOrganizationRoute
   '/settings': typeof authenticatedSettingsRoute
   '/transactions': typeof authenticatedTransactionsRoute
+  '/accept-invitation': typeof onboardingAcceptInvitationRoute
+  '/onboarding': typeof onboardingOnboardingRouteWithChildren
   '/credit-cards/$accountId': typeof authenticatedCreditCardsAccountIdRoute
+  '/onboarding/setup': typeof onboardingOnboardingSetupRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/(auth)': typeof authRouteRouteWithChildren
   '/(authenticated)': typeof authenticatedRouteRouteWithChildren
+  '/(onboarding)': typeof onboardingRouteRouteWithChildren
   '/(auth)/forgotten-password': typeof authForgottenPasswordRoute
   '/(auth)/login': typeof authLoginRoute
   '/(auth)/reset-password': typeof authResetPasswordRoute
   '/(auth)/sign-up': typeof authSignUpRoute
   '/(auth)/two-factor': typeof authTwoFactorRoute
-  '/(authenticated)/accept-invitation': typeof authenticatedAcceptInvitationRoute
   '/(authenticated)/accounts': typeof authenticatedAccountsRoute
   '/(authenticated)/categories': typeof authenticatedCategoriesRoute
   '/(authenticated)/dashboard': typeof authenticatedDashboardRoute
-  '/(authenticated)/onboarding': typeof authenticatedOnboardingRoute
   '/(authenticated)/organization': typeof authenticatedOrganizationRoute
   '/(authenticated)/settings': typeof authenticatedSettingsRoute
   '/(authenticated)/transactions': typeof authenticatedTransactionsRoute
+  '/(onboarding)/accept-invitation': typeof onboardingAcceptInvitationRoute
+  '/(onboarding)/onboarding': typeof onboardingOnboardingRouteWithChildren
   '/(authenticated)/credit-cards/$accountId': typeof authenticatedCreditCardsAccountIdRoute
+  '/(onboarding)/onboarding/setup': typeof onboardingOnboardingSetupRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -178,15 +194,16 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/sign-up'
     | '/two-factor'
-    | '/accept-invitation'
     | '/accounts'
     | '/categories'
     | '/dashboard'
-    | '/onboarding'
     | '/organization'
     | '/settings'
     | '/transactions'
+    | '/accept-invitation'
+    | '/onboarding'
     | '/credit-cards/$accountId'
+    | '/onboarding/setup'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -195,40 +212,44 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/sign-up'
     | '/two-factor'
-    | '/accept-invitation'
     | '/accounts'
     | '/categories'
     | '/dashboard'
-    | '/onboarding'
     | '/organization'
     | '/settings'
     | '/transactions'
+    | '/accept-invitation'
+    | '/onboarding'
     | '/credit-cards/$accountId'
+    | '/onboarding/setup'
   id:
     | '__root__'
     | '/'
     | '/(auth)'
     | '/(authenticated)'
+    | '/(onboarding)'
     | '/(auth)/forgotten-password'
     | '/(auth)/login'
     | '/(auth)/reset-password'
     | '/(auth)/sign-up'
     | '/(auth)/two-factor'
-    | '/(authenticated)/accept-invitation'
     | '/(authenticated)/accounts'
     | '/(authenticated)/categories'
     | '/(authenticated)/dashboard'
-    | '/(authenticated)/onboarding'
     | '/(authenticated)/organization'
     | '/(authenticated)/settings'
     | '/(authenticated)/transactions'
+    | '/(onboarding)/accept-invitation'
+    | '/(onboarding)/onboarding'
     | '/(authenticated)/credit-cards/$accountId'
+    | '/(onboarding)/onboarding/setup'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   authRouteRoute: typeof authRouteRouteWithChildren
   authenticatedRouteRoute: typeof authenticatedRouteRouteWithChildren
+  onboardingRouteRoute: typeof onboardingRouteRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
@@ -252,6 +273,13 @@ declare module '@tanstack/react-router' {
       path: ''
       fullPath: ''
       preLoaderRoute: typeof authenticatedRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/(onboarding)': {
+      id: '/(onboarding)'
+      path: ''
+      fullPath: ''
+      preLoaderRoute: typeof onboardingRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/(auth)/forgotten-password': {
@@ -289,13 +317,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof authTwoFactorRouteImport
       parentRoute: typeof authRouteRoute
     }
-    '/(authenticated)/accept-invitation': {
-      id: '/(authenticated)/accept-invitation'
-      path: '/accept-invitation'
-      fullPath: '/accept-invitation'
-      preLoaderRoute: typeof authenticatedAcceptInvitationRouteImport
-      parentRoute: typeof authenticatedRouteRoute
-    }
     '/(authenticated)/accounts': {
       id: '/(authenticated)/accounts'
       path: '/accounts'
@@ -315,13 +336,6 @@ declare module '@tanstack/react-router' {
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof authenticatedDashboardRouteImport
-      parentRoute: typeof authenticatedRouteRoute
-    }
-    '/(authenticated)/onboarding': {
-      id: '/(authenticated)/onboarding'
-      path: '/onboarding'
-      fullPath: '/onboarding'
-      preLoaderRoute: typeof authenticatedOnboardingRouteImport
       parentRoute: typeof authenticatedRouteRoute
     }
     '/(authenticated)/organization': {
@@ -345,12 +359,33 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof authenticatedTransactionsRouteImport
       parentRoute: typeof authenticatedRouteRoute
     }
+    '/(onboarding)/accept-invitation': {
+      id: '/(onboarding)/accept-invitation'
+      path: '/accept-invitation'
+      fullPath: '/accept-invitation'
+      preLoaderRoute: typeof onboardingAcceptInvitationRouteImport
+      parentRoute: typeof onboardingRouteRoute
+    }
+    '/(onboarding)/onboarding': {
+      id: '/(onboarding)/onboarding'
+      path: '/onboarding'
+      fullPath: '/onboarding'
+      preLoaderRoute: typeof onboardingOnboardingRouteImport
+      parentRoute: typeof onboardingRouteRoute
+    }
     '/(authenticated)/credit-cards/$accountId': {
       id: '/(authenticated)/credit-cards/$accountId'
       path: '/credit-cards/$accountId'
       fullPath: '/credit-cards/$accountId'
       preLoaderRoute: typeof authenticatedCreditCardsAccountIdRouteImport
       parentRoute: typeof authenticatedRouteRoute
+    }
+    '/(onboarding)/onboarding/setup': {
+      id: '/(onboarding)/onboarding/setup'
+      path: '/setup'
+      fullPath: '/onboarding/setup'
+      preLoaderRoute: typeof onboardingOnboardingSetupRouteImport
+      parentRoute: typeof onboardingOnboardingRoute
     }
   }
 }
@@ -376,11 +411,9 @@ const authRouteRouteWithChildren = authRouteRoute._addFileChildren(
 )
 
 interface authenticatedRouteRouteChildren {
-  authenticatedAcceptInvitationRoute: typeof authenticatedAcceptInvitationRoute
   authenticatedAccountsRoute: typeof authenticatedAccountsRoute
   authenticatedCategoriesRoute: typeof authenticatedCategoriesRoute
   authenticatedDashboardRoute: typeof authenticatedDashboardRoute
-  authenticatedOnboardingRoute: typeof authenticatedOnboardingRoute
   authenticatedOrganizationRoute: typeof authenticatedOrganizationRoute
   authenticatedSettingsRoute: typeof authenticatedSettingsRoute
   authenticatedTransactionsRoute: typeof authenticatedTransactionsRoute
@@ -388,11 +421,9 @@ interface authenticatedRouteRouteChildren {
 }
 
 const authenticatedRouteRouteChildren: authenticatedRouteRouteChildren = {
-  authenticatedAcceptInvitationRoute: authenticatedAcceptInvitationRoute,
   authenticatedAccountsRoute: authenticatedAccountsRoute,
   authenticatedCategoriesRoute: authenticatedCategoriesRoute,
   authenticatedDashboardRoute: authenticatedDashboardRoute,
-  authenticatedOnboardingRoute: authenticatedOnboardingRoute,
   authenticatedOrganizationRoute: authenticatedOrganizationRoute,
   authenticatedSettingsRoute: authenticatedSettingsRoute,
   authenticatedTransactionsRoute: authenticatedTransactionsRoute,
@@ -403,10 +434,36 @@ const authenticatedRouteRouteChildren: authenticatedRouteRouteChildren = {
 const authenticatedRouteRouteWithChildren =
   authenticatedRouteRoute._addFileChildren(authenticatedRouteRouteChildren)
 
+interface onboardingOnboardingRouteChildren {
+  onboardingOnboardingSetupRoute: typeof onboardingOnboardingSetupRoute
+}
+
+const onboardingOnboardingRouteChildren: onboardingOnboardingRouteChildren = {
+  onboardingOnboardingSetupRoute: onboardingOnboardingSetupRoute,
+}
+
+const onboardingOnboardingRouteWithChildren =
+  onboardingOnboardingRoute._addFileChildren(onboardingOnboardingRouteChildren)
+
+interface onboardingRouteRouteChildren {
+  onboardingAcceptInvitationRoute: typeof onboardingAcceptInvitationRoute
+  onboardingOnboardingRoute: typeof onboardingOnboardingRouteWithChildren
+}
+
+const onboardingRouteRouteChildren: onboardingRouteRouteChildren = {
+  onboardingAcceptInvitationRoute: onboardingAcceptInvitationRoute,
+  onboardingOnboardingRoute: onboardingOnboardingRouteWithChildren,
+}
+
+const onboardingRouteRouteWithChildren = onboardingRouteRoute._addFileChildren(
+  onboardingRouteRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   authRouteRoute: authRouteRouteWithChildren,
   authenticatedRouteRoute: authenticatedRouteRouteWithChildren,
+  onboardingRouteRoute: onboardingRouteRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

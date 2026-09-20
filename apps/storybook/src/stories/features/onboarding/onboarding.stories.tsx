@@ -1,0 +1,134 @@
+import { AccountFormFields } from '@features/accounts/components/forms/account-form'
+import type {
+  AccountFormInput,
+  AccountFormValues,
+} from '@features/accounts/hooks/use-create-account-form'
+import { accountFormSchema } from '@features/accounts/schemas/account-form'
+import {
+  OnboardingCompletion,
+  SetupReminder,
+  WorkspaceSettingsSetupFields,
+  type WorkspaceSetupInput,
+  workspaceSettingsSetupSchema,
+} from '@features/onboarding'
+import { zodResolver } from '@hookform/resolvers/zod'
+import type { Meta, StoryObj } from '@storybook/react-vite'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import type { ReactNode } from 'react'
+import { FormProvider, useForm } from 'react-hook-form'
+import { expect, within } from 'storybook/test'
+
+const settings = {
+  currency: 'BRL',
+  locale: 'pt-BR',
+  monthStartDay: 1,
+  organizationId: 'org_story',
+  timezone: 'America/Sao_Paulo',
+  updatedAt: null,
+  version: 0,
+  weekStartsOn: 'monday',
+} as const
+
+const withQueryState = (data: Record<string, unknown>) => (Story: () => ReactNode) => {
+  const queryClient = new QueryClient({ defaultOptions: { queries: { staleTime: Infinity } } })
+  for (const [key, value] of Object.entries(data)) queryClient.setQueryData(JSON.parse(key), value)
+  return (
+    <QueryClientProvider client={queryClient}>
+      <Story />
+    </QueryClientProvider>
+  )
+}
+
+function WorkspaceSettingsSetupFrame() {
+  const form = useForm<WorkspaceSetupInput>({
+    defaultValues: {
+      currency: settings.currency,
+      locale: settings.locale,
+      timezone: settings.timezone,
+      version: settings.version,
+    },
+    resolver: zodResolver(workspaceSettingsSetupSchema),
+  })
+
+  return (
+    <FormProvider {...form}>
+      <WorkspaceSettingsSetupFields onSubmit={form.handleSubmit(async () => undefined)} />
+    </FormProvider>
+  )
+}
+
+function FirstAccountForm() {
+  const form = useForm<AccountFormInput, unknown, AccountFormValues>({
+    defaultValues: { institution: null, kind: 'checking', name: '' },
+    resolver: zodResolver(accountFormSchema),
+  })
+
+  return (
+    <FormProvider {...form}>
+      <AccountFormFields onSubmit={form.handleSubmit(async () => undefined)} />
+    </FormProvider>
+  )
+}
+
+const meta = {
+  parameters: { layout: 'padded' },
+  tags: ['autodocs', 'storybook-test'],
+  title: 'Onboarding/FinancialSetup',
+} satisfies Meta
+
+export default meta
+
+type Story = StoryObj<typeof meta>
+
+export const WorkspaceSettings: Story = {
+  render: () => <WorkspaceSettingsSetupFrame />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    await expect(await canvas.findByLabelText('Moeda')).toBeTruthy()
+    await expect(await canvas.findByLabelText('Idioma e formato')).toBeTruthy()
+    await expect(await canvas.findByLabelText('Fuso horário')).toBeTruthy()
+  },
+}
+
+export const FirstAccount: Story = {
+  render: () => (
+    <div className='max-w-xl space-y-4'>
+      <h2 className='font-semibold text-xl'>Crie sua primeira conta</h2>
+      <FirstAccountForm />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    await expect(await canvas.findByLabelText('Nome')).toBeTruthy()
+    await expect(await canvas.findByLabelText('Tipo')).toBeTruthy()
+    await expect(await canvas.findByLabelText('Instituição (opcional)')).toBeTruthy()
+  },
+}
+
+export const Completion: Story = {
+  render: () => <OnboardingCompletion />,
+  play: async ({ canvasElement }) => {
+    await expect(await within(canvasElement).findByText('Configuração concluída')).toBeTruthy()
+  },
+}
+
+export const SkippedReminder: Story = {
+  decorators: [
+    withQueryState({
+      '["onboarding"]': {
+        complete: false,
+        dismissed: true,
+        eligible: true,
+        organizationId: 'org_story',
+        reminderVisible: true,
+        steps: { firstAccount: false, workspaceSettings: true },
+      },
+    }),
+  ],
+  render: () => <SetupReminder />,
+  play: async ({ canvasElement }) => {
+    await expect(
+      await within(canvasElement).findByText('Finalize sua configuração financeira'),
+    ).toBeTruthy()
+  },
+}

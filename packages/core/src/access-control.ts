@@ -34,6 +34,8 @@ export const requireFinancialWriteAccess = (
     ? err(forbiddenError('insufficient_role', 'A read-only member cannot make this change.'))
     : ok(true)
 
+export const requireFinancialOnboardingAccess = (role: WorkspaceRole): boolean => role === 'owner'
+
 const isOwnerOrAdmin = (role: WorkspaceRole): boolean => role === 'owner' || role === 'admin'
 
 /**

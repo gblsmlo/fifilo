@@ -1,5 +1,6 @@
 import type { AnalyticsSearch } from '@features/analytics'
 import { AnalyticsDashboard } from '@features/analytics'
+import { SetupReminder } from '@features/onboarding'
 import type { PublicOrganization, PublicUser } from '@fifilo/core/contracts/users'
 import { Badge } from '@fifilo/ui/components/badge'
 
@@ -27,6 +28,8 @@ export function DashboardPage({
           O painel de {organization.name} no período selecionado.
         </p>
       </div>
+
+      <SetupReminder />
 
       <AnalyticsDashboard onSearchChange={onSearchChange} search={search} />
     </section>

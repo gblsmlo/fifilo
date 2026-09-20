@@ -44,7 +44,7 @@ export function OrganizationOnboardingPage() {
     }
 
     await router.invalidate()
-    await router.navigate({ to: '/dashboard' })
+    await router.navigate({ to: '/onboarding/setup' })
   }
 
   return (

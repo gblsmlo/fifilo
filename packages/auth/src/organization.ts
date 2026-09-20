@@ -1,6 +1,12 @@
 import { generateId } from '@fifilo/core/primitives'
 import { db } from '@fifilo/infra-database/client'
-import { members, notificationOutbox, sessions } from '@fifilo/infra-database/schema'
+import {
+  financialOnboardingProgress,
+  members,
+  notificationOutbox,
+  sessions,
+} from '@fifilo/infra-database/schema'
+import { withActorWorkspaceTransaction } from '@fifilo/infra-database/workspace'
 import { serverEnv } from '@fifilo/infra-env/server'
 import { auditEvent } from '@fifilo/observability/runtime'
 import { APIError } from 'better-auth'
@@ -109,6 +115,24 @@ export const organizationOptions = {
     enabled: false,
   },
   organizationHooks: {
+    afterCreateOrganization: async ({ member, organization, user }) => {
+      await withActorWorkspaceTransaction(organization.id, user.id, async (tx) => {
+        await tx
+          .insert(financialOnboardingProgress)
+          .values({ organizationId: organization.id, userId: user.id })
+          .onConflictDoNothing({
+            target: [
+              financialOnboardingProgress.organizationId,
+              financialOnboardingProgress.userId,
+            ],
+          })
+      })
+      await auditOrganizationEvent('financial onboarding started', {
+        memberId: member.id,
+        organizationId: organization.id,
+        subjectUserId: user.id,
+      })
+    },
     afterAcceptInvitation: async ({ invitation, member, organization, user }) => {
       await auditOrganizationEvent('organization member joined', {
         invitationId: invitation.id,

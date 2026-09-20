@@ -538,6 +538,22 @@ export const userPreferences = pgTable(
   (table) => [primaryKey({ columns: [table.organizationId, table.userId] })],
 )
 
+export const financialOnboardingProgress = pgTable(
+  'financial_onboarding_progress',
+  {
+    organizationId: text('organization_id')
+      .notNull()
+      .references(() => organizations.id, { onDelete: 'cascade' }),
+    userId: text('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    dismissedAt: timestamp('dismissed_at', { withTimezone: true }),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [primaryKey({ columns: [table.organizationId, table.userId] })],
+)
+
 /**
  * One row per AI execution (Fase 07 § Persistência) - `kind` is a free-text
  * label Fase 08 onward gives meaning to (`chat`, `insight`, ...); this fase
@@ -807,6 +823,7 @@ export const databaseSchema = {
   creditCardDetails,
   entries,
   financialAccounts,
+  financialOnboardingProgress,
   idempotencyRecords,
   installmentPlans,
   messages,

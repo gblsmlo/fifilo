@@ -56,6 +56,8 @@ the successor exists; the successor adds its own row here.
 | 031 | [Anthropic API and OpenRouter ship together as the two initial adapters](031-anthropic-and-openrouter-ship-together.md) | active |
 | 032 | [level 3 and 4 personal data never reaches a model provider as plain text](032-personal-data-is-redacted-before-reaching-a-provider.md) | active |
 | 033 | [every AI execution carries a budget check, a kill-switch check and an audit trail](033-every-ai-run-has-budget-kill-switch-and-audit.md) | active |
+| 034 | [financial onboarding belongs to the creating owner](034-financial-onboarding-belongs-to-creating-owner.md) | active |
+| 035 | [onboarding uses a dedicated layout](035-onboarding-uses-dedicated-layout.md) | active |
 
 ## Historical
 

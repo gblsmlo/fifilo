@@ -1,6 +1,6 @@
 import { execFileSync } from 'node:child_process'
 import { hashPassword } from 'better-auth/crypto'
-import { expect, test } from '../helpers/app-test'
+import { expect, test, wrapPageWithHydrationWait } from '../helpers/app-test'
 
 /**
  * The full Fase 04 journey: owner invites → invitee accepts → sees the
@@ -68,8 +68,10 @@ test.describe('@organizations viewer role and promotion', () => {
     const dialog = page.getByRole('dialog', { name: 'Nova transação' })
     await dialog.getByLabel('Descrição').fill(expenseDescription)
     await dialog.getByLabel('Valor').fill('5000')
-    await dialog.getByLabel('Conta').selectOption({ label: accountName })
-    await dialog.getByLabel('Categoria').selectOption({ label: categoryName })
+    await dialog.getByLabel('Conta').click()
+    await page.getByRole('option', { name: accountName, exact: true }).click()
+    await dialog.getByLabel('Categoria').click()
+    await page.getByRole('option', { name: categoryName, exact: true }).click()
     await dialog.getByRole('button', { name: 'Registrar despesa' }).click()
     await expect(page.getByText(expenseDescription)).toBeVisible()
 
@@ -78,7 +80,8 @@ test.describe('@organizations viewer role and promotion', () => {
     await page.getByLabel('Email').fill(invitedEmail)
     // Exact: a leftover member row from an earlier run has its own
     // `aria-label="Papel de <name>"`, which substring-matches "Papel" too.
-    await page.getByLabel('Papel', { exact: true }).selectOption('viewer')
+    await page.getByLabel('Papel', { exact: true }).click()
+    await page.getByRole('option', { name: 'Somente leitura', exact: true }).click()
     await page.getByRole('button', { name: 'Enviar convite' }).click()
     await expect(page.getByText('Convite registrado para envio.')).toBeVisible()
 
@@ -101,27 +104,23 @@ test.describe('@organizations viewer role and promotion', () => {
     )
 
     const invitee = await browser.newContext()
-    const inviteePage = await invitee.newPage()
+    const inviteePage = wrapPageWithHydrationWait(await invitee.newPage())
 
     const signInResponse = await inviteePage.request.post('/api/auth/sign-in/email', {
       data: { email: invitedEmail, password: invitedPassword, rememberMe: true },
     })
     expect(signInResponse.ok()).toBe(true)
 
-    // The accept-invitation page itself (its button, its client-side
-    // navigation to `/dashboard`) is Fase 00 territory, already in place
-    // before this phase and not what it changed; calling the same endpoint
-    // `AcceptInvitationPage` calls, directly, keeps this journey's setup
-    // fast and focused on what Fase 04 actually adds - the role check that
-    // follows.
-    const acceptResponse = await inviteePage.request.post(
-      '/api/auth/organization/accept-invitation',
-      { data: { invitationId } },
-    )
-    expect(acceptResponse.ok()).toBe(true)
+    await inviteePage.goto(`/accept-invitation?invitationId=${invitationId}`)
+    await expect(inviteePage.locator('[data-slot="sidebar"]')).toHaveCount(0)
+    await expect(inviteePage.getByRole('button', { name: 'Alternar sidebar' })).toHaveCount(0)
+    await inviteePage.getByRole('button', { name: 'Aceitar convite' }).click()
+    await expect(inviteePage).toHaveURL(/\/dashboard/)
 
     await inviteePage.goto('/dashboard')
     await expect(inviteePage.getByText(`E2E Invitee ${stamp}`)).toBeVisible()
+    const onboardingStatus = await inviteePage.request.get('/api/onboarding')
+    expect((await onboardingStatus.json()).eligible).toBe(false)
 
     // Read access: the viewer sees the owner's transaction.
     await inviteePage.goto('/transactions')
@@ -132,18 +131,21 @@ test.describe('@organizations viewer role and promotion', () => {
     const inviteeDialog = inviteePage.getByRole('dialog', { name: 'Nova transação' })
     await inviteeDialog.getByLabel('Descrição').fill(blockedDescription)
     await inviteeDialog.getByLabel('Valor').fill('1000')
-    await inviteeDialog.getByLabel('Conta').selectOption({ label: accountName })
-    await inviteeDialog.getByLabel('Categoria').selectOption({ label: categoryName })
+    await inviteeDialog.getByLabel('Conta').click()
+    await inviteePage.getByRole('option', { name: accountName, exact: true }).click()
+    await inviteeDialog.getByLabel('Categoria').click()
+    await inviteePage.getByRole('option', { name: categoryName, exact: true }).click()
     await inviteeDialog.getByRole('button', { name: 'Registrar despesa' }).click()
     await expect(inviteePage.getByText('Falha ao registrar transação')).toBeVisible()
     await expect(inviteePage.getByText(blockedDescription)).toHaveCount(0)
 
     // The owner promotes the invitee to member.
     await page.goto('/organization')
-    await page.getByLabel(`Papel de E2E Invitee ${stamp}`).selectOption('member')
+    await page.getByLabel(`Papel de E2E Invitee ${stamp}`).click()
+    await page.getByRole('option', { name: 'Membro', exact: true }).click()
     // `changeRole`'s own `loadMembers()` refetch is the confirmation the
     // request actually completed, not just that the select's value changed.
-    await expect(page.getByLabel(`Papel de E2E Invitee ${stamp}`)).toHaveValue('member')
+    await expect(page.getByLabel(`Papel de E2E Invitee ${stamp}`)).toContainText('Membro')
 
     // Now the same invitee can create one. A fresh navigation, not a
     // reload: `resolveSessionActorContext` reads `members.role` fresh on
@@ -157,8 +159,10 @@ test.describe('@organizations viewer role and promotion', () => {
     const promotedDialog = inviteePage.getByRole('dialog', { name: 'Nova transação' })
     await promotedDialog.getByLabel('Descrição').fill(allowedDescription)
     await promotedDialog.getByLabel('Valor').fill('1000')
-    await promotedDialog.getByLabel('Conta').selectOption({ label: accountName })
-    await promotedDialog.getByLabel('Categoria').selectOption({ label: categoryName })
+    await promotedDialog.getByLabel('Conta').click()
+    await inviteePage.getByRole('option', { name: accountName, exact: true }).click()
+    await promotedDialog.getByLabel('Categoria').click()
+    await inviteePage.getByRole('option', { name: categoryName, exact: true }).click()
     await promotedDialog.getByRole('button', { name: 'Registrar despesa' }).click()
     await expect(inviteePage.getByText(allowedDescription)).toBeVisible()
 

@@ -56,7 +56,8 @@ test.describe('@analytics dashboard', () => {
     // Decision 022: a category has a fixed kind, so income needs its own
     // category - it cannot reuse the expense one above.
     await page.getByLabel('Nome').fill(incomeCategoryName)
-    await page.getByLabel('Tipo').selectOption('income')
+    await page.getByLabel('Tipo').click()
+    await page.getByRole('option', { name: 'Receita', exact: true }).click()
     await page.getByRole('button', { name: 'Criar categoria' }).click()
     await expect(
       page.locator('[data-slot="card-title"]', { hasText: incomeCategoryName }),
@@ -75,11 +76,14 @@ test.describe('@analytics dashboard', () => {
       await page.getByRole('button', { name: 'Nova transação' }).click()
       await expect(dialog).toBeVisible()
       await dialog.getByRole('tab', { name: 'Receita' }).click()
-      await dialog.getByLabel('Descrição').fill(`E2E Receita ${stamp} ${occurredOn}`)
-      await dialog.getByLabel('Valor').fill(amountMinor)
-      await dialog.getByLabel('Conta').selectOption({ label: checkingName })
-      await dialog.getByLabel('Categoria').selectOption({ label: incomeCategoryName })
-      await dialog.getByLabel('Data').fill(occurredOn)
+      const incomePanel = dialog.getByRole('tabpanel', { name: 'Receita' })
+      await incomePanel.getByLabel('Descrição').fill(`E2E Receita ${stamp} ${occurredOn}`)
+      await incomePanel.getByLabel('Valor').fill(amountMinor)
+      await incomePanel.getByLabel('Conta').click()
+      await page.getByRole('option', { name: checkingName, exact: true }).click()
+      await incomePanel.getByLabel('Categoria').click()
+      await page.getByRole('option', { name: incomeCategoryName, exact: true }).click()
+      await incomePanel.getByLabel('Data').fill(occurredOn)
       await dialog.getByRole('button', { name: 'Registrar receita' }).click()
       await expect(dialog).toBeHidden()
     }
@@ -91,11 +95,14 @@ test.describe('@analytics dashboard', () => {
       // never unmounts between opens, so a prior `registerIncome` call
       // leaves its tab selected the next time this one opens.
       await dialog.getByRole('tab', { name: 'Despesa' }).click()
-      await dialog.getByLabel('Descrição').fill(`E2E Despesa ${stamp} ${occurredOn}`)
-      await dialog.getByLabel('Valor').fill(amountMinor)
-      await dialog.getByLabel('Conta').selectOption({ label: checkingName })
-      await dialog.getByLabel('Categoria').selectOption({ label: categoryName })
-      await dialog.getByLabel('Data').fill(occurredOn)
+      const expensePanel = dialog.getByRole('tabpanel', { name: 'Despesa' })
+      await expensePanel.getByLabel('Descrição').fill(`E2E Despesa ${stamp} ${occurredOn}`)
+      await expensePanel.getByLabel('Valor').fill(amountMinor)
+      await expensePanel.getByLabel('Conta').click()
+      await page.getByRole('option', { name: checkingName, exact: true }).click()
+      await expensePanel.getByLabel('Categoria').click()
+      await page.getByRole('option', { name: categoryName, exact: true }).click()
+      await expensePanel.getByLabel('Data').fill(occurredOn)
       await dialog.getByRole('button', { name: 'Registrar despesa' }).click()
       await expect(dialog).toBeHidden()
     }

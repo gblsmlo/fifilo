@@ -61,7 +61,11 @@ export function WorkspaceSettingsForm({
               render={({ field }) => (
                 <Select disabled={!canEdit} onValueChange={field.onChange} value={field.value}>
                   <SelectTrigger aria-label='Moeda'>
-                    <SelectValue placeholder='Selecione a moeda' />
+                    <SelectValue placeholder='Selecione a moeda'>
+                      {(value) =>
+                        CURRENCY_OPTIONS.find((option) => option.value === value)?.label ?? value
+                      }
+                    </SelectValue>
                   </SelectTrigger>
                   <SelectPopup>
                     {CURRENCY_OPTIONS.map((option) => (
@@ -129,7 +133,11 @@ export function WorkspaceSettingsForm({
               render={({ field }) => (
                 <Select disabled={!canEdit} onValueChange={field.onChange} value={field.value}>
                   <SelectTrigger aria-label='Início da semana'>
-                    <SelectValue placeholder='Selecione' />
+                    <SelectValue placeholder='Selecione'>
+                      {(value) =>
+                        WEEK_START_OPTIONS.find((option) => option.value === value)?.label ?? value
+                      }
+                    </SelectValue>
                   </SelectTrigger>
                   <SelectPopup>
                     {WEEK_START_OPTIONS.map((option) => (

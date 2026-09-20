@@ -1,10 +1,17 @@
 import type { InstallmentShare } from '@fifilo/core/credit-cards'
 import type { CurrencyCode } from '@fifilo/core/primitives'
 import { Button } from '@fifilo/ui/components/button'
-import { Field, FieldControl, FieldError, FieldLabel } from '@fifilo/ui/components/field'
+import { Field, FieldError, FieldLabel } from '@fifilo/ui/components/field'
 import { Form } from '@fifilo/ui/components/form'
 import { Input } from '@fifilo/ui/components/input'
 import { MoneyInput } from '@fifilo/ui/components/money-input'
+import {
+  Select,
+  SelectItem,
+  SelectPopup,
+  SelectTrigger,
+  SelectValue,
+} from '@fifilo/ui/components/select'
 import { formatMoney } from '@libs/format-money'
 import { Controller, FormProvider, useFormContext } from 'react-hook-form'
 
@@ -17,9 +24,6 @@ interface SelectOption {
   id: string
   name: string
 }
-
-const selectClassName =
-  'h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50'
 
 interface InstallmentPurchaseFormProps {
   accountId: string
@@ -81,17 +85,27 @@ export function InstallmentPurchaseFormFields({
 
       <Field invalid={Boolean(errors.categoryId)} name='categoryId'>
         <FieldLabel>Categoria</FieldLabel>
-        <FieldControl
-          render={
-            <select {...register('categoryId')} className={selectClassName}>
-              <option value=''>Selecione uma categoria</option>
-              {categoryOptions.map((category) => (
-                <option key={category.id} value={category.id}>
-                  {category.name}
-                </option>
-              ))}
-            </select>
-          }
+        <Controller
+          control={control}
+          name='categoryId'
+          render={({ field }) => (
+            <Select onValueChange={field.onChange} value={field.value}>
+              <SelectTrigger aria-label='Categoria'>
+                <SelectValue placeholder='Selecione uma categoria'>
+                  {(value) =>
+                    categoryOptions.find((category) => category.id === value)?.name ?? value
+                  }
+                </SelectValue>
+              </SelectTrigger>
+              <SelectPopup>
+                {categoryOptions.map((category) => (
+                  <SelectItem key={category.id} value={category.id}>
+                    {category.name}
+                  </SelectItem>
+                ))}
+              </SelectPopup>
+            </Select>
+          )}
         />
         <FieldError>{errors.categoryId?.message}</FieldError>
       </Field>

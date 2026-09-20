@@ -37,6 +37,13 @@ async function signUpAndCreateOrganization(page: Page, name: string): Promise<vo
   await page.getByRole('textbox', { exact: true, name: 'Nome' }).fill(name)
   await page.getByRole('textbox', { exact: true, name: 'Slug' }).fill(slug)
   await page.getByRole('button', { name: 'Criar organização' }).click()
+  await expect(page).toHaveURL(/\/onboarding\/setup$/)
+  await page.getByRole('button', { name: 'Continuar' }).click()
+  await expect(page.getByText('Crie sua primeira conta')).toBeVisible()
+  await page.getByLabel('Nome').fill('Conta de teste')
+  await page.getByRole('button', { name: 'Criar conta' }).click()
+  await expect(page.getByText('Configuração concluída')).toBeVisible()
+  await page.getByRole('link', { name: 'Ir para o painel' }).click()
   await expect(page).toHaveURL(/\/dashboard/)
 }
 

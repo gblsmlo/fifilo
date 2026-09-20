@@ -3,14 +3,15 @@ import type { PublicOrganization } from '@fifilo/core/contracts/users'
 import { Badge } from '@fifilo/ui/components/badge'
 import { Button } from '@fifilo/ui/components/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@fifilo/ui/components/card'
-import {
-  Field,
-  FieldControl,
-  FieldDescription,
-  FieldError,
-  FieldLabel,
-} from '@fifilo/ui/components/field'
+import { Field, FieldDescription, FieldError, FieldLabel } from '@fifilo/ui/components/field'
 import { Input } from '@fifilo/ui/components/input'
+import {
+  Select,
+  SelectItem,
+  SelectPopup,
+  SelectTrigger,
+  SelectValue,
+} from '@fifilo/ui/components/select'
 import { useRouter } from '@tanstack/react-router'
 import { type FormEvent, useEffect, useState } from 'react'
 
@@ -28,9 +29,6 @@ const ROLE_LABELS: Record<string, string> = {
   owner: 'Dono',
   viewer: 'Somente leitura',
 }
-
-const selectClassName =
-  'h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50'
 
 interface Member {
   id: string
@@ -107,6 +105,8 @@ export function OrganizationPage({ organization, role }: Readonly<OrganizationPa
     loadMembers()
   }
 
+  const availableOrganizations = organizations.length > 0 ? organizations : [organization]
+
   return (
     <section className='mx-auto flex w-full max-w-3xl flex-col gap-6 p-6'>
       <div className='space-y-2'>
@@ -122,22 +122,28 @@ export function OrganizationPage({ organization, role }: Readonly<OrganizationPa
         <CardContent>
           <Field name='active-organization'>
             <FieldLabel>Workspace ativo</FieldLabel>
-            <FieldControl
-              render={
-                <select
-                  className={selectClassName}
-                  disabled={isPending}
-                  onChange={(event) => switchOrganization(event.target.value)}
-                  value={organization.id}
-                >
-                  {(organizations.length > 0 ? organizations : [organization]).map((item) => (
-                    <option key={item.id} value={item.id}>
-                      {item.name}
-                    </option>
-                  ))}
-                </select>
-              }
-            />
+            <Select
+              disabled={isPending}
+              onValueChange={(value) => {
+                if (value) void switchOrganization(value)
+              }}
+              value={organization.id}
+            >
+              <SelectTrigger aria-label='Workspace ativo'>
+                <SelectValue>
+                  {(value) =>
+                    availableOrganizations.find((item) => item.id === value)?.name ?? value
+                  }
+                </SelectValue>
+              </SelectTrigger>
+              <SelectPopup>
+                {availableOrganizations.map((item) => (
+                  <SelectItem key={item.id} value={item.id}>
+                    {item.name}
+                  </SelectItem>
+                ))}
+              </SelectPopup>
+            </Select>
           </Field>
         </CardContent>
       </Card>
@@ -161,24 +167,31 @@ export function OrganizationPage({ organization, role }: Readonly<OrganizationPa
                     <Badge variant='secondary'>{ROLE_LABELS.owner}</Badge>
                   ) : (
                     <div className='flex items-center gap-2'>
-                      <select
-                        aria-label={`Papel de ${member.user.name}`}
-                        className={selectClassName}
+                      <Select
                         disabled={!canManageMembers}
-                        onChange={(event) =>
-                          changeRole(member.id, event.target.value as InvitableRole)
-                        }
-                        title={
-                          canManageMembers ? undefined : 'Somente owner e admin trocam papéis.'
-                        }
+                        onValueChange={(value) => {
+                          if (value) void changeRole(member.id, value as InvitableRole)
+                        }}
                         value={member.role}
                       >
-                        {INVITABLE_ROLES.map((option) => (
-                          <option key={option} value={option}>
-                            {ROLE_LABELS[option]}
-                          </option>
-                        ))}
-                      </select>
+                        <SelectTrigger
+                          aria-label={`Papel de ${member.user.name}`}
+                          title={
+                            canManageMembers ? undefined : 'Somente owner e admin trocam papéis.'
+                          }
+                        >
+                          <SelectValue>
+                            {(value) => ROLE_LABELS[String(value)] ?? value}
+                          </SelectValue>
+                        </SelectTrigger>
+                        <SelectPopup>
+                          {INVITABLE_ROLES.map((option) => (
+                            <SelectItem key={option} value={option}>
+                              {ROLE_LABELS[option]}
+                            </SelectItem>
+                          ))}
+                        </SelectPopup>
+                      </Select>
                       <Button
                         disabled={!canManageMembers}
                         onClick={() => removeMember(member.id)}
@@ -222,21 +235,23 @@ export function OrganizationPage({ organization, role }: Readonly<OrganizationPa
               </Field>
               <Field name='member-role'>
                 <FieldLabel>Papel</FieldLabel>
-                <FieldControl
-                  render={
-                    <select
-                      className={selectClassName}
-                      onChange={(event) => setInviteRole(event.target.value as InvitableRole)}
-                      value={inviteRole}
-                    >
-                      {INVITABLE_ROLES.map((option) => (
-                        <option key={option} value={option}>
-                          {ROLE_LABELS[option]}
-                        </option>
-                      ))}
-                    </select>
-                  }
-                />
+                <Select
+                  onValueChange={(value) => {
+                    if (value) setInviteRole(value as InvitableRole)
+                  }}
+                  value={inviteRole}
+                >
+                  <SelectTrigger aria-label='Papel'>
+                    <SelectValue>{(value) => ROLE_LABELS[String(value)] ?? value}</SelectValue>
+                  </SelectTrigger>
+                  <SelectPopup>
+                    {INVITABLE_ROLES.map((option) => (
+                      <SelectItem key={option} value={option}>
+                        {ROLE_LABELS[option]}
+                      </SelectItem>
+                    ))}
+                  </SelectPopup>
+                </Select>
                 <FieldDescription>
                   Somente leitura não pode criar nem editar dados.
                 </FieldDescription>

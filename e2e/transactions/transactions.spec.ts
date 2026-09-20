@@ -22,7 +22,8 @@ test.describe('@transactions categories and transactions', () => {
     await expect(page.locator('[data-slot="card"]', { hasText: checkingName })).toBeVisible()
 
     await page.getByLabel('Nome').fill(walletName)
-    await page.getByLabel('Tipo').selectOption('wallet')
+    await page.getByRole('combobox', { name: 'Tipo' }).click()
+    await page.getByRole('option', { name: 'Carteira' }).click()
     await page.getByRole('button', { name: 'Criar conta' }).click()
     await expect(page.locator('[data-slot="card"]', { hasText: walletName })).toBeVisible()
 
@@ -42,8 +43,10 @@ test.describe('@transactions categories and transactions', () => {
     // Despesa is the dialog's default tab.
     await dialog.getByLabel('Descrição').fill(expenseDescription)
     await dialog.getByLabel('Valor').fill('5000')
-    await dialog.getByLabel('Conta').selectOption({ label: checkingName })
-    await dialog.getByLabel('Categoria').selectOption({ label: categoryName })
+    await dialog.getByLabel('Conta').click()
+    await page.getByRole('option', { name: checkingName, exact: true }).click()
+    await dialog.getByLabel('Categoria').click()
+    await page.getByRole('option', { name: categoryName, exact: true }).click()
     await dialog.getByRole('button', { name: 'Registrar despesa' }).click()
 
     await expect(dialog).toBeHidden()
@@ -54,8 +57,10 @@ test.describe('@transactions categories and transactions', () => {
 
     await dialog.getByLabel('Descrição').fill(transferDescription)
     await dialog.getByLabel('Valor').fill('2000')
-    await dialog.getByLabel('Conta de origem').selectOption({ label: checkingName })
-    await dialog.getByLabel('Conta de destino').selectOption({ label: walletName })
+    await dialog.getByLabel('Conta de origem').click()
+    await page.getByRole('option', { name: checkingName, exact: true }).click()
+    await dialog.getByLabel('Conta de destino').click()
+    await page.getByRole('option', { name: walletName, exact: true }).click()
     await dialog.getByRole('button', { name: 'Transferir' }).click()
 
     await expect(dialog).toBeHidden()

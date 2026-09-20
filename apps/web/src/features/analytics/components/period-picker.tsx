@@ -1,5 +1,4 @@
-const inputClassName =
-  'h-9 rounded-md border border-input bg-transparent px-3 text-sm outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50'
+import { Input } from '@fifilo/ui/components/input'
 
 interface PeriodPickerProps {
   from: string
@@ -10,19 +9,19 @@ interface PeriodPickerProps {
 export function PeriodPicker({ from, onChange, to }: Readonly<PeriodPickerProps>) {
   return (
     <form className='flex flex-wrap items-end gap-3' onSubmit={(event) => event.preventDefault()}>
-      <label className='flex flex-col gap-1 text-sm'>
-        De
-        <input
-          className={inputClassName}
+      <label className='flex flex-col gap-1 text-sm' htmlFor='analytics-from'>
+        <span>De</span>
+        <Input
+          id='analytics-from'
           onChange={(event) => onChange({ from: event.target.value || undefined })}
           type='date'
           value={from}
         />
       </label>
-      <label className='flex flex-col gap-1 text-sm'>
-        Até
-        <input
-          className={inputClassName}
+      <label className='flex flex-col gap-1 text-sm' htmlFor='analytics-to'>
+        <span>Até</span>
+        <Input
+          id='analytics-to'
           onChange={(event) => onChange({ to: event.target.value || undefined })}
           type='date'
           value={to}

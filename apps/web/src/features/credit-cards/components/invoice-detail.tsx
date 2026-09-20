@@ -4,6 +4,13 @@ import { StateSurface } from '@fifilo/patterns/state-surface'
 import { Badge } from '@fifilo/ui/components/badge'
 import { Button } from '@fifilo/ui/components/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@fifilo/ui/components/card'
+import {
+  Select,
+  SelectItem,
+  SelectPopup,
+  SelectTrigger,
+  SelectValue,
+} from '@fifilo/ui/components/select'
 import { formatMoney } from '@libs/format-money'
 import { useState } from 'react'
 
@@ -109,19 +116,31 @@ export function InvoiceDetail({
             ) : null}
             {invoice.status === 'closed' || invoice.status === 'overdue' ? (
               <>
-                <select
-                  aria-label='Pagar com'
-                  className='h-9 rounded-md border border-input bg-transparent px-3 text-sm'
-                  onChange={(event) => setPayFromAccountId(event.target.value)}
-                  value={payFromAccountId}
+                <Select
+                  onValueChange={(value) =>
+                    setPayFromAccountId(value === 'none' ? '' : (value ?? ''))
+                  }
+                  value={payFromAccountId || 'none'}
                 >
-                  <option value=''>Pagar com…</option>
-                  {payFromAccountOptions.map((account) => (
-                    <option key={account.id} value={account.id}>
-                      {account.name}
-                    </option>
-                  ))}
-                </select>
+                  <SelectTrigger aria-label='Pagar com'>
+                    <SelectValue placeholder='Pagar com…'>
+                      {(value) =>
+                        value === 'none'
+                          ? 'Pagar com…'
+                          : (payFromAccountOptions.find((account) => account.id === value)?.name ??
+                            value)
+                      }
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectPopup>
+                    <SelectItem value='none'>Pagar com…</SelectItem>
+                    {payFromAccountOptions.map((account) => (
+                      <SelectItem key={account.id} value={account.id}>
+                        {account.name}
+                      </SelectItem>
+                    ))}
+                  </SelectPopup>
+                </Select>
                 <Button
                   disabled={!payFromAccountId}
                   loading={isPaying}

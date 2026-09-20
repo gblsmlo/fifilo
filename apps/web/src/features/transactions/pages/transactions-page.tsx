@@ -3,6 +3,14 @@ import { categoriesQueryOptions } from '@features/categories'
 import { workspaceSettingsQueryOptions } from '@features/settings'
 import type { TransactionsPageResponse } from '@fifilo/core/transactions'
 import { Button } from '@fifilo/ui/components/button'
+import { Input } from '@fifilo/ui/components/input'
+import {
+  Select,
+  SelectItem,
+  SelectPopup,
+  SelectTrigger,
+  SelectValue,
+} from '@fifilo/ui/components/select'
 import { Spinner } from '@fifilo/ui/components/spinner'
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
@@ -13,9 +21,6 @@ import { TransactionRequestError } from '../http/errors'
 import { transactionsQueryOptions } from '../query-options'
 import { DEFAULT_WORKSPACE_TIMEZONE, resolveThisMonthRange } from '../resolve-this-month'
 import type { TransactionsSearch } from '../route-search'
-
-const selectClassName =
-  'h-9 rounded-md border border-input bg-transparent px-3 text-sm outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50'
 
 const KIND_OPTIONS = [
   { label: 'Todos os tipos', value: '' },
@@ -77,10 +82,10 @@ export function TransactionsPage({ onSearchChange, search }: Readonly<Transactio
       </div>
 
       <form className='flex flex-wrap items-end gap-3' onSubmit={(event) => event.preventDefault()}>
-        <label className='flex flex-col gap-1 text-sm'>
-          De
-          <input
-            className={selectClassName}
+        <label className='flex flex-col gap-1 text-sm' htmlFor='transactions-from'>
+          <span>De</span>
+          <Input
+            id='transactions-from'
             onChange={(event) =>
               onSearchChange({ ...search, from: event.target.value || undefined })
             }
@@ -88,34 +93,42 @@ export function TransactionsPage({ onSearchChange, search }: Readonly<Transactio
             value={from}
           />
         </label>
-        <label className='flex flex-col gap-1 text-sm'>
-          Até
-          <input
-            className={selectClassName}
+        <label className='flex flex-col gap-1 text-sm' htmlFor='transactions-to'>
+          <span>Até</span>
+          <Input
+            id='transactions-to'
             onChange={(event) => onSearchChange({ ...search, to: event.target.value || undefined })}
             type='date'
             value={to}
           />
         </label>
-        <label className='flex flex-col gap-1 text-sm'>
-          Tipo
-          <select
-            className={selectClassName}
-            onChange={(event) =>
+        <div className='flex flex-col gap-1 text-sm'>
+          <span>Tipo</span>
+          <Select
+            onValueChange={(value) =>
               onSearchChange({
                 ...search,
-                kind: (event.target.value || undefined) as TransactionsSearch['kind'],
+                kind: (value === 'none' ? undefined : value) as TransactionsSearch['kind'],
               })
             }
-            value={search.kind ?? ''}
+            value={search.kind ?? 'none'}
           >
-            {KIND_OPTIONS.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-        </label>
+            <SelectTrigger aria-label='Tipo'>
+              <SelectValue placeholder='Todos os tipos'>
+                {(value) =>
+                  KIND_OPTIONS.find((option) => (option.value || 'none') === value)?.label ?? value
+                }
+              </SelectValue>
+            </SelectTrigger>
+            <SelectPopup>
+              {KIND_OPTIONS.map((option) => (
+                <SelectItem key={option.value || 'none'} value={option.value || 'none'}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectPopup>
+          </Select>
+        </div>
       </form>
 
       {transactionsQuery.isPending ? (

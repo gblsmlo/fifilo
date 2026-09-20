@@ -1,8 +1,15 @@
 import { Button } from '@fifilo/ui/components/button'
-import { Field, FieldControl, FieldError, FieldLabel } from '@fifilo/ui/components/field'
+import { Field, FieldError, FieldLabel } from '@fifilo/ui/components/field'
 import { Form } from '@fifilo/ui/components/form'
 import { Input } from '@fifilo/ui/components/input'
-import { FormProvider, useFormContext } from 'react-hook-form'
+import {
+  Select,
+  SelectItem,
+  SelectPopup,
+  SelectTrigger,
+  SelectValue,
+} from '@fifilo/ui/components/select'
+import { Controller, FormProvider, useFormContext } from 'react-hook-form'
 
 import { type AccountFormInput, useCreateAccountForm } from '../../hooks/use-create-account-form'
 
@@ -34,6 +41,7 @@ interface AccountFormFieldsProps {
 
 export function AccountFormFields({ onSubmit }: Readonly<AccountFormFieldsProps>) {
   const {
+    control,
     formState: { errors, isSubmitting },
     register,
   } = useFormContext<AccountFormInput>()
@@ -48,19 +56,25 @@ export function AccountFormFields({ onSubmit }: Readonly<AccountFormFieldsProps>
 
       <Field invalid={Boolean(errors.kind)} name='kind'>
         <FieldLabel>Tipo</FieldLabel>
-        <FieldControl
-          render={
-            <select
-              {...register('kind')}
-              className='h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50'
-            >
-              {Object.entries(ACCOUNT_KIND_LABELS).map(([value, label]) => (
-                <option key={value} value={value}>
-                  {label}
-                </option>
-              ))}
-            </select>
-          }
+        <Controller
+          control={control}
+          name='kind'
+          render={({ field }) => (
+            <Select onValueChange={field.onChange} value={field.value}>
+              <SelectTrigger aria-label='Tipo'>
+                <SelectValue placeholder='Selecione o tipo'>
+                  {(value) => ACCOUNT_KIND_LABELS[value as AccountFormInput['kind']] ?? value}
+                </SelectValue>
+              </SelectTrigger>
+              <SelectPopup>
+                {Object.entries(ACCOUNT_KIND_LABELS).map(([value, label]) => (
+                  <SelectItem key={value} value={value}>
+                    {label}
+                  </SelectItem>
+                ))}
+              </SelectPopup>
+            </Select>
+          )}
         />
         <FieldError>{errors.kind?.message}</FieldError>
       </Field>

@@ -1,6 +1,15 @@
 import { errorCodeToSurfaceKind } from '@fifilo/patterns/state-kinds'
 import { StateSurface } from '@fifilo/patterns/state-surface'
 import { Card, CardContent, CardHeader, CardTitle } from '@fifilo/ui/components/card'
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@fifilo/ui/components/table'
 import { formatMoney } from '@libs/format-money'
 import { useQuery } from '@tanstack/react-query'
 import { queryErrorMessage } from '../guard-state'
@@ -48,27 +57,29 @@ export function TopExpensesSection({ from, to }: Readonly<{ from: string; to: st
         ) : null}
 
         {!query.isPending && !query.isError && query.data.length > 0 ? (
-          <table className='w-full text-sm'>
-            <caption className='sr-only'>Maiores gastos do período</caption>
-            <thead>
-              <tr className='text-left text-muted-foreground'>
-                <th scope='col'>Descrição</th>
-                <th scope='col'>Categoria</th>
-                <th scope='col'>Data</th>
-                <th scope='col'>Valor</th>
-              </tr>
-            </thead>
-            <tbody>
+          <Table>
+            <TableCaption className='sr-only'>Maiores gastos do período</TableCaption>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Descrição</TableHead>
+                <TableHead>Categoria</TableHead>
+                <TableHead>Data</TableHead>
+                <TableHead>Valor</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {query.data.map((row) => (
-                <tr className='border-t' key={row.transactionId}>
-                  <td className='py-2'>{row.description}</td>
-                  <td>{row.categoryName ?? '—'}</td>
-                  <td>{row.occurredOn}</td>
-                  <td>{formatMoney({ amountMinor: row.amountMinor, currency: 'BRL' })}</td>
-                </tr>
+                <TableRow key={row.transactionId}>
+                  <TableCell>{row.description}</TableCell>
+                  <TableCell>{row.categoryName ?? '—'}</TableCell>
+                  <TableCell>{row.occurredOn}</TableCell>
+                  <TableCell>
+                    {formatMoney({ amountMinor: row.amountMinor, currency: 'BRL' })}
+                  </TableCell>
+                </TableRow>
               ))}
-            </tbody>
-          </table>
+            </TableBody>
+          </Table>
         ) : null}
       </CardContent>
     </Card>

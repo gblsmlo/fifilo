@@ -23,7 +23,8 @@ test.describe('@credit-cards credit card and invoice', () => {
     await expect(page.locator('[data-slot="card"]', { hasText: checkingName })).toBeVisible()
 
     await page.getByLabel('Nome').fill(cardName)
-    await page.getByLabel('Tipo').selectOption('credit_card')
+    await page.getByRole('combobox', { name: 'Tipo' }).click()
+    await page.getByRole('option', { name: 'Cartão de crédito' }).click()
     await page.getByRole('button', { name: 'Criar conta' }).click()
     const cardAccountRow = page.locator('[data-slot="card"]', { hasText: cardName })
     await expect(cardAccountRow).toBeVisible()
@@ -47,7 +48,8 @@ test.describe('@credit-cards credit card and invoice', () => {
     await expect(page.getByTestId('available-limit')).toBeVisible()
 
     await page.getByLabel('Descrição', { exact: true }).fill(purchaseDescription)
-    await page.getByLabel('Categoria', { exact: true }).selectOption({ label: categoryName })
+    await page.getByLabel('Categoria', { exact: true }).click()
+    await page.getByRole('option', { name: categoryName, exact: true }).click()
     await page.getByLabel('Valor total').fill('30000')
     await page.getByLabel('Número de parcelas').fill('3')
     await page.getByLabel('Data da compra').fill(today)
@@ -69,7 +71,8 @@ test.describe('@credit-cards credit card and invoice', () => {
     await page.getByRole('button', { name: 'Fechar fatura' }).click()
     await expect(page.getByRole('button', { name: 'Pagar fatura' })).toBeVisible()
 
-    await page.getByLabel('Pagar com').selectOption({ label: checkingName })
+    await page.getByLabel('Pagar com').click()
+    await page.getByRole('option', { name: checkingName, exact: true }).click()
     await page.getByRole('button', { name: 'Pagar fatura' }).click()
 
     await expect(page.getByTestId('available-limit')).toContainText('4.900,00')

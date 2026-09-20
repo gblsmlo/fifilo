@@ -5,6 +5,13 @@ import { StateSurface } from '@fifilo/patterns/state-surface'
 import { Badge } from '@fifilo/ui/components/badge'
 import { Button } from '@fifilo/ui/components/button'
 import { Card, CardHeader, CardTitle } from '@fifilo/ui/components/card'
+import {
+  Select,
+  SelectItem,
+  SelectPopup,
+  SelectTrigger,
+  SelectValue,
+} from '@fifilo/ui/components/select'
 import { useState } from 'react'
 
 const CATEGORY_KIND_LABELS: Record<CategoryResponse['kind'], string> = {
@@ -139,18 +146,28 @@ export function CategoryList({
             <p className='text-sm'>
               Esta categoria tem transações. Escolha para onde movê-las antes de arquivar.
             </p>
-            <select
-              className='h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50'
-              onChange={(event) => setTargetCategoryId(event.target.value)}
-              value={targetCategoryId}
+            <Select
+              onValueChange={(value) => setTargetCategoryId(value === 'none' ? '' : (value ?? ''))}
+              value={targetCategoryId || 'none'}
             >
-              <option value=''>Selecione uma categoria</option>
-              {targetOptions.map((category) => (
-                <option key={category.id} value={category.id}>
-                  {category.name}
-                </option>
-              ))}
-            </select>
+              <SelectTrigger aria-label='Categoria de destino'>
+                <SelectValue placeholder='Selecione uma categoria'>
+                  {(value) =>
+                    value === 'none'
+                      ? 'Selecione uma categoria'
+                      : (targetOptions.find((category) => category.id === value)?.name ?? value)
+                  }
+                </SelectValue>
+              </SelectTrigger>
+              <SelectPopup>
+                <SelectItem value='none'>Selecione uma categoria</SelectItem>
+                {targetOptions.map((category) => (
+                  <SelectItem key={category.id} value={category.id}>
+                    {category.name}
+                  </SelectItem>
+                ))}
+              </SelectPopup>
+            </Select>
           </div>
         ) : (
           <p className='text-sm'>

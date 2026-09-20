@@ -49,7 +49,11 @@ export function UserPreferencesForm({
               render={({ field }) => (
                 <Select onValueChange={field.onChange} value={field.value}>
                   <SelectTrigger aria-label='Tema'>
-                    <SelectValue placeholder='Selecione o tema' />
+                    <SelectValue placeholder='Selecione o tema'>
+                      {(value) =>
+                        THEME_OPTIONS.find((option) => option.value === value)?.label ?? value
+                      }
+                    </SelectValue>
                   </SelectTrigger>
                   <SelectPopup>
                     {THEME_OPTIONS.map((option) => (
@@ -73,7 +77,11 @@ export function UserPreferencesForm({
               render={({ field }) => (
                 <Select onValueChange={field.onChange} value={field.value}>
                   <SelectTrigger aria-label='Densidade'>
-                    <SelectValue placeholder='Selecione a densidade' />
+                    <SelectValue placeholder='Selecione a densidade'>
+                      {(value) =>
+                        DENSITY_OPTIONS.find((option) => option.value === value)?.label ?? value
+                      }
+                    </SelectValue>
                   </SelectTrigger>
                   <SelectPopup>
                     {DENSITY_OPTIONS.map((option) => (

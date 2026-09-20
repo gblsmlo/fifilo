@@ -1,8 +1,15 @@
 import { Button } from '@fifilo/ui/components/button'
-import { Field, FieldControl, FieldError, FieldLabel } from '@fifilo/ui/components/field'
+import { Field, FieldError, FieldLabel } from '@fifilo/ui/components/field'
 import { Form } from '@fifilo/ui/components/form'
 import { Input } from '@fifilo/ui/components/input'
-import { FormProvider, useFormContext } from 'react-hook-form'
+import {
+  Select,
+  SelectItem,
+  SelectPopup,
+  SelectTrigger,
+  SelectValue,
+} from '@fifilo/ui/components/select'
+import { Controller, FormProvider, useFormContext } from 'react-hook-form'
 
 import { type CategoryFormInput, useCreateCategoryForm } from '../../hooks/use-create-category-form'
 
@@ -10,9 +17,6 @@ const CATEGORY_KIND_LABELS: Record<CategoryFormInput['kind'], string> = {
   expense: 'Despesa',
   income: 'Receita',
 }
-
-const selectClassName =
-  'h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50'
 
 interface CategoryFormProps {
   onCreated?: () => void
@@ -38,6 +42,7 @@ interface CategoryFormFieldsProps {
 
 export function CategoryFormFields({ onSubmit, parentOptions }: Readonly<CategoryFormFieldsProps>) {
   const {
+    control,
     formState: { errors, isSubmitting },
     register,
   } = useFormContext<CategoryFormInput>()
@@ -52,36 +57,58 @@ export function CategoryFormFields({ onSubmit, parentOptions }: Readonly<Categor
 
       <Field invalid={Boolean(errors.kind)} name='kind'>
         <FieldLabel>Tipo</FieldLabel>
-        <FieldControl
-          render={
-            <select {...register('kind')} className={selectClassName}>
-              {Object.entries(CATEGORY_KIND_LABELS).map(([value, label]) => (
-                <option key={value} value={value}>
-                  {label}
-                </option>
-              ))}
-            </select>
-          }
+        <Controller
+          control={control}
+          name='kind'
+          render={({ field }) => (
+            <Select onValueChange={field.onChange} value={field.value}>
+              <SelectTrigger aria-label='Tipo'>
+                <SelectValue placeholder='Selecione o tipo'>
+                  {(value) => CATEGORY_KIND_LABELS[value as CategoryFormInput['kind']] ?? value}
+                </SelectValue>
+              </SelectTrigger>
+              <SelectPopup>
+                {Object.entries(CATEGORY_KIND_LABELS).map(([value, label]) => (
+                  <SelectItem key={value} value={value}>
+                    {label}
+                  </SelectItem>
+                ))}
+              </SelectPopup>
+            </Select>
+          )}
         />
         <FieldError>{errors.kind?.message}</FieldError>
       </Field>
 
       <Field invalid={Boolean(errors.parentId)} name='parentId'>
         <FieldLabel>Categoria pai (opcional)</FieldLabel>
-        <FieldControl
-          render={
-            <select
-              {...register('parentId', { setValueAs: (value) => (value === '' ? null : value) })}
-              className={selectClassName}
+        <Controller
+          control={control}
+          name='parentId'
+          render={({ field }) => (
+            <Select
+              onValueChange={(value) => field.onChange(value === 'none' ? null : (value ?? null))}
+              value={field.value ?? 'none'}
             >
-              <option value=''>Nenhuma — categoria de topo</option>
-              {parentOptions.map((category) => (
-                <option key={category.id} value={category.id}>
-                  {category.name}
-                </option>
-              ))}
-            </select>
-          }
+              <SelectTrigger aria-label='Categoria pai (opcional)'>
+                <SelectValue placeholder='Nenhuma — categoria de topo'>
+                  {(value) =>
+                    value === 'none'
+                      ? 'Nenhuma — categoria de topo'
+                      : (parentOptions.find((category) => category.id === value)?.name ?? value)
+                  }
+                </SelectValue>
+              </SelectTrigger>
+              <SelectPopup>
+                <SelectItem value='none'>Nenhuma — categoria de topo</SelectItem>
+                {parentOptions.map((category) => (
+                  <SelectItem key={category.id} value={category.id}>
+                    {category.name}
+                  </SelectItem>
+                ))}
+              </SelectPopup>
+            </Select>
+          )}
         />
         <FieldError>{errors.parentId?.message}</FieldError>
       </Field>

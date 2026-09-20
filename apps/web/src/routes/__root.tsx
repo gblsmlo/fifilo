@@ -1,4 +1,5 @@
 import { clientEnv } from '@fifilo/infra-env/client'
+import { Button } from '@fifilo/ui/components/button'
 import { AnchoredToastProvider, ToastProvider } from '@fifilo/ui/components/toast'
 import type { QueryClient } from '@tanstack/react-query'
 import { HeadContent, Link, Scripts, createRootRouteWithContext } from '@tanstack/react-router'
@@ -38,18 +39,12 @@ function RootNotFound() {
         </p>
       </div>
       <div className='flex flex-wrap gap-3'>
-        <Link
-          className='inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground'
-          to='/dashboard'
-        >
+        <Button render={<Link to='/dashboard' />} variant='outline'>
           Ir para dashboard
-        </Link>
-        <Link
-          className='inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground'
-          to='/login'
-        >
+        </Button>
+        <Button render={<Link to='/login' />} variant='outline'>
           Entrar novamente
-        </Link>
+        </Button>
       </div>
     </section>
   )

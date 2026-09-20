@@ -1,8 +1,15 @@
 import { Button } from '@fifilo/ui/components/button'
-import { Field, FieldControl, FieldError, FieldLabel } from '@fifilo/ui/components/field'
+import { Field, FieldError, FieldLabel } from '@fifilo/ui/components/field'
 import { Form } from '@fifilo/ui/components/form'
 import { Input } from '@fifilo/ui/components/input'
 import { MoneyInput } from '@fifilo/ui/components/money-input'
+import {
+  Select,
+  SelectItem,
+  SelectPopup,
+  SelectTrigger,
+  SelectValue,
+} from '@fifilo/ui/components/select'
 import { Controller, useFormContext } from 'react-hook-form'
 
 import type {
@@ -15,9 +22,6 @@ interface SelectOption {
   id: string
   name: string
 }
-
-const selectClassName =
-  'h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50'
 
 interface IncomeExpenseFieldsProps {
   accountOptions: readonly SelectOption[]
@@ -61,34 +65,52 @@ export function IncomeExpenseFormFields({
 
       <Field invalid={Boolean(errors.accountId)} name='accountId'>
         <FieldLabel>Conta</FieldLabel>
-        <FieldControl
-          render={
-            <select {...register('accountId')} className={selectClassName}>
-              <option value=''>Selecione uma conta</option>
-              {accountOptions.map((account) => (
-                <option key={account.id} value={account.id}>
-                  {account.name}
-                </option>
-              ))}
-            </select>
-          }
+        <Controller
+          control={control}
+          name='accountId'
+          render={({ field }) => (
+            <Select onValueChange={field.onChange} value={field.value}>
+              <SelectTrigger aria-label='Conta'>
+                <SelectValue placeholder='Selecione uma conta'>
+                  {(value) => accountOptions.find((account) => account.id === value)?.name ?? value}
+                </SelectValue>
+              </SelectTrigger>
+              <SelectPopup>
+                {accountOptions.map((account) => (
+                  <SelectItem key={account.id} value={account.id}>
+                    {account.name}
+                  </SelectItem>
+                ))}
+              </SelectPopup>
+            </Select>
+          )}
         />
         <FieldError>{errors.accountId?.message}</FieldError>
       </Field>
 
       <Field invalid={Boolean(errors.categoryId)} name='categoryId'>
         <FieldLabel>Categoria</FieldLabel>
-        <FieldControl
-          render={
-            <select {...register('categoryId')} className={selectClassName}>
-              <option value=''>Selecione uma categoria</option>
-              {categoryOptions.map((category) => (
-                <option key={category.id} value={category.id}>
-                  {category.name}
-                </option>
-              ))}
-            </select>
-          }
+        <Controller
+          control={control}
+          name='categoryId'
+          render={({ field }) => (
+            <Select onValueChange={field.onChange} value={field.value}>
+              <SelectTrigger aria-label='Categoria'>
+                <SelectValue placeholder='Selecione uma categoria'>
+                  {(value) =>
+                    categoryOptions.find((category) => category.id === value)?.name ?? value
+                  }
+                </SelectValue>
+              </SelectTrigger>
+              <SelectPopup>
+                {categoryOptions.map((category) => (
+                  <SelectItem key={category.id} value={category.id}>
+                    {category.name}
+                  </SelectItem>
+                ))}
+              </SelectPopup>
+            </Select>
+          )}
         />
         <FieldError>{errors.categoryId?.message}</FieldError>
       </Field>
@@ -142,34 +164,50 @@ export function TransferFormFields({ accountOptions, onSubmit }: Readonly<Transf
 
       <Field invalid={Boolean(errors.fromAccountId)} name='fromAccountId'>
         <FieldLabel>Conta de origem</FieldLabel>
-        <FieldControl
-          render={
-            <select {...register('fromAccountId')} className={selectClassName}>
-              <option value=''>Selecione uma conta</option>
-              {accountOptions.map((account) => (
-                <option key={account.id} value={account.id}>
-                  {account.name}
-                </option>
-              ))}
-            </select>
-          }
+        <Controller
+          control={control}
+          name='fromAccountId'
+          render={({ field }) => (
+            <Select onValueChange={field.onChange} value={field.value}>
+              <SelectTrigger aria-label='Conta de origem'>
+                <SelectValue placeholder='Selecione uma conta'>
+                  {(value) => accountOptions.find((account) => account.id === value)?.name ?? value}
+                </SelectValue>
+              </SelectTrigger>
+              <SelectPopup>
+                {accountOptions.map((account) => (
+                  <SelectItem key={account.id} value={account.id}>
+                    {account.name}
+                  </SelectItem>
+                ))}
+              </SelectPopup>
+            </Select>
+          )}
         />
         <FieldError>{errors.fromAccountId?.message}</FieldError>
       </Field>
 
       <Field invalid={Boolean(errors.toAccountId)} name='toAccountId'>
         <FieldLabel>Conta de destino</FieldLabel>
-        <FieldControl
-          render={
-            <select {...register('toAccountId')} className={selectClassName}>
-              <option value=''>Selecione uma conta</option>
-              {accountOptions.map((account) => (
-                <option key={account.id} value={account.id}>
-                  {account.name}
-                </option>
-              ))}
-            </select>
-          }
+        <Controller
+          control={control}
+          name='toAccountId'
+          render={({ field }) => (
+            <Select onValueChange={field.onChange} value={field.value}>
+              <SelectTrigger aria-label='Conta de destino'>
+                <SelectValue placeholder='Selecione uma conta'>
+                  {(value) => accountOptions.find((account) => account.id === value)?.name ?? value}
+                </SelectValue>
+              </SelectTrigger>
+              <SelectPopup>
+                {accountOptions.map((account) => (
+                  <SelectItem key={account.id} value={account.id}>
+                    {account.name}
+                  </SelectItem>
+                ))}
+              </SelectPopup>
+            </Select>
+          )}
         />
         <FieldError>{errors.toAccountId?.message}</FieldError>
       </Field>

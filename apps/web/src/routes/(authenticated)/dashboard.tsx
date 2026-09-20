@@ -21,7 +21,7 @@ function DashboardRoute() {
 
   return (
     <DashboardPage
-      onSearchChange={(next) => navigate({ search: next })}
+      onSearchChange={(next) => navigate({ search: (prev) => ({ ...prev, ...next }) })}
       organization={currentOrganization}
       role={currentRole}
       search={search}

@@ -2,6 +2,7 @@ import { authClient } from '@fifilo/auth/client'
 import { Button } from '@fifilo/ui/components/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@fifilo/ui/components/card'
 import { Field, FieldDescription, FieldError, FieldLabel } from '@fifilo/ui/components/field'
+import { Form } from '@fifilo/ui/components/form'
 import { Input } from '@fifilo/ui/components/input'
 import { useRouter } from '@tanstack/react-router'
 import { type FormEvent, useState } from 'react'
@@ -54,7 +55,7 @@ export function OrganizationOnboardingPage() {
           <CardTitle>Crie sua organização</CardTitle>
         </CardHeader>
         <CardContent>
-          <form className='flex flex-col gap-5' onSubmit={submit}>
+          <Form className='flex flex-col gap-5' onSubmit={submit}>
             <Field name='organization-name'>
               <FieldLabel>Nome</FieldLabel>
               <Input
@@ -84,7 +85,7 @@ export function OrganizationOnboardingPage() {
             <Button disabled={!name.trim() || !slug} loading={isSubmitting} type='submit'>
               Criar organização
             </Button>
-          </form>
+          </Form>
         </CardContent>
       </Card>
     </section>

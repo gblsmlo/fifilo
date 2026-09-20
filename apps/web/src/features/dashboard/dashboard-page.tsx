@@ -3,6 +3,7 @@ import { AnalyticsDashboard } from '@features/analytics'
 import { SetupReminder } from '@features/onboarding'
 import type { PublicOrganization, PublicUser } from '@fifilo/core/contracts/users'
 import { Badge } from '@fifilo/ui/components/badge'
+import { Page } from '@web/components/page'
 
 interface DashboardPageProps {
   onSearchChange: (next: AnalyticsSearch) => void
@@ -20,18 +21,17 @@ export function DashboardPage({
   user,
 }: Readonly<DashboardPageProps>) {
   return (
-    <section className='mx-auto flex w-full max-w-5xl flex-col gap-6 p-6'>
-      <div className='space-y-2'>
-        <Badge variant='secondary'>{role}</Badge>
-        <h1 className='font-semibold text-3xl tracking-tight'>Olá, {user.name.split(' ')[0]}</h1>
-        <p className='text-muted-foreground'>
-          O painel de {organization.name} no período selecionado.
-        </p>
-      </div>
+    <Page width='lg'>
+      <Page.Header
+        align='start'
+        description={`O painel de ${organization.name} no período selecionado.`}
+        meta={<Badge variant='secondary'>{role}</Badge>}
+        title={`Olá, ${user.name.split(' ')[0]}`}
+      />
 
       <SetupReminder />
 
       <AnalyticsDashboard onSearchChange={onSearchChange} search={search} />
-    </section>
+    </Page>
   )
 }

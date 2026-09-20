@@ -1,10 +1,11 @@
 import type { CategoryResponse } from '@fifilo/core/categories'
+import { DataTable, type DataTableColumn } from '@fifilo/patterns/data-table'
 import { Dialog } from '@fifilo/patterns/dialog'
 import { errorCodeToSurfaceKind } from '@fifilo/patterns/state-kinds'
-import { StateSurface } from '@fifilo/patterns/state-surface'
+import type { SurfaceGuardState } from '@fifilo/patterns/state-surface'
+import { Widget } from '@fifilo/patterns/widget'
 import { Badge } from '@fifilo/ui/components/badge'
 import { Button } from '@fifilo/ui/components/button'
-import { Card, CardHeader, CardTitle } from '@fifilo/ui/components/card'
 import {
   Select,
   SelectItem,
@@ -12,6 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@fifilo/ui/components/select'
+import { Text } from '@fifilo/ui/components/text'
 import { useState } from 'react'
 
 const CATEGORY_KIND_LABELS: Record<CategoryResponse['kind'], string> = {
@@ -33,11 +35,23 @@ export interface ReassignCategoryInput {
 interface CategoryListProps {
   categories: readonly CategoryResponse[]
   error?: CategoryListError | null
+  isPending?: boolean
   isReassigning?: boolean
   /** `undefined` clears the error state; set after a failed reassign attempt. */
   reassignErrorCode?: string | null
   onReassign: (input: ReassignCategoryInput, onSuccess: () => void) => void
   onReassignReset: () => void
+}
+
+const resolveState = (
+  error: CategoryListError | null,
+  isPending: boolean,
+  isEmpty: boolean,
+): SurfaceGuardState => {
+  if (error) return errorCodeToSurfaceKind(error.code)
+  if (isPending) return 'loading'
+  if (isEmpty) return 'empty'
+  return 'data'
 }
 
 /**
@@ -48,6 +62,7 @@ interface CategoryListProps {
 export function CategoryList({
   categories,
   error = null,
+  isPending = false,
   isReassigning = false,
   onReassign,
   onReassignReset,
@@ -66,57 +81,81 @@ export function CategoryList({
     onReassignReset()
   }
 
-  if (error) {
-    return (
-      <StateSurface
-        actions={
-          error.onRetry ? [{ label: 'Tentar novamente', onPress: error.onRetry }] : undefined
+  const state = resolveState(error, isPending, categories.length === 0)
+  const surface = error
+    ? {
+        actions: error.onRetry
+          ? [{ label: 'Tentar novamente', onPress: error.onRetry }]
+          : undefined,
+        description: error.message,
+        title: 'Não foi possível carregar as categorias',
+      }
+    : isPending
+      ? { description: 'Buscando as categorias do workspace.', title: 'Carregando categorias' }
+      : {
+          description: 'Crie a primeira categoria para começar a classificar despesas e receitas.',
+          title: 'Nenhuma categoria ainda',
         }
-        description={error.message}
-        kind={errorCodeToSurfaceKind(error.code)}
-        title='Não foi possível carregar as categorias'
-      />
-    )
-  }
-
-  if (categories.length === 0) {
-    return (
-      <StateSurface
-        description='Crie a primeira categoria para começar a classificar despesas e receitas.'
-        kind='empty'
-        title='Nenhuma categoria ainda'
-      />
-    )
-  }
 
   const targetOptions = categories.filter(
     (category) =>
       category.id !== pendingId && category.kind === pending?.kind && !category.archivedAt,
   )
 
+  const columns: DataTableColumn<CategoryResponse>[] = [
+    {
+      cell: (category) => (
+        <Text render={<span />} size='sm' weight='medium'>
+          {category.name}
+        </Text>
+      ),
+      header: 'Categoria',
+      id: 'name',
+    },
+    {
+      cell: (category) => <Badge variant='outline'>{CATEGORY_KIND_LABELS[category.kind]}</Badge>,
+      header: 'Tipo',
+      id: 'kind',
+    },
+    {
+      cell: (category) => (
+        <Text foreground='muted' render={<span />} size='sm'>
+          {category.parentId ? 'Subcategoria' : 'Principal'}
+        </Text>
+      ),
+      header: 'Nível',
+      id: 'level',
+    },
+    {
+      align: 'end',
+      cell: (category) =>
+        category.archivedAt ? (
+          <Badge variant='secondary'>Arquivada</Badge>
+        ) : (
+          <Button onClick={() => setPendingId(category.id)} size='sm' type='button' variant='ghost'>
+            Arquivar
+          </Button>
+        ),
+      header: <span className='sr-only'>Ações</span>,
+      id: 'actions',
+    },
+  ]
+
   return (
-    <div className='flex flex-col gap-2'>
-      {categories.map((category) => (
-        <Card key={category.id}>
-          <CardHeader className='flex-row items-center justify-between gap-4'>
-            <div>
-              <CardTitle>{category.name}</CardTitle>
-              <p className='text-muted-foreground text-sm'>
-                {CATEGORY_KIND_LABELS[category.kind]}
-                {category.parentId ? ' · subcategoria' : ''}
-              </p>
-            </div>
-            <div className='flex items-center gap-2'>
-              {category.archivedAt ? <Badge variant='secondary'>Arquivada</Badge> : null}
-              {!category.archivedAt ? (
-                <Button onClick={() => setPendingId(category.id)} type='button' variant='ghost'>
-                  Arquivar
-                </Button>
-              ) : null}
-            </div>
-          </CardHeader>
-        </Card>
-      ))}
+    <>
+      <Widget
+        description='Categorias de receita e despesa, com um nível de subcategoria.'
+        state={state}
+        surface={surface}
+        title='Categorias'
+      >
+        <DataTable
+          caption='Categorias do workspace'
+          columns={columns}
+          rowKey={(category) => category.id}
+          rows={categories}
+        />
+      </Widget>
 
       <Dialog
         errorMessage={hasOtherError ? 'Não foi possível reatribuir a categoria.' : undefined}
@@ -143,9 +182,9 @@ export function CategoryList({
       >
         {needsTarget ? (
           <div className='flex flex-col gap-2'>
-            <p className='text-sm'>
+            <Text render={<p />} size='sm'>
               Esta categoria tem transações. Escolha para onde movê-las antes de arquivar.
-            </p>
+            </Text>
             <Select
               onValueChange={(value) => setTargetCategoryId(value === 'none' ? '' : (value ?? ''))}
               value={targetCategoryId || 'none'}
@@ -170,12 +209,12 @@ export function CategoryList({
             </Select>
           </div>
         ) : (
-          <p className='text-sm'>
+          <Text render={<p />} size='sm'>
             "{pending?.name}" para de aceitar novas transações. Se houver transações existentes,
             você escolhe para onde movê-las na próxima etapa.
-          </p>
+          </Text>
         )}
       </Dialog>
-    </div>
+    </>
   )
 }

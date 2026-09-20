@@ -3,6 +3,7 @@ import { SettingsRequestError } from '@features/settings/http/errors'
 import { updateWorkspaceSettingsRequestSchema } from '@fifilo/core/settings'
 import { Button } from '@fifilo/ui/components/button'
 import { Field, FieldDescription, FieldError, FieldLabel } from '@fifilo/ui/components/field'
+import { Form } from '@fifilo/ui/components/form'
 import { Input } from '@fifilo/ui/components/input'
 import {
   Select,
@@ -11,6 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@fifilo/ui/components/select'
+import { Text } from '@fifilo/ui/components/text'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import type { FormEventHandler } from 'react'
@@ -94,7 +96,7 @@ export function WorkspaceSettingsSetupFields({
   } = useFormContext<WorkspaceSetupInput>()
 
   return (
-    <form className='flex flex-col gap-5' noValidate onSubmit={onSubmit}>
+    <Form className='flex flex-col gap-5' noValidate onSubmit={onSubmit}>
       <Field name='currency'>
         <FieldLabel>Moeda</FieldLabel>
         <FieldDescription>Usada nas contas e lançamentos do workspace.</FieldDescription>
@@ -131,11 +133,13 @@ export function WorkspaceSettingsSetupFields({
         <FieldError>{errors.timezone?.message}</FieldError>
       </Field>
       {errors.root?.message ? (
-        <p className='text-destructive text-sm'>{errors.root.message}</p>
+        <Text foreground='destructive' render={<p role='alert' />} size='sm'>
+          {errors.root.message}
+        </Text>
       ) : null}
       <Button loading={isSubmitting} type='submit'>
         Continuar
       </Button>
-    </form>
+    </Form>
   )
 }

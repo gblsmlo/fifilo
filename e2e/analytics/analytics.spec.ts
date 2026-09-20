@@ -46,12 +46,12 @@ test.describe('@analytics dashboard', () => {
     await page.goto('/accounts')
     await page.getByLabel('Nome').fill(checkingName)
     await page.getByRole('button', { name: 'Criar conta' }).click()
-    await expect(page.locator('[data-slot="card"]', { hasText: checkingName })).toBeVisible()
+    await expect(page.getByRole('row', { name: checkingName })).toBeVisible()
 
     await page.goto('/categories')
     await page.getByLabel('Nome').fill(categoryName)
     await page.getByRole('button', { name: 'Criar categoria' }).click()
-    await expect(page.locator('[data-slot="card-title"]', { hasText: categoryName })).toBeVisible()
+    await expect(page.getByRole('row', { name: categoryName })).toBeVisible()
 
     // Decision 022: a category has a fixed kind, so income needs its own
     // category - it cannot reuse the expense one above.
@@ -59,9 +59,7 @@ test.describe('@analytics dashboard', () => {
     await page.getByLabel('Tipo').click()
     await page.getByRole('option', { name: 'Receita', exact: true }).click()
     await page.getByRole('button', { name: 'Criar categoria' }).click()
-    await expect(
-      page.locator('[data-slot="card-title"]', { hasText: incomeCategoryName }),
-    ).toBeVisible()
+    await expect(page.getByRole('row', { name: incomeCategoryName })).toBeVisible()
 
     // Read the baseline before any of this run's transactions exist: the
     // new, empty account contributes zero, so this is the shared org's
@@ -154,11 +152,11 @@ test.describe('@analytics dashboard', () => {
     // prova de que a UI está de fato ligada ao mesmo endpoint, não só o
     // endpoint em si.
     await expect(
-      page.locator('[data-slot="card"]', { hasText: 'Disponível em caixa' }),
+      page.locator('[data-slot="stat"]', { hasText: 'Disponível em caixa' }),
     ).toBeVisible()
 
     // Maiores gastos: a maior despesa (fevereiro, R$ 400,00) primeiro.
-    const topExpensesCard = page.locator('[data-slot="card"]', { hasText: 'Maiores gastos' })
+    const topExpensesCard = page.getByRole('region', { name: 'Maiores gastos' })
     await expect(topExpensesCard).toBeVisible()
     await expect(topExpensesCard.locator('tbody tr').first()).toContainText('400,00')
   })

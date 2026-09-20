@@ -1,6 +1,7 @@
 import { SettingsRow, SettingsSection } from '@fifilo/patterns/settings'
 import { Button } from '@fifilo/ui/components/button'
 import { Field, FieldError } from '@fifilo/ui/components/field'
+import { Form } from '@fifilo/ui/components/form'
 import { Input } from '@fifilo/ui/components/input'
 import {
   Select,
@@ -51,7 +52,7 @@ export function WorkspaceSettingsForm({
   } = useFormContext<WorkspaceSettingsFormInput>()
 
   return (
-    <form className='flex flex-col gap-4' noValidate onSubmit={onSubmit}>
+    <Form className='flex flex-col gap-4' noValidate onSubmit={onSubmit}>
       <SettingsSection title='Workspace'>
         <SettingsRow description='Moeda de toda conta e lançamento' title='Moeda'>
           <Field className='w-52' invalid={Boolean(errors.currency)} name='currency'>
@@ -165,6 +166,6 @@ export function WorkspaceSettingsForm({
           Somente o dono ou um administrador pode alterar as configurações do workspace.
         </p>
       )}
-    </form>
+    </Form>
   )
 }

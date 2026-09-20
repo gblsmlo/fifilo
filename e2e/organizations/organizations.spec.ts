@@ -56,12 +56,12 @@ test.describe('@organizations viewer role and promotion', () => {
     await page.goto('/accounts')
     await page.getByLabel('Nome').fill(accountName)
     await page.getByRole('button', { name: 'Criar conta' }).click()
-    await expect(page.locator('[data-slot="card"]', { hasText: accountName })).toBeVisible()
+    await expect(page.getByRole('row', { name: accountName })).toBeVisible()
 
     await page.goto('/categories')
     await page.getByLabel('Nome').fill(categoryName)
     await page.getByRole('button', { name: 'Criar categoria' }).click()
-    await expect(page.locator('[data-slot="card-title"]', { hasText: categoryName })).toBeVisible()
+    await expect(page.getByRole('row', { name: categoryName })).toBeVisible()
 
     await page.goto('/transactions')
     await page.getByRole('button', { name: 'Nova transação' }).click()

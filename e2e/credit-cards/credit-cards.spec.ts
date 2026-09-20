@@ -20,23 +20,23 @@ test.describe('@credit-cards credit card and invoice', () => {
     await page.goto('/accounts')
     await page.getByLabel('Nome').fill(checkingName)
     await page.getByRole('button', { name: 'Criar conta' }).click()
-    await expect(page.locator('[data-slot="card"]', { hasText: checkingName })).toBeVisible()
+    await expect(page.getByRole('row', { name: checkingName })).toBeVisible()
 
     await page.getByLabel('Nome').fill(cardName)
     await page.getByRole('combobox', { name: 'Tipo' }).click()
     await page.getByRole('option', { name: 'Cartão de crédito' }).click()
     await page.getByRole('button', { name: 'Criar conta' }).click()
-    const cardAccountRow = page.locator('[data-slot="card"]', { hasText: cardName })
+    const cardAccountRow = page.getByRole('row', { name: cardName })
     await expect(cardAccountRow).toBeVisible()
 
     await page.goto('/categories')
     await page.getByLabel('Nome').fill(categoryName)
     await page.getByRole('button', { name: 'Criar categoria' }).click()
-    await expect(page.locator('[data-slot="card-title"]', { hasText: categoryName })).toBeVisible()
+    await expect(page.getByRole('row', { name: categoryName })).toBeVisible()
 
     await page.goto('/accounts')
     await page
-      .locator('[data-slot="card"]', { hasText: cardName })
+      .getByRole('row', { name: cardName })
       .getByRole('link', { name: 'Gerenciar cartão' })
       .click()
 
@@ -58,13 +58,15 @@ test.describe('@credit-cards credit card and invoice', () => {
 
     await page.getByRole('button', { name: 'Registrar compra parcelada' }).click()
 
-    // Three consecutive cycles, three invoice cards - each titled
-    // "{periodStart} — {periodEnd}", the one pattern unique to an invoice
-    // card on this page before any invoice is selected. The earliest cycle,
-    // due soonest, is the last one the descending-by-period list renders.
-    const invoiceCards = page.locator('[data-slot="card"]', { hasText: '—' })
-    await expect(invoiceCards).toHaveCount(3)
-    await invoiceCards.last().click()
+    // Three consecutive cycles, three invoice rows - each named by its
+    // "{periodStart} — {periodEnd}" period, the one pattern unique to an
+    // invoice row on this page before any invoice is selected. The earliest
+    // cycle, due soonest, is the last one the descending-by-period table renders.
+    const invoiceRows = page
+      .getByRole('region', { name: 'Faturas' })
+      .getByRole('row', { name: '—' })
+    await expect(invoiceRows).toHaveCount(3)
+    await invoiceRows.last().click()
 
     await expect(page.getByText(purchaseDescription)).toBeVisible()
 
@@ -78,8 +80,6 @@ test.describe('@credit-cards credit card and invoice', () => {
     await expect(page.getByTestId('available-limit')).toContainText('4.900,00')
 
     await page.goto('/accounts')
-    await expect(page.locator('[data-slot="card"]', { hasText: checkingName })).toContainText(
-      '100,00',
-    )
+    await expect(page.getByRole('row', { name: checkingName })).toContainText('100,00')
   })
 })

@@ -1,5 +1,6 @@
 import { toWorkspaceRole } from '@fifilo/core/access-control'
-import { Spinner } from '@fifilo/ui/components/spinner'
+import { StateGuard } from '@fifilo/patterns/state-surface'
+import { Page } from '@web/components/page'
 import { FormProvider } from 'react-hook-form'
 
 import { ExportCsvSection } from '../components/export-csv-section'
@@ -25,19 +26,20 @@ export function SettingsPage({ role }: Readonly<SettingsPageProps>) {
   const canEdit = workspaceRole === 'owner' || workspaceRole === 'admin'
 
   return (
-    <section className='mx-auto flex w-full max-w-3xl flex-col gap-8 p-6'>
-      <div className='space-y-2'>
-        <h1 className='font-semibold text-3xl tracking-tight'>Configurações</h1>
-        <p className='text-muted-foreground'>
-          Moeda, fuso e preferências do workspace, e as suas próprias preferências de conta.
-        </p>
-      </div>
+    <Page className='gap-8' width='md'>
+      <Page.Header
+        align='start'
+        description='Moeda, fuso e preferências do workspace, e as suas próprias preferências de conta.'
+        title='Configurações'
+      />
 
-      {workspace.query.isPending ? (
-        <div className='flex justify-center py-12'>
-          <Spinner aria-label='Carregando configurações' />
-        </div>
-      ) : (
+      <StateGuard
+        state={workspace.query.isPending ? 'loading' : 'data'}
+        surface={{
+          description: 'Buscando moeda, fuso e início do mês do workspace.',
+          title: 'Carregando configurações',
+        }}
+      >
         <FormProvider {...workspace.form}>
           <WorkspaceSettingsForm
             canEdit={canEdit}
@@ -45,22 +47,24 @@ export function SettingsPage({ role }: Readonly<SettingsPageProps>) {
             onSubmit={workspace.onSubmit}
           />
         </FormProvider>
-      )}
+      </StateGuard>
 
-      {preferences.query.isPending ? (
-        <div className='flex justify-center py-12'>
-          <Spinner aria-label='Carregando preferências' />
-        </div>
-      ) : (
+      <StateGuard
+        state={preferences.query.isPending ? 'loading' : 'data'}
+        surface={{
+          description: 'Buscando tema, densidade e notificações.',
+          title: 'Carregando preferências',
+        }}
+      >
         <FormProvider {...preferences.form}>
           <UserPreferencesForm
             isSubmitting={preferences.form.formState.isSubmitting}
             onSubmit={preferences.onSubmit}
           />
         </FormProvider>
-      )}
+      </StateGuard>
 
       {canEdit ? <ExportCsvSection /> : null}
-    </section>
+    </Page>
   )
 }

@@ -1,6 +1,7 @@
 import { SettingsRow, SettingsSection } from '@fifilo/patterns/settings'
 import { Button } from '@fifilo/ui/components/button'
 import { Field, FieldError } from '@fifilo/ui/components/field'
+import { Form } from '@fifilo/ui/components/form'
 import {
   Select,
   SelectItem,
@@ -39,7 +40,7 @@ export function UserPreferencesForm({
   } = useFormContext<UserPreferencesFormInput>()
 
   return (
-    <form className='flex flex-col gap-4' noValidate onSubmit={onSubmit}>
+    <Form className='flex flex-col gap-4' noValidate onSubmit={onSubmit}>
       <SettingsSection title='Sua conta'>
         <SettingsRow description='Aplica-se só a você, neste workspace' title='Tema'>
           <Field className='w-44' invalid={Boolean(errors.theme)} name='theme'>
@@ -119,6 +120,6 @@ export function UserPreferencesForm({
           Salvar preferências
         </Button>
       </div>
-    </form>
+    </Form>
   )
 }

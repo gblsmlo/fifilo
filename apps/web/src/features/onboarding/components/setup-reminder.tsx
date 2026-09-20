@@ -1,6 +1,7 @@
+import { Alert, AlertAction, AlertDescription, AlertTitle } from '@fifilo/ui/components/alert'
 import { Button } from '@fifilo/ui/components/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@fifilo/ui/components/card'
 import { useQuery } from '@tanstack/react-query'
+import { SparklesIcon } from 'lucide-react'
 
 import { onboardingStatusQueryOptions } from '../query-options'
 
@@ -9,16 +10,15 @@ export function SetupReminder() {
   if (!data?.reminderVisible) return null
 
   return (
-    <Card className='border-primary/30 bg-primary/5'>
-      <CardHeader>
-        <CardTitle>Finalize sua configuração financeira</CardTitle>
-      </CardHeader>
-      <CardContent className='flex items-center justify-between gap-4'>
-        <p className='text-muted-foreground text-sm'>
-          Adicione as configurações do workspace e sua primeira conta.
-        </p>
-        <Button render={<a href='/onboarding/setup'>Continuar</a>} />
-      </CardContent>
-    </Card>
+    <Alert variant='info'>
+      <SparklesIcon aria-hidden='true' />
+      <AlertTitle>Finalize sua configuração financeira</AlertTitle>
+      <AlertDescription>
+        Adicione as configurações do workspace e sua primeira conta.
+      </AlertDescription>
+      <AlertAction>
+        <Button render={<a href='/onboarding/setup'>Continuar</a>} size='sm' variant='outline' />
+      </AlertAction>
+    </Alert>
   )
 }

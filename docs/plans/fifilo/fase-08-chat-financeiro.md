@@ -123,20 +123,33 @@ Cancelamento: `AbortSignal` propagado até o adaptador, com a execução marcada
 
 ## Critério de conclusão
 
-- [ ] Seis ferramentas com teste de que respeitam papel e workspace.
-- [ ] Teste de que `viewer` conversa e não escreve nada.
+- [ ] Seis ferramentas com teste de que respeitam papel e workspace. As seis
+      existem com teste de comportamento (`packages/core/src/assistant/tools`),
+      mas só `list-transactions` afirma isolamento entre organizações. As
+      outras cinco não têm a asserção de workspace que este item pede.
+- [ ] Teste de que `viewer` conversa e não escreve nada. Parcial:
+      `create-conversation.test.ts` e `list-transactions.test.ts` cobrem o
+      `viewer`; falta o mesmo nas demais ferramentas.
 - [ ] Teste de aritmética: resposta do agente bate com a projeção.
 - [ ] Teste de cancelamento no meio do stream, com token contabilizado.
 - [ ] Teste do caminho de recusa de conselho de investimento.
-- [ ] Cinco provas negativas de RLS em `conversations` e `messages`.
+- [ ] Cinco provas negativas de RLS em `conversations` e `messages`. A migração
+      `0007` criou as tabelas com policy; nenhuma prova negativa foi escrita.
 - [ ] Story dos estados do chat; E2E de uma conversa com ferramenta.
+- [ ] [Portão operacional](README.md#portão-operacional--chamada-real-a-cada-provedor):
+      chamada real a Anthropic e a OpenRouter, com contabilidade de token
+      conferida contra a resposta do provedor, antes da fatia de Web.
 
 ## Decisões a registrar
 
+O número sai de [`decisions/README.md`](../../decisions/README.md) no momento de
+registrar, não antes: 032 e 033, reservados aqui originalmente, foram
+consumidos pela [Fase 07](fase-07-fundacao-de-ia.md).
+
 | # | Decisão |
 | ---: | --- |
-| 032 | ferramenta de agente é caso de uso do Core sob o mesmo contexto de ator; o agente não acessa o banco |
-| 033 | autor de mensagem é polimórfico (`member` ou `agent`) |
+| — | ferramenta de agente é caso de uso do Core sob o mesmo contexto de ator; o agente não acessa o banco |
+| — | autor de mensagem é polimórfico (`member` ou `agent`) |
 
 ## Fatias de commit
 
@@ -148,4 +161,28 @@ Cancelamento: `AbortSignal` propagado até o adaptador, com a execução marcada
 
 ## Registro de sessões
 
-_(a preencher durante a execução)_
+### Sessão 1 — núcleo e persistência
+
+Duas fatias, nesta ordem: `d0235e0` (`feat(core): add assistant conversations
+and read-only tool surface`) e `8b6c797` (`feat(database): persist
+conversations and messages with tenant policies`).
+
+**Entrega.** `packages/core/src/assistant` com a conversa, os ports, os
+schemas, as seis ferramentas da tabela acima e os casos de uso
+(`create-conversation`, `list-conversations`, `get-conversation-messages`,
+`append-message`, `run-tool`). `run-tool` recusa nome de ferramenta inexistente
+com `not_found` e argumento malformado com `tool_input_invalid` antes de a
+ferramenta rodar — um modelo não inventa ferramenta nem entrada. Persistência:
+migração `0007` com `conversations` e `messages` e as policies de tenant.
+
+**Aberto.** Nenhuma rota, nenhuma superfície de Web, nenhuma prova negativa de
+RLS nas duas tabelas novas, e a asserção de workspace presente só em
+`list-transactions`. Ver o critério de conclusão, item a item.
+
+### Sessão 2 — 2026-09-20 — reparo do plano, sem toque em código
+
+O estado desta fase no [`README.md`](README.md) do roadmap dizia `Planejada`
+enquanto duas fatias de commit já estavam entregues, e a tabela de decisões
+reservava 032 e 033, consumidos pela Fase 07. Ambos corrigidos; o critério de
+conclusão passou a dizer o que falta em cada item parcial, em vez de só ficar
+desmarcado. Nenhum arquivo de código foi tocado.

@@ -85,10 +85,13 @@ deste usuário" escrito no prompt não é.
 
 ## Decisões a registrar
 
+O número sai de [`decisions/README.md`](../../decisions/README.md) no momento de
+registrar, não antes.
+
 | # | Decisão |
 | ---: | --- |
-| 036 | a escada de categorização é determinística, depois vetorial, depois modelo |
-| 037 | recuperação é escopada por SQL; instrução em prompt não é controle de acesso |
+| — | a escada de categorização é determinística, depois vetorial, depois modelo |
+| — | recuperação é escopada por SQL; instrução em prompt não é controle de acesso |
 
 ## Fatias de commit
 

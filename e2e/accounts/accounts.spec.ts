@@ -16,12 +16,12 @@ test.describe('@accounts financial accounts', () => {
     await page.getByLabel('Nome').fill(accountName)
     await page.getByRole('button', { name: 'Criar conta' }).click()
 
-    const card = page.locator('[data-slot="card"]', { hasText: accountName })
-    await expect(card).toBeVisible()
-    await expect(card.getByText('R$')).toBeVisible()
+    const row = page.getByRole('row', { name: accountName })
+    await expect(row).toBeVisible()
+    await expect(row.getByText('R$')).toBeVisible()
     await expect(page.getByTestId('consolidated-balance')).toContainText('R$')
 
-    await card.getByRole('button', { name: 'Arquivar' }).click()
+    await row.getByRole('button', { name: 'Arquivar' }).click()
 
     const dialog = page.getByRole('dialog', { name: 'Arquivar conta?' })
     await expect(dialog).toBeVisible()

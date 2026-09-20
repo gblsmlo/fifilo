@@ -1,6 +1,7 @@
 import { authClient } from '@fifilo/auth/client'
 import { Button } from '@fifilo/ui/components/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@fifilo/ui/components/card'
+import { Text } from '@fifilo/ui/components/text'
 import { useRouter } from '@tanstack/react-router'
 import { useState } from 'react'
 
@@ -34,10 +35,14 @@ export function AcceptInvitationPage({ invitationId }: Readonly<{ invitationId: 
           <CardTitle>Convite para organização</CardTitle>
         </CardHeader>
         <CardContent className='space-y-4'>
-          <p className='text-muted-foreground text-sm'>
+          <Text foreground='muted' render={<p />} size='sm'>
             Confirme para associar sua conta à organização que enviou o convite.
-          </p>
-          {error ? <p className='text-destructive text-sm'>{error}</p> : null}
+          </Text>
+          {error ? (
+            <Text foreground='destructive' render={<p role='alert' />} size='sm'>
+              {error}
+            </Text>
+          ) : null}
           <Button loading={isSubmitting} onClick={accept}>
             Aceitar convite
           </Button>

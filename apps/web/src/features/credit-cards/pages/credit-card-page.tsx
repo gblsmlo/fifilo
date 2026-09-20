@@ -1,7 +1,8 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@fifilo/ui/components/card'
-import { Spinner } from '@fifilo/ui/components/spinner'
+import { Stat } from '@fifilo/patterns/stat'
+import { Widget, WidgetPanel } from '@fifilo/patterns/widget'
 import { formatMoney } from '@libs/format-money'
 import { useQuery } from '@tanstack/react-query'
+import { Page } from '@web/components/page'
 import { useRef, useState } from 'react'
 
 import { accountsQueryOptions } from '../../accounts/query-options'
@@ -44,26 +45,21 @@ export function CreditCardPage({ accountId }: Readonly<CreditCardPageProps>) {
 
   if (notConfigured) {
     return (
-      <section className='mx-auto flex w-full max-w-2xl flex-col gap-6 p-6'>
-        <div className='space-y-2'>
-          <h1 className='font-semibold text-3xl tracking-tight'>{account?.name ?? 'Cartão'}</h1>
-          <p className='text-muted-foreground'>
-            Informe o dia de fechamento, o dia de vencimento e o limite para começar a usar o
-            cartão.
-          </p>
-        </div>
-        <Card>
-          <CardHeader>
-            <CardTitle>Cadastrar cartão</CardTitle>
-          </CardHeader>
-          <CardContent>
+      <Page width='sm'>
+        <Page.Header
+          align='start'
+          description='Informe o dia de fechamento, o dia de vencimento e o limite para começar a usar o cartão.'
+          title={account?.name ?? 'Cartão'}
+        />
+        <Widget title='Cadastrar cartão'>
+          <WidgetPanel>
             <AttachCreditCardForm
               accountId={accountId}
               onAttached={() => availableLimitQuery.refetch()}
             />
-          </CardContent>
-        </Card>
-      </section>
+          </WidgetPanel>
+        </Widget>
+      </Page>
     )
   }
 
@@ -84,96 +80,89 @@ export function CreditCardPage({ accountId }: Readonly<CreditCardPageProps>) {
   }
 
   return (
-    <section className='mx-auto flex w-full max-w-6xl flex-col gap-6 p-6'>
-      <div className='space-y-2'>
-        <h1 className='font-semibold text-3xl tracking-tight'>{account?.name ?? 'Cartão'}</h1>
-        {availableLimitQuery.data ? (
-          <p className='font-medium text-sm' data-testid='available-limit'>
-            Limite disponível: {formatMoney(availableLimitQuery.data)}
-          </p>
-        ) : null}
-      </div>
+    <Page width='xl'>
+      <Page.Header
+        align='start'
+        description='Faturas, itens e compras parceladas do cartão.'
+        title={account?.name ?? 'Cartão'}
+      />
+
+      <Stat
+        className='sm:max-w-xs'
+        data-testid='available-limit'
+        label='Limite disponível'
+        loading={!availableLimitQuery.data}
+        value={availableLimitQuery.data ? formatMoney(availableLimitQuery.data) : undefined}
+      />
 
       <div className='grid gap-6 lg:grid-cols-[1fr_1fr_320px]'>
-        <div>
-          {invoicesQuery.isPending ? (
-            <div className='flex justify-center py-12'>
-              <Spinner aria-label='Carregando faturas' />
-            </div>
-          ) : (
-            <InvoiceList
-              error={
-                invoicesQuery.isError
-                  ? {
-                      code:
-                        invoicesQuery.error instanceof CreditCardRequestError
-                          ? invoicesQuery.error.code
-                          : undefined,
-                      message:
-                        invoicesQuery.error instanceof CreditCardRequestError
-                          ? invoicesQuery.error.message
-                          : 'Não foi possível carregar as faturas.',
-                      onRetry: () => invoicesQuery.refetch(),
-                    }
-                  : null
-              }
-              invoices={invoicesQuery.data ?? []}
-              onSelect={setSelectedInvoiceId}
-              selectedInvoiceId={selectedInvoiceId}
-            />
-          )}
-        </div>
+        <InvoiceList
+          error={
+            invoicesQuery.isError
+              ? {
+                  code:
+                    invoicesQuery.error instanceof CreditCardRequestError
+                      ? invoicesQuery.error.code
+                      : undefined,
+                  message:
+                    invoicesQuery.error instanceof CreditCardRequestError
+                      ? invoicesQuery.error.message
+                      : 'Não foi possível carregar as faturas.',
+                  onRetry: () => invoicesQuery.refetch(),
+                }
+              : null
+          }
+          invoices={invoicesQuery.data ?? []}
+          isPending={invoicesQuery.isPending}
+          onSelect={setSelectedInvoiceId}
+          selectedInvoiceId={selectedInvoiceId}
+        />
 
-        <div>
-          <InvoiceDetail
-            error={
-              selectedInvoiceId && invoiceQuery.isError
-                ? {
-                    code:
-                      invoiceQuery.error instanceof CreditCardRequestError
-                        ? invoiceQuery.error.code
-                        : undefined,
-                    message:
-                      invoiceQuery.error instanceof CreditCardRequestError
-                        ? invoiceQuery.error.message
-                        : 'Não foi possível carregar a fatura.',
-                    onRetry: () => invoiceQuery.refetch(),
-                  }
-                : null
-            }
-            invoice={invoiceQuery.data?.invoice ?? null}
-            isClosing={closeInvoice.isPending}
-            isPaying={payInvoice.isPending}
-            items={invoiceQuery.data?.items ?? []}
-            onClose={() => {
-              if (selectedInvoiceId) closeInvoice.mutate(selectedInvoiceId)
-            }}
-            onPay={(fromAccountId) => {
-              if (!selectedInvoiceId) return
-              payInvoice.mutate({
-                idempotencyKey: getPayIdempotencyKey(selectedInvoiceId),
-                invoiceId: selectedInvoiceId,
-                payload: { fromAccountId },
-              })
-            }}
-            payFromAccountOptions={payFromAccountOptions}
-          />
-        </div>
+        <InvoiceDetail
+          error={
+            selectedInvoiceId && invoiceQuery.isError
+              ? {
+                  code:
+                    invoiceQuery.error instanceof CreditCardRequestError
+                      ? invoiceQuery.error.code
+                      : undefined,
+                  message:
+                    invoiceQuery.error instanceof CreditCardRequestError
+                      ? invoiceQuery.error.message
+                      : 'Não foi possível carregar a fatura.',
+                  onRetry: () => invoiceQuery.refetch(),
+                }
+              : null
+          }
+          invoice={invoiceQuery.data?.invoice ?? null}
+          isClosing={closeInvoice.isPending}
+          isPaying={payInvoice.isPending}
+          items={invoiceQuery.data?.items ?? []}
+          onClose={() => {
+            if (selectedInvoiceId) closeInvoice.mutate(selectedInvoiceId)
+          }}
+          onPay={(fromAccountId) => {
+            if (!selectedInvoiceId) return
+            payInvoice.mutate({
+              idempotencyKey: getPayIdempotencyKey(selectedInvoiceId),
+              invoiceId: selectedInvoiceId,
+              payload: { fromAccountId },
+            })
+          }}
+          payFromAccountOptions={payFromAccountOptions}
+        />
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Compra parcelada</CardTitle>
-          </CardHeader>
-          <CardContent>
+        <Widget className='self-start' title='Compra parcelada'>
+          <WidgetPanel>
             <InstallmentPurchaseForm
               accountId={accountId}
               categoryOptions={categoryOptions}
               currency={account?.currency ?? 'BRL'}
               onCreated={() => invoicesQuery.refetch()}
             />
-          </CardContent>
-        </Card>
+          </WidgetPanel>
+        </Widget>
       </div>
-    </section>
+    </Page>
   )
 }

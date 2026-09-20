@@ -89,10 +89,13 @@ age sem registro legível é indefensável.
 
 ## Decisões a registrar
 
+O número sai de [`decisions/README.md`](../../decisions/README.md) no momento de
+registrar, não antes.
+
 | # | Decisão |
 | ---: | --- |
-| 038 | perfil de agente é dado do workspace; a allowlist é aplicada na execução |
-| 039 | gatilho cron carrega fuso explícito do workspace |
+| — | perfil de agente é dado do workspace; a allowlist é aplicada na execução |
+| — | gatilho cron carrega fuso explícito do workspace |
 
 ## Fatias de commit
 

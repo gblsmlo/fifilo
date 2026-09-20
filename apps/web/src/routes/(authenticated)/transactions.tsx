@@ -15,5 +15,12 @@ function TransactionsRoute() {
   const search = Route.useSearch()
   const navigate = Route.useNavigate()
 
-  return <TransactionsPage onSearchChange={(next) => navigate({ search: next })} search={search} />
+  // A functional update: two filter changes in the same tick must not race
+  // over a stale `search` closure and drop each other's param.
+  return (
+    <TransactionsPage
+      onSearchChange={(next) => navigate({ search: (prev) => ({ ...prev, ...next }) })}
+      search={search}
+    />
+  )
 }

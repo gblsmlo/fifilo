@@ -1,5 +1,5 @@
 import { TrendLineChart } from '@fifilo/patterns/charts/trend-line-chart'
-import { Card, CardContent, CardHeader, CardTitle } from '@fifilo/ui/components/card'
+import { Widget, WidgetPanel } from '@fifilo/patterns/widget'
 import { formatMoney } from '@libs/format-money'
 import { useQuery } from '@tanstack/react-query'
 
@@ -11,11 +11,8 @@ export function BalanceEvolutionSection({ from, to }: Readonly<{ from: string; t
   const points = query.data?.consolidated ?? []
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Evolução de saldo</CardTitle>
-      </CardHeader>
-      <CardContent>
+    <Widget description='Saldo consolidado ao longo do período.' title='Evolução de saldo'>
+      <WidgetPanel>
         <TrendLineChart
           data={points.map((point) => ({ balanceMinor: point.balanceMinor, x: point.date }))}
           series={[{ key: 'balanceMinor', label: 'Saldo consolidado' }]}
@@ -29,7 +26,7 @@ export function BalanceEvolutionSection({ from, to }: Readonly<{ from: string; t
           valueFormatter={(value) => formatMoney({ amountMinor: value, currency: 'BRL' })}
           xAxisLabel='Data'
         />
-      </CardContent>
-    </Card>
+      </WidgetPanel>
+    </Widget>
   )
 }

@@ -91,7 +91,7 @@ export const WithPreview: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
     await expect(await canvas.findByTestId('installment-preview')).toBeTruthy()
-    await expect(await canvas.findByText('1/3 — 2026-06-05')).toBeTruthy()
+    await expect(await canvas.findByRole('row', { name: /1\/3.*2026-06-05/ })).toBeTruthy()
   },
   render: () => (
     <InstallmentPurchaseFormFrame defaultValues={{ installments: 3, totalMinor: 10_000 }} />

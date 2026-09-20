@@ -1,9 +1,9 @@
 import type { InvoiceItemResponse, InvoiceResponse } from '@fifilo/core/credit-cards'
+import { DataTable, type DataTableColumn } from '@fifilo/patterns/data-table'
 import { errorCodeToSurfaceKind } from '@fifilo/patterns/state-kinds'
-import { StateSurface } from '@fifilo/patterns/state-surface'
+import { Widget } from '@fifilo/patterns/widget'
 import { Badge } from '@fifilo/ui/components/badge'
 import { Button } from '@fifilo/ui/components/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@fifilo/ui/components/card'
 import {
   Select,
   SelectItem,
@@ -11,6 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@fifilo/ui/components/select'
+import { Text } from '@fifilo/ui/components/text'
 import { formatMoney } from '@libs/format-money'
 import { useState } from 'react'
 
@@ -43,17 +44,50 @@ interface InvoiceDetailProps {
   payFromAccountOptions: readonly SelectOption[]
 }
 
-const groupByDay = (
-  items: readonly InvoiceItemResponse[],
-): ReadonlyArray<[string, InvoiceItemResponse[]]> => {
-  const byDay = new Map<string, InvoiceItemResponse[]>()
-  for (const item of items) {
-    const day = byDay.get(item.occurredOn) ?? []
-    day.push(item)
-    byDay.set(item.occurredOn, day)
-  }
-  return [...byDay.entries()].sort(([a], [b]) => (a < b ? -1 : 1))
-}
+const money = (amountMinor: number) => formatMoney({ amountMinor, currency: 'BRL' })
+
+const columns: DataTableColumn<InvoiceItemResponse>[] = [
+  {
+    cell: (item) => (
+      <Text className='tabular-nums' foreground='muted' render={<span />} size='sm'>
+        {item.occurredOn}
+      </Text>
+    ),
+    header: 'Data',
+    id: 'date',
+  },
+  {
+    cell: (item) => (
+      <Text render={<span />} size='sm' weight='medium'>
+        {item.description}
+        {item.installmentNumber ? ` (parcela ${item.installmentNumber})` : ''}
+      </Text>
+    ),
+    header: 'Descrição',
+    id: 'description',
+  },
+  {
+    align: 'end',
+    cell: (item) => (
+      <Text
+        className='tabular-nums'
+        data-negative={item.amountMinor < 0}
+        render={<span />}
+        size='sm'
+        weight='semibold'
+      >
+        {money(item.amountMinor)}
+      </Text>
+    ),
+    header: 'Valor',
+    id: 'amount',
+  },
+]
+
+const byDay = (items: readonly InvoiceItemResponse[]) =>
+  [...items].sort((a, b) =>
+    a.occurredOn < b.occurredOn ? -1 : a.occurredOn > b.occurredOn ? 1 : 0,
+  )
 
 export function InvoiceDetail({
   error = null,
@@ -69,120 +103,106 @@ export function InvoiceDetail({
 
   if (error) {
     return (
-      <StateSurface
-        actions={
-          error.onRetry ? [{ label: 'Tentar novamente', onPress: error.onRetry }] : undefined
-        }
-        description={error.message}
-        kind={errorCodeToSurfaceKind(error.code)}
-        title='Não foi possível carregar a fatura'
+      <Widget
+        state={errorCodeToSurfaceKind(error.code)}
+        surface={{
+          actions: error.onRetry
+            ? [{ label: 'Tentar novamente', onPress: error.onRetry }]
+            : undefined,
+          description: error.message,
+          title: 'Não foi possível carregar a fatura',
+        }}
+        title='Fatura'
       />
     )
   }
 
   if (!invoice) {
     return (
-      <StateSurface
-        description='Selecione uma fatura na lista para ver os itens.'
-        kind='empty'
-        title='Nenhuma fatura selecionada'
+      <Widget
+        state='empty'
+        surface={{
+          description: 'Selecione uma fatura na lista para ver os itens.',
+          title: 'Nenhuma fatura selecionada',
+        }}
+        title='Fatura'
       />
     )
   }
 
-  const groups = groupByDay(items)
+  const canPay = invoice.status === 'closed' || invoice.status === 'overdue'
+
+  const footer =
+    invoice.status === 'open' || canPay ? (
+      <div className='flex flex-wrap items-center justify-end gap-2'>
+        {invoice.status === 'open' ? (
+          <Button loading={isClosing} onClick={onClose} size='sm' type='button'>
+            Fechar fatura
+          </Button>
+        ) : null}
+        {canPay ? (
+          <>
+            <Select
+              onValueChange={(value) => setPayFromAccountId(value === 'none' ? '' : (value ?? ''))}
+              value={payFromAccountId || 'none'}
+            >
+              <SelectTrigger aria-label='Pagar com'>
+                <SelectValue placeholder='Pagar com…'>
+                  {(value) =>
+                    value === 'none'
+                      ? 'Pagar com…'
+                      : (payFromAccountOptions.find((account) => account.id === value)?.name ??
+                        value)
+                  }
+                </SelectValue>
+              </SelectTrigger>
+              <SelectPopup>
+                <SelectItem value='none'>Pagar com…</SelectItem>
+                {payFromAccountOptions.map((account) => (
+                  <SelectItem key={account.id} value={account.id}>
+                    {account.name}
+                  </SelectItem>
+                ))}
+              </SelectPopup>
+            </Select>
+            <Button
+              disabled={!payFromAccountId}
+              loading={isPaying}
+              onClick={() => onPay(payFromAccountId)}
+              size='sm'
+              type='button'
+            >
+              Pagar fatura
+            </Button>
+          </>
+        ) : null}
+      </div>
+    ) : undefined
 
   return (
-    <div className='flex flex-col gap-4'>
-      <Card>
-        <CardHeader className='flex-row items-center justify-between gap-4'>
-          <div>
-            <CardTitle>
-              {invoice.periodStart} — {invoice.periodEnd}
-            </CardTitle>
-            <p className='text-muted-foreground text-sm'>Vencimento: {invoice.dueOn}</p>
-          </div>
-          <Badge>{STATUS_LABELS[invoice.status]}</Badge>
-        </CardHeader>
-        <CardContent className='flex items-center justify-between gap-4'>
-          <span className='font-semibold text-lg'>
-            {formatMoney({ amountMinor: invoice.totalMinor, currency: 'BRL' })}
-          </span>
-          <div className='flex items-center gap-2'>
-            {invoice.status === 'open' ? (
-              <Button loading={isClosing} onClick={onClose} type='button'>
-                Fechar fatura
-              </Button>
-            ) : null}
-            {invoice.status === 'closed' || invoice.status === 'overdue' ? (
-              <>
-                <Select
-                  onValueChange={(value) =>
-                    setPayFromAccountId(value === 'none' ? '' : (value ?? ''))
-                  }
-                  value={payFromAccountId || 'none'}
-                >
-                  <SelectTrigger aria-label='Pagar com'>
-                    <SelectValue placeholder='Pagar com…'>
-                      {(value) =>
-                        value === 'none'
-                          ? 'Pagar com…'
-                          : (payFromAccountOptions.find((account) => account.id === value)?.name ??
-                            value)
-                      }
-                    </SelectValue>
-                  </SelectTrigger>
-                  <SelectPopup>
-                    <SelectItem value='none'>Pagar com…</SelectItem>
-                    {payFromAccountOptions.map((account) => (
-                      <SelectItem key={account.id} value={account.id}>
-                        {account.name}
-                      </SelectItem>
-                    ))}
-                  </SelectPopup>
-                </Select>
-                <Button
-                  disabled={!payFromAccountId}
-                  loading={isPaying}
-                  onClick={() => onPay(payFromAccountId)}
-                  type='button'
-                >
-                  Pagar fatura
-                </Button>
-              </>
-            ) : null}
-          </div>
-        </CardContent>
-      </Card>
-
-      {items.length === 0 ? (
-        <StateSurface
-          description='Nenhuma compra caiu nessa fatura ainda.'
-          kind='empty'
-          title='Fatura vazia'
-        />
-      ) : (
-        groups.map(([day, dayItems]) => (
-          <div key={day}>
-            <h3 className='mb-2 font-medium text-muted-foreground text-sm'>{day}</h3>
-            <div className='flex flex-col gap-2'>
-              {dayItems.map((item) => (
-                <Card key={item.id}>
-                  <CardContent className='flex items-center justify-between gap-4'>
-                    <span>
-                      {item.description}
-                      {item.installmentNumber ? ` (parcela ${item.installmentNumber})` : ''}
-                    </span>
-                    <span data-negative={item.amountMinor < 0}>
-                      {formatMoney({ amountMinor: item.amountMinor, currency: 'BRL' })}
-                    </span>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
-        ))
-      )}
-    </div>
+    <Widget
+      action={<Badge>{STATUS_LABELS[invoice.status]}</Badge>}
+      description={`Vencimento: ${invoice.dueOn}`}
+      footer={footer}
+      state={items.length === 0 ? 'empty' : 'data'}
+      surface={{
+        description: 'Nenhuma compra caiu nessa fatura ainda.',
+        title: 'Fatura vazia',
+      }}
+      title={`${invoice.periodStart} — ${invoice.periodEnd}`}
+    >
+      <DataTable
+        caption='Itens da fatura'
+        columns={columns}
+        footer={[
+          'Total da fatura',
+          <Text className='tabular-nums' key='total' render={<span />} size='sm' weight='semibold'>
+            {money(invoice.totalMinor)}
+          </Text>,
+        ]}
+        rowKey={(item) => item.id}
+        rows={byDay(items)}
+      />
+    </Widget>
   )
 }

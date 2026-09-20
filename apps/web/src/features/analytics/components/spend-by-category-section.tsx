@@ -1,5 +1,5 @@
 import { RankedBarChart } from '@fifilo/patterns/charts/ranked-bar-chart'
-import { Card, CardContent, CardHeader, CardTitle } from '@fifilo/ui/components/card'
+import { Widget, WidgetPanel } from '@fifilo/patterns/widget'
 import { formatMoney } from '@libs/format-money'
 import { useQuery } from '@tanstack/react-query'
 
@@ -11,11 +11,8 @@ export function SpendByCategorySection({ from, to }: Readonly<{ from: string; to
   const rows = query.data ?? []
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Gasto por categoria</CardTitle>
-      </CardHeader>
-      <CardContent>
+    <Widget description='Despesa acumulada por categoria no período.' title='Gasto por categoria'>
+      <WidgetPanel>
         <RankedBarChart
           data={rows.map((row) => ({
             id: row.categoryId,
@@ -32,7 +29,7 @@ export function SpendByCategorySection({ from, to }: Readonly<{ from: string; to
           valueFormatter={(value) => formatMoney({ amountMinor: value, currency: 'BRL' })}
           valueLabel='Total gasto'
         />
-      </CardContent>
-    </Card>
+      </WidgetPanel>
+    </Widget>
   )
 }

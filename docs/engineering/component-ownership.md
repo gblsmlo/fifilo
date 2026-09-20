@@ -12,7 +12,7 @@ is the active map of the layers, kept against what exists in the workspace.
 | Layer | Responsibility | Examples |
 | --- | --- | --- |
 | `packages/ui/src/components` | reusable, domain-neutral visual primitive | `Button`, `Field`, `Dialog`, `Empty`, `Spinner` |
-| `packages/patterns/src` | reusable neutral composition with a stable visual or interaction contract | `StateSurface`, `StateGuard`, `Dialog` shell, `ConfirmDialog`, `DestructiveDialog`, `PasswordStrength`, `SettingsRow` |
+| `packages/patterns/src` | reusable neutral composition with a stable visual or interaction contract | `StateSurface`, `StateGuard`, `Dialog` shell, `ConfirmDialog`, `DestructiveDialog`, `PasswordStrength`, `SettingsRow`, `Widget`, `DataTable`, `Stat` |
 | `apps/web/src/layouts` | global shell coupled to router, session, navigation or app chrome | `AppLayout`, `AppHeader`, `AppSidebar`, `AppAuthLayout` |
 | `apps/web/src/components` | page structure exclusive to the web app | `Page`, `PasswordField` |
 | `apps/web/src/features/<feature>` | UI with the vocabulary, data or behavior of one capability | `SignInFormFields`, `OrganizationOnboardingPage` |
@@ -33,6 +33,29 @@ vocabulary (`loading`, `empty`, `error`, `permission`, `ready`) lives once in
 A domain-neutral shell goes to `packages/patterns` without waiting for a second
 consumer. What requires a second consumer is generalizing a shell's API, not
 creating it.
+
+## The widget family
+
+A screen behind the sidebar is a `Page` header followed by widgets. The
+widget family reproduces the Coss `CardFrame` particles and is the only way a
+feature draws a list, a table or a key figure:
+
+- `Widget` (`@fifilo/patterns/widget`) is the frame: heading, description,
+  action, body and footer. With `state` and `surface` it guards loading,
+  empty, error and permission through `StateGuard` before the body mounts.
+- `DataTable` (`@fifilo/patterns/data-table`) is the body of a list: the Coss
+  `Table` in `card` variant laid straight into the frame, with columns the
+  showcase declares, an optional summary row and optional row selection.
+- `WidgetPanel` is the body of anything that is not a table: a chart, a form,
+  free content.
+- `Stat` and `StatGroup` (`@fifilo/patterns/stat`) highlight one figure each;
+  the showcase formats the value and picks the tone.
+
+A feature never renders a native `table`, `form`, `label`, `ul` or heading of
+its own: tables go through `DataTable`, forms through `Form` and `Field`,
+headings through `Page.Header` or the `Widget` title, and free text through
+`Text`. A card list hand-assembled from `Card` per row is a review finding;
+the row belongs in a `DataTable`.
 
 ## The rules the table does not show
 

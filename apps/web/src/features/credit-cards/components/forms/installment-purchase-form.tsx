@@ -1,5 +1,6 @@
 import type { InstallmentShare } from '@fifilo/core/credit-cards'
 import type { CurrencyCode } from '@fifilo/core/primitives'
+import { DataTable } from '@fifilo/patterns/data-table'
 import { Button } from '@fifilo/ui/components/button'
 import { Field, FieldError, FieldLabel } from '@fifilo/ui/components/field'
 import { Form } from '@fifilo/ui/components/form'
@@ -12,6 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@fifilo/ui/components/select'
+import { Text } from '@fifilo/ui/components/text'
 import { formatMoney } from '@libs/format-money'
 import { Controller, FormProvider, useFormContext } from 'react-hook-form'
 
@@ -140,18 +142,29 @@ export function InstallmentPurchaseFormFields({
       </Field>
 
       {preview.length > 0 ? (
-        <div className='rounded-md border border-border p-3' data-testid='installment-preview'>
-          <p className='mb-2 font-medium text-muted-foreground text-sm'>Parcelas calculadas</p>
-          <ul className='flex flex-col gap-1 text-sm'>
-            {preview.map((share) => (
-              <li className='flex justify-between' key={share.installmentNumber}>
-                <span>
-                  {share.installmentNumber}/{preview.length} — {share.occurredOn}
-                </span>
-                <span>{formatMoney({ amountMinor: share.amountMinor, currency })}</span>
-              </li>
-            ))}
-          </ul>
+        <div className='flex flex-col gap-2' data-testid='installment-preview'>
+          <Text foreground='muted' render={<p />} size='sm' weight='medium'>
+            Parcelas calculadas
+          </Text>
+          <DataTable
+            caption='Parcelas calculadas'
+            columns={[
+              {
+                cell: (share) => `${share.installmentNumber}/${preview.length}`,
+                header: 'Parcela',
+                id: 'installment',
+              },
+              { cell: (share) => share.occurredOn, header: 'Data', id: 'date' },
+              {
+                align: 'end',
+                cell: (share) => formatMoney({ amountMinor: share.amountMinor, currency }),
+                header: 'Valor',
+                id: 'amount',
+              },
+            ]}
+            rowKey={(share) => String(share.installmentNumber)}
+            rows={preview}
+          />
         </div>
       ) : null}
 

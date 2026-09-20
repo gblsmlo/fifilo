@@ -1,5 +1,5 @@
 import { TrendLineChart } from '@fifilo/patterns/charts/trend-line-chart'
-import { Card, CardContent, CardHeader, CardTitle } from '@fifilo/ui/components/card'
+import { Widget, WidgetPanel } from '@fifilo/patterns/widget'
 import { formatMoney } from '@libs/format-money'
 import { useQuery } from '@tanstack/react-query'
 
@@ -11,11 +11,8 @@ export function MonthlyCashflowSection({ from, to }: Readonly<{ from: string; to
   const points = query.data ?? []
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Fluxo mensal</CardTitle>
-      </CardHeader>
-      <CardContent>
+    <Widget description='Receita e despesa por mês do período.' title='Fluxo mensal'>
+      <WidgetPanel>
         <TrendLineChart
           data={points.map((point) => ({
             expenseMinor: point.expenseMinor,
@@ -36,7 +33,7 @@ export function MonthlyCashflowSection({ from, to }: Readonly<{ from: string; to
           valueFormatter={(value) => formatMoney({ amountMinor: value, currency: 'BRL' })}
           xAxisLabel='Mês'
         />
-      </CardContent>
-    </Card>
+      </WidgetPanel>
+    </Widget>
   )
 }

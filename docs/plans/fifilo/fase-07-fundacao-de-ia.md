@@ -124,13 +124,15 @@ Mais dois específicos deste domínio:
       aparece no payload que sai.
 - [x] Teste de orçamento estourado.
 - [x] Kill switch desliga e o produto continua de pé.
-- [ ] **Bloqueado.** Contabilidade de token conferida contra uma chamada real a
-      cada provedor - nem `ANTHROPIC_API_KEY` nem `OPENROUTER_API_KEY` existem
-      neste ambiente. `mapAnthropicEvent` e o parsing SSE do OpenRouter estão
-      testados contra eventos sintéticos de formato documentado e um
-      transporte mockado, respectivamente - o único item que uma chamada real
-      ainda prova é a integração de fato com o provedor, não a lógica de
-      mapeamento em si. Ver Registro de sessões.
+- [x] **Movido para portão operacional.** A contabilidade de token conferida
+      contra uma chamada real a cada provedor deixou de ser critério desta
+      fase e passou a ser o [portão operacional](README.md#portão-operacional--chamada-real-a-cada-provedor)
+      que incide sobre a fatia de Web da Fase 08. Motivo: o item prova
+      integração com um serviço de terceiro, não o código desta fase, e como
+      critério de fase deixava a Fase 08 começar contra uma dependência
+      declarada aberta. `mapAnthropicEvent` e o parsing SSE do OpenRouter
+      seguem testados contra eventos sintéticos de formato documentado e um
+      transporte mockado. Ver Registro de sessões.
 - [x] Cinco provas negativas de RLS em `ai_runs` e `ai_budgets`.
 
 ## Decisões a registrar
@@ -207,3 +209,18 @@ que não existem neste ambiente. A fase fica **Bloqueada** no `README.md` do
 roadmap, não **Concluída** - o Portão do Marco 2 já estava fechado pela Fase
 06; esta fase não o reabre nem o mantém fechado por si mesma, mas o próprio
 critério desta fase permanece aberto até a chamada real acontecer.
+
+### Sessão 2 — 2026-09-20 — reparo do plano, sem toque em código
+
+A Sessão 1 deixou a fase **Bloqueada** por um item que não era código dela. A
+Fase 08 começou mesmo assim, contra uma dependência declarada aberta — o portão
+existia no texto e não existia na prática.
+
+Reparo: a contabilidade de token contra uma chamada real saiu do critério de
+conclusão desta fase e virou o portão operacional registrado no
+[`README.md`](README.md) do roadmap, incidindo sobre a fatia de Web da Fase 08,
+que é onde a IA fica visível para um usuário. A fase passa a **Concluída** pelo
+código que entregou; a prova de integração com provedor continua obrigatória,
+com dono explícito e no ponto em que de fato importa.
+
+Nenhum arquivo de código foi tocado nesta sessão.

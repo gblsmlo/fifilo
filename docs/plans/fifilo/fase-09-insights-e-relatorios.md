@@ -109,10 +109,13 @@ fechado.
 
 ## Decisões a registrar
 
+O número sai de [`decisions/README.md`](../../decisions/README.md) no momento de
+registrar, não antes.
+
 | # | Decisão |
 | ---: | --- |
-| 034 | anomalia é detectada por estatística; o modelo explica, não descobre |
-| 035 | insight sem evidência rastreável não é publicado |
+| — | anomalia é detectada por estatística; o modelo explica, não descobre |
+| — | insight sem evidência rastreável não é publicado |
 
 ## Fatias de commit
 

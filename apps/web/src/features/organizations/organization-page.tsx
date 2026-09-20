@@ -1,9 +1,11 @@
 import { authClient } from '@fifilo/auth/client'
 import type { PublicOrganization } from '@fifilo/core/contracts/users'
+import { DataTable, type DataTableColumn } from '@fifilo/patterns/data-table'
+import { Widget, WidgetPanel } from '@fifilo/patterns/widget'
 import { Badge } from '@fifilo/ui/components/badge'
 import { Button } from '@fifilo/ui/components/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@fifilo/ui/components/card'
 import { Field, FieldDescription, FieldError, FieldLabel } from '@fifilo/ui/components/field'
+import { Form } from '@fifilo/ui/components/form'
 import { Input } from '@fifilo/ui/components/input'
 import {
   Select,
@@ -12,7 +14,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@fifilo/ui/components/select'
+import { Text } from '@fifilo/ui/components/text'
 import { useRouter } from '@tanstack/react-router'
+import { Page } from '@web/components/page'
 import { type FormEvent, useEffect, useState } from 'react'
 
 interface OrganizationPageProps {
@@ -107,19 +111,83 @@ export function OrganizationPage({ organization, role }: Readonly<OrganizationPa
 
   const availableOrganizations = organizations.length > 0 ? organizations : [organization]
 
-  return (
-    <section className='mx-auto flex w-full max-w-3xl flex-col gap-6 p-6'>
-      <div className='space-y-2'>
-        <Badge variant='secondary'>{ROLE_LABELS[role] ?? role}</Badge>
-        <h1 className='font-semibold text-3xl tracking-tight'>{organization.name}</h1>
-        <p className='text-muted-foreground'>Tenant ativo: {organization.slug}</p>
-      </div>
+  const memberColumns: DataTableColumn<Member>[] = [
+    {
+      cell: (member) => (
+        <div className='flex flex-col gap-0.5'>
+          <Text render={<span />} size='sm' weight='medium'>
+            {member.user.name}
+          </Text>
+          <Text foreground='muted' render={<span />} size='xs'>
+            {member.user.email}
+          </Text>
+        </div>
+      ),
+      header: 'Membro',
+      id: 'member',
+    },
+    {
+      cell: (member) =>
+        member.role === 'owner' ? (
+          <Badge variant='secondary'>{ROLE_LABELS.owner}</Badge>
+        ) : (
+          <Select
+            disabled={!canManageMembers}
+            onValueChange={(value) => {
+              if (value) void changeRole(member.id, value as InvitableRole)
+            }}
+            value={member.role}
+          >
+            <SelectTrigger
+              aria-label={`Papel de ${member.user.name}`}
+              className='min-w-44'
+              title={canManageMembers ? undefined : 'Somente owner e admin trocam papéis.'}
+            >
+              <SelectValue>{(value) => ROLE_LABELS[String(value)] ?? value}</SelectValue>
+            </SelectTrigger>
+            <SelectPopup>
+              {INVITABLE_ROLES.map((option) => (
+                <SelectItem key={option} value={option}>
+                  {ROLE_LABELS[option]}
+                </SelectItem>
+              ))}
+            </SelectPopup>
+          </Select>
+        ),
+      header: 'Papel',
+      id: 'role',
+    },
+    {
+      align: 'end',
+      cell: (member) =>
+        member.role === 'owner' ? null : (
+          <Button
+            disabled={!canManageMembers}
+            onClick={() => removeMember(member.id)}
+            size='sm'
+            title={canManageMembers ? undefined : 'Somente owner e admin removem membros.'}
+            type='button'
+            variant='ghost'
+          >
+            Remover
+          </Button>
+        ),
+      header: <span className='sr-only'>Ações</span>,
+      id: 'actions',
+    },
+  ]
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Alternar organização</CardTitle>
-        </CardHeader>
-        <CardContent>
+  return (
+    <Page width='md'>
+      <Page.Header
+        align='start'
+        description={`Tenant ativo: ${organization.slug}`}
+        meta={<Badge variant='secondary'>{ROLE_LABELS[role] ?? role}</Badge>}
+        title={organization.name}
+      />
+
+      <Widget title='Alternar organização'>
+        <WidgetPanel>
           <Field name='active-organization'>
             <FieldLabel>Workspace ativo</FieldLabel>
             <Select
@@ -145,83 +213,39 @@ export function OrganizationPage({ organization, role }: Readonly<OrganizationPa
               </SelectPopup>
             </Select>
           </Field>
-        </CardContent>
-      </Card>
+        </WidgetPanel>
+      </Widget>
 
       {canViewMembers ? (
-        <Card>
-          <CardHeader>
-            <CardTitle>Membros</CardTitle>
-          </CardHeader>
-          <CardContent className='flex flex-col gap-3'>
-            {members.length === 0 ? (
-              <p className='text-muted-foreground text-sm'>Nenhum membro carregado ainda.</p>
-            ) : (
-              members.map((member) => (
-                <div className='flex items-center justify-between gap-4' key={member.id}>
-                  <div>
-                    <p className='font-medium text-sm'>{member.user.name}</p>
-                    <p className='text-muted-foreground text-sm'>{member.user.email}</p>
-                  </div>
-                  {member.role === 'owner' ? (
-                    <Badge variant='secondary'>{ROLE_LABELS.owner}</Badge>
-                  ) : (
-                    <div className='flex items-center gap-2'>
-                      <Select
-                        disabled={!canManageMembers}
-                        onValueChange={(value) => {
-                          if (value) void changeRole(member.id, value as InvitableRole)
-                        }}
-                        value={member.role}
-                      >
-                        <SelectTrigger
-                          aria-label={`Papel de ${member.user.name}`}
-                          title={
-                            canManageMembers ? undefined : 'Somente owner e admin trocam papéis.'
-                          }
-                        >
-                          <SelectValue>
-                            {(value) => ROLE_LABELS[String(value)] ?? value}
-                          </SelectValue>
-                        </SelectTrigger>
-                        <SelectPopup>
-                          {INVITABLE_ROLES.map((option) => (
-                            <SelectItem key={option} value={option}>
-                              {ROLE_LABELS[option]}
-                            </SelectItem>
-                          ))}
-                        </SelectPopup>
-                      </Select>
-                      <Button
-                        disabled={!canManageMembers}
-                        onClick={() => removeMember(member.id)}
-                        title={
-                          canManageMembers ? undefined : 'Somente owner e admin removem membros.'
-                        }
-                        type='button'
-                        variant='ghost'
-                      >
-                        Remover
-                      </Button>
-                    </div>
-                  )}
-                </div>
-              ))
-            )}
-            {memberFeedback ? (
-              <p className='text-destructive-foreground text-sm'>{memberFeedback}</p>
-            ) : null}
-          </CardContent>
-        </Card>
+        <Widget
+          description='Quem acessa este workspace e com qual papel.'
+          footer={
+            memberFeedback ? (
+              <Text foreground='destructive' render={<p role='alert' />} size='sm'>
+                {memberFeedback}
+              </Text>
+            ) : undefined
+          }
+          state={members.length === 0 ? 'empty' : 'data'}
+          surface={{
+            description: 'Os membros aparecem aqui assim que a lista carregar.',
+            title: 'Nenhum membro carregado ainda',
+          }}
+          title='Membros'
+        >
+          <DataTable
+            caption='Membros da organização'
+            columns={memberColumns}
+            rowKey={(member) => member.id}
+            rows={members}
+          />
+        </Widget>
       ) : null}
 
       {canManageMembers ? (
-        <Card>
-          <CardHeader>
-            <CardTitle>Convidar membro</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <form className='flex flex-col gap-4 sm:flex-row sm:items-end' onSubmit={invite}>
+        <Widget title='Convidar membro'>
+          <WidgetPanel>
+            <Form className='flex flex-col gap-4 sm:flex-row sm:items-end' onSubmit={invite}>
               <Field className='flex-1' name='member-email'>
                 <FieldLabel>Email</FieldLabel>
                 <Input
@@ -257,10 +281,10 @@ export function OrganizationPage({ organization, role }: Readonly<OrganizationPa
                 </FieldDescription>
               </Field>
               <Button type='submit'>Enviar convite</Button>
-            </form>
-          </CardContent>
-        </Card>
+            </Form>
+          </WidgetPanel>
+        </Widget>
       ) : null}
-    </section>
+    </Page>
   )
 }

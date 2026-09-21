@@ -18,6 +18,8 @@ import type { ReactNode } from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
 import { expect, userEvent, within } from 'storybook/test'
 
+import { withOnboardingRoute } from '../../../test-utils/auth-story-router'
+
 const settings = {
   currency: 'BRL',
   locale: 'pt-BR',
@@ -125,7 +127,7 @@ export const WorkspaceSettingsEdited: Story = {
 export const FirstAccount: Story = {
   render: () => (
     <div className='max-w-xl space-y-4'>
-      <h2 className='font-semibold text-xl'>Crie sua primeira conta</h2>
+      <h2 className='font-semibold text-xl'>Onde está seu dinheiro hoje?</h2>
       <FirstAccountForm />
     </div>
   ),
@@ -138,14 +140,35 @@ export const FirstAccount: Story = {
 }
 
 export const Completion: Story = {
+  decorators: [
+    withOnboardingRoute,
+    withQueryState({
+      '["accounts","balances"]': {
+        accounts: [{ accountId: 'acc_story', balance: { amountMinor: 428_000, currency: 'BRL' } }],
+        consolidated: { amountMinor: 428_000, currency: 'BRL' },
+      },
+    }),
+  ],
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'O desfecho é o saldo da pessoa, não a palavra "concluído": é o que prova que o setup produziu algo verdadeiro.',
+      },
+    },
+  },
   render: () => <OnboardingCompletion />,
   play: async ({ canvasElement }) => {
-    await expect(await within(canvasElement).findByText('Configuração concluída')).toBeTruthy()
+    const canvas = within(canvasElement)
+
+    await expect(await canvas.findByText(/Seu saldo: R\$\s*4\.280,00/)).toBeTruthy()
+    await expect(await canvas.findByRole('link', { name: 'Registrar um lançamento' })).toBeTruthy()
   },
 }
 
 export const SkippedReminder: Story = {
   decorators: [
+    withOnboardingRoute,
     withQueryState({
       '["onboarding"]': {
         complete: false,
@@ -160,7 +183,7 @@ export const SkippedReminder: Story = {
   render: () => <SetupReminder />,
   play: async ({ canvasElement }) => {
     await expect(
-      await within(canvasElement).findByText('Finalize sua configuração financeira'),
+      await within(canvasElement).findByText('Falta pouco para o painel fazer sentido'),
     ).toBeTruthy()
   },
 }

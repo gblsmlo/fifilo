@@ -1,6 +1,7 @@
 import { Alert, AlertAction, AlertDescription, AlertTitle } from '@fifilo/ui/components/alert'
 import { Button } from '@fifilo/ui/components/button'
 import { useQuery } from '@tanstack/react-query'
+import { Link } from '@tanstack/react-router'
 import { SparklesIcon } from 'lucide-react'
 
 import { onboardingStatusQueryOptions } from '../query-options'
@@ -12,12 +13,14 @@ export function SetupReminder() {
   return (
     <Alert variant='info'>
       <SparklesIcon aria-hidden='true' />
-      <AlertTitle>Finalize sua configuração financeira</AlertTitle>
-      <AlertDescription>
-        Adicione as configurações do workspace e sua primeira conta.
-      </AlertDescription>
+      <AlertTitle>Falta pouco para o painel fazer sentido</AlertTitle>
+      <AlertDescription>Confirme sua região e diga onde está seu dinheiro hoje.</AlertDescription>
       <AlertAction>
-        <Button render={<a href='/onboarding/setup'>Continuar</a>} size='sm' variant='outline' />
+        <Button
+          render={<Link to='/onboarding/setup'>Continuar</Link>}
+          size='sm'
+          variant='outline'
+        />
       </AlertAction>
     </Alert>
   )

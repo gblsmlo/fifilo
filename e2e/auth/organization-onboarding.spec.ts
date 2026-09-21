@@ -61,17 +61,17 @@ test.describe('@auth first access and organization creation', () => {
     await page.getByRole('combobox', { name: 'Idioma e formato' }).click()
     await page.getByRole('option', { name: 'Português (Brasil)' }).click()
     await page.getByRole('button', { name: 'Continuar' }).click()
-    await expect(page.getByText('Crie sua primeira conta')).toBeVisible()
+    await expect(page.getByText('Onde está seu dinheiro hoje?')).toBeVisible()
     await page.getByLabel('Nome').fill('Conta principal')
     await page.getByRole('combobox', { name: 'Tipo' }).click()
     await page.getByRole('option', { name: 'Conta corrente' }).click()
     await page.getByLabel('Instituição (opcional)').fill('Banco E2E')
     await page.getByRole('button', { name: 'Criar conta' }).click()
-    await expect(page.getByText('Configuração concluída')).toBeVisible()
+    await expect(page.getByText('Tudo pronto')).toBeVisible()
     await page.getByRole('link', { name: 'Ir para o painel' }).click()
     await expect(page).toHaveURL(/\/dashboard/)
     await expect(page.getByText(/painel de Organização E2E/)).toBeVisible()
-    await expect(page.getByText('Finalize sua configuração financeira')).toHaveCount(0)
+    await expect(page.getByText('Falta pouco para o painel fazer sentido')).toHaveCount(0)
 
     // Revisiting onboarding with an active organization goes back to the app.
     await page.goto('/onboarding')
@@ -86,14 +86,14 @@ test.describe('@auth first access and organization creation', () => {
 
   test('skipping persists and resumes at the unfinished settings step', async ({ page }) => {
     await createOrganization(page, 'skip-setup')
-    await page.getByRole('button', { name: 'Pular por agora' }).click()
+    await page.getByRole('button', { name: 'Faço isso depois' }).click()
     await expect(page).toHaveURL(/\/dashboard/)
-    await expect(page.getByText('Finalize sua configuração financeira')).toBeVisible()
+    await expect(page.getByText('Falta pouco para o painel fazer sentido')).toBeVisible()
     await page.reload()
-    await expect(page.getByText('Finalize sua configuração financeira')).toBeVisible()
+    await expect(page.getByText('Falta pouco para o painel fazer sentido')).toBeVisible()
     await page.getByRole('link', { name: 'Continuar' }).click()
     await expect(page).toHaveURL(/\/onboarding\/setup$/)
-    await expect(page.getByText('Configure seu workspace')).toBeVisible()
+    await expect(page.getByText('Confirme sua região')).toBeVisible()
 
     // The seeding runs on every entry to the setup, so coming back through the
     // reminder repairs a workspace that skipped straight past it.

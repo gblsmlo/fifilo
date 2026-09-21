@@ -36,8 +36,10 @@ export function FinancialOnboardingPage() {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Configure seu workspace</CardTitle>
-          <CardDescription>Escolha como o Fifilo deve interpretar datas e valores.</CardDescription>
+          <CardTitle>Confirme sua região</CardTitle>
+          <CardDescription>
+            Como o Fifilo deve interpretar suas datas e seus valores.
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <WorkspaceSettingsSetup
@@ -48,7 +50,7 @@ export function FinancialOnboardingPage() {
         </CardContent>
         <CardFooter>
           <Button onClick={skip} variant='ghost'>
-            Pular por agora
+            Faço isso depois
           </Button>
         </CardFooter>
       </Card>
@@ -58,8 +60,10 @@ export function FinancialOnboardingPage() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Crie sua primeira conta</CardTitle>
-        <CardDescription>Comece com uma conta corrente, carteira ou investimento.</CardDescription>
+        <CardTitle>Onde está seu dinheiro hoje?</CardTitle>
+        <CardDescription>
+          Comece pela conta que você mais usa. Dá para adicionar outras depois.
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <AccountForm
@@ -70,7 +74,7 @@ export function FinancialOnboardingPage() {
       </CardContent>
       <CardFooter>
         <Button onClick={skip} variant='ghost'>
-          Pular por agora
+          Faço isso depois
         </Button>
       </CardFooter>
     </Card>

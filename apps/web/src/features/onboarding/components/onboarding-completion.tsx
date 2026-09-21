@@ -1,3 +1,4 @@
+import { accountBalancesQueryOptions } from '@features/accounts'
 import { Button } from '@fifilo/ui/components/button'
 import {
   Card,
@@ -6,19 +7,31 @@ import {
   CardHeader,
   CardTitle,
 } from '@fifilo/ui/components/card'
+import { formatMoney } from '@libs/format-money'
+import { useQuery } from '@tanstack/react-query'
+import { Link } from '@tanstack/react-router'
 
+/**
+ * The balance is the whole point of the screen: a setup that ends on
+ * "concluído" has proved nothing, and one that ends on the person's own money
+ * has. Invitation moved out — there is nothing to share yet.
+ */
 export function OnboardingCompletion() {
+  const { data } = useQuery(accountBalancesQueryOptions())
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Configuração concluída</CardTitle>
+        <CardTitle>
+          {data ? `Seu saldo: ${formatMoney(data.consolidated)}` : 'Tudo pronto'}
+        </CardTitle>
         <CardDescription>
-          Seu workspace já está pronto para organizar sua vida financeira.
+          Tudo pronto. Registre um lançamento para o painel ganhar vida.
         </CardDescription>
       </CardHeader>
       <CardFooter className='flex flex-wrap gap-3'>
-        <Button render={<a href='/dashboard'>Ir para o painel</a>} />
-        <Button render={<a href='/organization'>Convidar alguém</a>} variant='outline' />
+        <Button render={<Link to='/transactions'>Registrar um lançamento</Link>} />
+        <Button render={<Link to='/dashboard'>Ir para o painel</Link>} variant='outline' />
       </CardFooter>
     </Card>
   )

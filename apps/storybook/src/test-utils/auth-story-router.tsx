@@ -16,20 +16,22 @@ const AUTH_PATHS = [
   '/two-factor',
 ] as const
 
+const ONBOARDING_PATHS = ['/dashboard', '/transactions', '/onboarding/setup'] as const
+
 /**
  * Under `@storybook/react-vite` there is no automatic router wrapper, so a
  * `Link` outside router context throws. The story mounts the minimal tree with
- * the access journey destinations and leaves the component on a neutral route:
+ * the journey's destinations and leaves the component on a neutral route:
  * resolving the story through the real tree would erase `args` and controls.
  */
-export function withAuthRoute(Story: ComponentType) {
+const withRouteDestinations = (paths: readonly string[]) => (Story: ComponentType) => {
   const rootRoute = createRootRoute({ component: () => <Outlet /> })
   const storyRoute = createRoute({
     component: () => <Story />,
     getParentRoute: () => rootRoute,
     path: '/',
   })
-  const destinations = AUTH_PATHS.map((path) =>
+  const destinations = paths.map((path) =>
     createRoute({ component: () => null, getParentRoute: () => rootRoute, path }),
   )
   const router = createRouter({
@@ -39,3 +41,7 @@ export function withAuthRoute(Story: ComponentType) {
 
   return <RouterProvider router={router} />
 }
+
+export const withAuthRoute = withRouteDestinations(AUTH_PATHS)
+
+export const withOnboardingRoute = withRouteDestinations(ONBOARDING_PATHS)

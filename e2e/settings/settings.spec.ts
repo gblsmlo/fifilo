@@ -38,11 +38,12 @@ async function signUpAndCreateOrganization(page: Page, name: string): Promise<vo
   await page.getByRole('textbox', { exact: true, name: 'Slug' }).fill(slug)
   await page.getByRole('button', { name: 'Criar organização' }).click()
   await expect(page).toHaveURL(/\/onboarding\/setup$/)
-  await page.getByRole('button', { name: 'Continuar' }).click()
-  await expect(page.getByText('Crie sua primeira conta')).toBeVisible()
+  // The region step arrives detected; this journey accepts it as offered.
+  await page.getByRole('button', { name: 'Está certo' }).click()
+  await expect(page.getByText('Onde está seu dinheiro hoje?')).toBeVisible()
   await page.getByLabel('Nome').fill('Conta de teste')
   await page.getByRole('button', { name: 'Criar conta' }).click()
-  await expect(page.getByText('Configuração concluída')).toBeVisible()
+  await expect(page.getByText('Tudo pronto')).toBeVisible()
   await page.getByRole('link', { name: 'Ir para o painel' }).click()
   await expect(page).toHaveURL(/\/dashboard/)
 }

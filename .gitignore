@@ -149,3 +149,6 @@ vite.config.ts.timestamp-*
 
 # Claude Code: settings pessoais da maquina (o versionado e settings.json)
 .claude/settings.local.json
+
+# Codex: sessao local do agente, nunca versionada
+.codex/

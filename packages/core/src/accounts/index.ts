@@ -24,6 +24,7 @@ export type {
   UpdateAccountRequest,
 } from './schemas'
 export {
+  OPENING_BALANCE_DATE_ERROR,
   accountBalanceSchema,
   accountBalancesResponseSchema,
   accountErrorResponseSchema,
@@ -32,6 +33,7 @@ export {
   createAccountRequestObjectSchema,
   createAccountRequestSchema,
   listAccountsQuerySchema,
+  openingBalanceHasDate,
   updateAccountRequestSchema,
 } from './schemas'
 export type { ArchiveAccountCommand, ArchiveAccountError } from './use-cases/archive-account'

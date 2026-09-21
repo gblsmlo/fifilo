@@ -104,7 +104,7 @@ export function AccountsPage() {
       </CollectionProvider>
 
       <Dialog
-        description='O saldo começa zerado; um lançamento alimenta a conta depois.'
+        description='Informe o saldo atual para a conta começar do ponto certo.'
         onOpenChange={setCreating}
         open={creating}
         title='Nova conta'

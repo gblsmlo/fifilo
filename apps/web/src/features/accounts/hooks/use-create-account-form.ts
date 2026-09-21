@@ -1,3 +1,7 @@
+// Deep import, not the feature barrel: `@features/transactions` reaches back
+// into `@features/accounts`, and going through both barrels would close a
+// cycle. `resolve-this-month` imports nothing from here.
+import { civilDateToday } from '@features/transactions/resolve-this-month'
 import { toastManager } from '@fifilo/ui/components/toast'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useQueryClient } from '@tanstack/react-query'
@@ -16,12 +20,26 @@ export type { AccountFormInput, AccountFormValues } from '../schemas/account-for
 
 export interface UseCreateAccountFormParams {
   onCreated?: () => void
+  /**
+   * `workspace_settings.timezone`, resolved by the caller. Required, not
+   * defaulted: the API filters balances by the workspace's own civil today
+   * (`accounts.routes.ts` § balances), so an opening entry prefilled from a
+   * guessed timezone can land a day ahead of that filter and report the
+   * account as empty right after it was funded.
+   */
+  timezone: string
 }
 
-export function useCreateAccountForm({ onCreated }: UseCreateAccountFormParams = {}) {
+export function useCreateAccountForm({ onCreated, timezone }: UseCreateAccountFormParams) {
   const queryClient = useQueryClient()
   const form = useForm<AccountFormInput, unknown, AccountFormValues>({
-    defaultValues: { institution: null, kind: 'checking', name: '' },
+    defaultValues: {
+      institution: null,
+      kind: 'checking',
+      name: '',
+      openingBalanceDate: civilDateToday(timezone),
+      openingBalanceMinor: 0,
+    },
     mode: 'onSubmit',
     resolver: zodResolver(accountFormSchema),
   })

@@ -21,7 +21,13 @@ const rejectDuplicateName: AccountSubmit = async (form) => {
 
 function AccountFormFrame({ onSubmit }: Readonly<{ onSubmit: AccountSubmit }>) {
   const form = useForm<AccountFormInput, unknown, AccountFormValues>({
-    defaultValues: { institution: null, kind: 'checking', name: '' },
+    defaultValues: {
+      institution: null,
+      kind: 'checking',
+      name: '',
+      openingBalanceDate: '2026-09-21',
+      openingBalanceMinor: 0,
+    },
     resolver: zodResolver(accountFormSchema),
   })
 
@@ -49,7 +55,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'Formulário de criação de conta. Sem saldo de abertura ainda: a entrada monetária mascarada é uma entrega própria.',
+          'Formulário de criação de conta. O saldo de abertura edita o inteiro em unidade menor (Decision 017) e exige a data civil em que o saldo vale (Decision 018).',
       },
     },
   },
@@ -80,6 +86,25 @@ export const ValidationErrors: Story = {
     await userEvent.click(await canvas.findByRole('button', { name: 'Criar conta' }))
 
     await expect(await canvas.findByText('Informe o nome da conta.')).toBeTruthy()
+  },
+  render: () => <AccountFormFrame onSubmit={ignoreSubmit} />,
+}
+
+export const OpeningBalance: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Cada tecla acrescenta um dígito à unidade menor e o campo reformata a partir dela: nenhuma tecla passa por float (Decision 017).',
+      },
+    },
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    await userEvent.type(await canvas.findByLabelText('Saldo hoje'), '428000')
+
+    await expect(await canvas.findByDisplayValue('4.280,00')).toBeTruthy()
   },
   render: () => <AccountFormFrame onSubmit={ignoreSubmit} />,
 }

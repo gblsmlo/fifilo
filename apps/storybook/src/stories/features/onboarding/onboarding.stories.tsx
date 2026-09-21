@@ -59,7 +59,13 @@ function WorkspaceSettingsSetupFrame() {
 
 function FirstAccountForm() {
   const form = useForm<AccountFormInput, unknown, AccountFormValues>({
-    defaultValues: { institution: null, kind: 'checking', name: '' },
+    defaultValues: {
+      institution: null,
+      kind: 'checking',
+      name: '',
+      openingBalanceDate: '2026-09-21',
+      openingBalanceMinor: 0,
+    },
     resolver: zodResolver(accountFormSchema),
   })
 

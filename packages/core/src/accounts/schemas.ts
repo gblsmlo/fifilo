@@ -46,15 +46,26 @@ export const createAccountRequestObjectSchema = z.object({
   openingBalanceMinor: moneySchema.shape.amountMinor.optional(),
 })
 
+export const OPENING_BALANCE_DATE_ERROR = 'Informe a data do saldo de abertura.'
+
 /**
  * The opening balance is optional; when present it becomes the account's
  * first entry (Fase 01 § Modelagem), so the civil date it happened on
  * (Decision 018) is required alongside it — the domain never assumes "today".
+ *
+ * Exported apart from the schema below because `.pick()` cannot carry a
+ * wrapper's `.refine()`, and the Web create form picks a subset of the object
+ * schema (Decision 002 § one fact, one owner).
  */
+export const openingBalanceHasDate = (input: {
+  openingBalanceDate?: string | undefined
+  openingBalanceMinor?: number | undefined
+}): boolean => !input.openingBalanceMinor || Boolean(input.openingBalanceDate)
+
 export const createAccountRequestSchema = createAccountRequestObjectSchema.refine(
-  (input) => !input.openingBalanceMinor || Boolean(input.openingBalanceDate),
+  openingBalanceHasDate,
   {
-    error: 'Informe a data do saldo de abertura.',
+    error: OPENING_BALANCE_DATE_ERROR,
     path: ['openingBalanceDate'],
   },
 )

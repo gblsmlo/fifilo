@@ -1,7 +1,9 @@
+import { workspaceSettingsQueryOptions } from '@features/settings'
 import { Button } from '@fifilo/ui/components/button'
-import { Field, FieldError, FieldLabel } from '@fifilo/ui/components/field'
+import { Field, FieldDescription, FieldError, FieldLabel } from '@fifilo/ui/components/field'
 import { Form } from '@fifilo/ui/components/form'
 import { Input } from '@fifilo/ui/components/input'
+import { MoneyInput } from '@fifilo/ui/components/money-input'
 import {
   Select,
   SelectItem,
@@ -9,6 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@fifilo/ui/components/select'
+import { useQuery } from '@tanstack/react-query'
 import { Controller, FormProvider, useFormContext } from 'react-hook-form'
 
 import { type AccountFormInput, useCreateAccountForm } from '../../hooks/use-create-account-form'
@@ -26,7 +29,19 @@ interface AccountFormProps {
 }
 
 export function AccountForm({ onCreated }: Readonly<AccountFormProps>) {
-  const { form, onSubmit } = useCreateAccountForm({ onCreated })
+  const settingsQuery = useQuery(workspaceSettingsQueryOptions())
+
+  if (!settingsQuery.data) return null
+
+  return <AccountFormWithSettings onCreated={onCreated} timezone={settingsQuery.data.timezone} />
+}
+
+interface AccountFormWithSettingsProps extends AccountFormProps {
+  timezone: string
+}
+
+function AccountFormWithSettings({ onCreated, timezone }: Readonly<AccountFormWithSettingsProps>) {
+  const { form, onSubmit } = useCreateAccountForm({ onCreated, timezone })
 
   return (
     <FormProvider {...form}>
@@ -83,6 +98,28 @@ export function AccountFormFields({ onSubmit }: Readonly<AccountFormFieldsProps>
         <FieldLabel>Instituição (opcional)</FieldLabel>
         <Input {...register('institution')} autoComplete='off' placeholder='Ex.: Banco Fifilo' />
         <FieldError>{errors.institution?.message}</FieldError>
+      </Field>
+
+      <Field invalid={Boolean(errors.openingBalanceMinor)} name='openingBalanceMinor'>
+        <FieldLabel>Saldo hoje</FieldLabel>
+        <FieldDescription>
+          O saldo que aparece no seu extrato agora. Entra no total como ponto de partida, sem virar
+          um lançamento.
+        </FieldDescription>
+        <Controller
+          control={control}
+          name='openingBalanceMinor'
+          render={({ field }) => (
+            <MoneyInput onValueMinorChange={field.onChange} valueMinor={field.value ?? 0} />
+          )}
+        />
+        <FieldError>{errors.openingBalanceMinor?.message}</FieldError>
+      </Field>
+
+      <Field invalid={Boolean(errors.openingBalanceDate)} name='openingBalanceDate'>
+        <FieldLabel>Data do saldo</FieldLabel>
+        <Input {...register('openingBalanceDate')} type='date' />
+        <FieldError>{errors.openingBalanceDate?.message}</FieldError>
       </Field>
 
       <div className='grid'>

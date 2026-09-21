@@ -73,6 +73,12 @@ test.describe('@auth first access and organization creation', () => {
     // Revisiting onboarding with an active organization goes back to the app.
     await page.goto('/onboarding')
     await expect(page).toHaveURL(/\/dashboard/)
+
+    // The default set was seeded on the way through the setup, so the first
+    // entry has something to classify.
+    await page.goto('/categories')
+    await expect(page.getByRole('row', { name: 'Alimentação' })).toBeVisible()
+    await expect(page.getByRole('row', { name: 'Salário' })).toBeVisible()
   })
 
   test('skipping persists and resumes at the unfinished settings step', async ({ page }) => {
@@ -85,5 +91,10 @@ test.describe('@auth first access and organization creation', () => {
     await page.getByRole('link', { name: 'Continuar' }).click()
     await expect(page).toHaveURL(/\/onboarding\/setup$/)
     await expect(page.getByText('Configure seu workspace')).toBeVisible()
+
+    // The seeding runs on every entry to the setup, so coming back through the
+    // reminder repairs a workspace that skipped straight past it.
+    await page.goto('/categories')
+    await expect(page.getByRole('row', { name: 'Alimentação' })).toBeVisible()
   })
 })

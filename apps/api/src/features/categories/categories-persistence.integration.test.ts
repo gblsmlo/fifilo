@@ -1,7 +1,8 @@
 import { afterAll, beforeAll, describe, expect, test } from 'bun:test'
+import { DEFAULT_CATEGORIES, buildDefaultCategories } from '@fifilo/core/categories'
 import { generateEntityId } from '@fifilo/core/primitives'
 import { db } from '@fifilo/infra-database/client'
-import { organizations, transactions, users } from '@fifilo/infra-database/schema'
+import { categories, organizations, transactions, users } from '@fifilo/infra-database/schema'
 import { withWorkspaceTransactionOn } from '@fifilo/infra-database/workspace'
 import { and, eq, inArray, sql } from 'drizzle-orm'
 
@@ -140,6 +141,68 @@ describe('categories persistence', () => {
       tx.execute(sql`select id from categories where id = ${id}`),
     )
     expect([...rows]).toHaveLength(0)
+  })
+
+  test('createMany writes the whole batch inside the acting workspace only', async () => {
+    const records = buildDefaultCategories(ORGANIZATION_A)
+
+    const seeded = await repository.createMany(records)
+
+    expect(seeded).toBe(DEFAULT_CATEGORIES.length)
+
+    const mine = await repository.list(ORGANIZATION_A, { includeArchived: true })
+    expect(mine.filter((category) => category.icon !== null).length).toBeGreaterThanOrEqual(
+      DEFAULT_CATEGORIES.length,
+    )
+
+    const theirs = await repository.list(ORGANIZATION_B, { includeArchived: true })
+    expect(theirs.map((category) => category.id)).not.toContain(records[0]?.id ?? '')
+  })
+
+  test('createMany repeated on the same ids writes nothing the second time', async () => {
+    const records = buildDefaultCategories(ORGANIZATION_B)
+
+    expect(await repository.createMany(records)).toBe(DEFAULT_CATEGORIES.length)
+    expect(await repository.createMany(records)).toBe(0)
+  })
+
+  test('createMany cannot plant a batch into another organization (WITH CHECK)', async () => {
+    // The adapter opens the workspace transaction from the batch's own
+    // organization, so the only way to reach the policy is to hand it rows
+    // that claim a different one.
+    const attempt = repository.createMany(
+      buildDefaultCategories(ORGANIZATION_A).map((record, index) =>
+        index === 0 ? record : { ...record, organizationId: ORGANIZATION_B },
+      ),
+    )
+
+    await expect(attempt).rejects.toThrow()
+  })
+
+  test('a failure partway through createMany leaves no category behind', async () => {
+    const records = buildDefaultCategories(ORGANIZATION_A)
+
+    const failure = withWorkspaceTransactionOn(db, ORGANIZATION_A, async (tx) => {
+      await tx.insert(categories).values(
+        records.map((record) => ({
+          createdAt: record.createdAt,
+          icon: record.icon,
+          id: record.id,
+          kind: record.kind,
+          name: `${record.name} rollback`,
+          organizationId: record.organizationId,
+          updatedAt: record.createdAt,
+        })),
+      )
+      throw new Error('forced rollback mid-batch')
+    })
+
+    await expect(failure).rejects.toThrow('forced rollback mid-batch')
+
+    const planted = await withWorkspaceTransactionOn(db, ORGANIZATION_A, (tx) =>
+      tx.execute(sql`select id from categories where name like '%rollback'`),
+    )
+    expect([...planted]).toHaveLength(0)
   })
 
   test('a stale version is a conflict, not a silent overwrite (optimistic concurrency)', async () => {

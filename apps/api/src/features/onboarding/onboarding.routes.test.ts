@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'bun:test'
 import type { WorkspaceRole } from '@fifilo/core/access-control'
+import { DEFAULT_CATEGORIES } from '@fifilo/core/categories'
 import type {
   FinancialOnboardingProgress,
   FinancialOnboardingProgressRepository,
@@ -8,6 +9,7 @@ import type { WorkspaceSettingsRepository } from '@fifilo/core/settings'
 import { Elysia } from 'elysia'
 
 import type { ActorResolution } from '../auth'
+import { createFakeCategoryRepository } from '../categories/categories-test-support'
 import { createOnboardingRoutes } from './onboarding.routes'
 
 const actorWith = (role: WorkspaceRole): ActorResolution => ({
@@ -173,5 +175,51 @@ describe('onboarding routes', () => {
 
     expect(response.status).toBe(200)
     expect(await response.json()).toMatchObject({ eligible: false, dismissed: false })
+  })
+
+  test('seeds the default categories once and reports how many it wrote', async () => {
+    const repository = createFakeCategoryRepository()
+    const routes = createOnboardingRoutes({
+      accountsLookup: {
+        async hasAny() {
+          return false
+        },
+      },
+      categoryRepository: repository,
+      onboardingRepository: progress(),
+      resolveActor: async () => actorWith('owner'),
+      settingsRepository: settings(false),
+    })
+
+    const first = await request(routes, '/api/onboarding/categories', { method: 'POST' })
+    expect(first.status).toBe(200)
+    expect(await first.json()).toEqual({ seeded: DEFAULT_CATEGORIES.length })
+
+    const second = await request(routes, '/api/onboarding/categories', { method: 'POST' })
+    expect(second.status).toBe(200)
+    expect(await second.json()).toEqual({ seeded: 0 })
+    expect(await repository.list('org_1', { includeArchived: true })).toHaveLength(
+      DEFAULT_CATEGORIES.length,
+    )
+  })
+
+  test('denies seeding to a role that is not the workspace owner', async () => {
+    const repository = createFakeCategoryRepository()
+    const routes = createOnboardingRoutes({
+      accountsLookup: {
+        async hasAny() {
+          return false
+        },
+      },
+      categoryRepository: repository,
+      onboardingRepository: progress(),
+      resolveActor: async () => actorWith('admin'),
+      settingsRepository: settings(false),
+    })
+
+    const response = await request(routes, '/api/onboarding/categories', { method: 'POST' })
+
+    expect(response.status).toBe(403)
+    expect(await repository.list('org_1', { includeArchived: true })).toHaveLength(0)
   })
 })

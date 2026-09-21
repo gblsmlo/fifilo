@@ -1,5 +1,11 @@
-export type { FinancialOnboardingStatus } from '../contracts/onboarding'
-export { financialOnboardingStatusSchema } from '../contracts/onboarding'
+export type {
+  FinancialOnboardingStatus,
+  SeedDefaultCategoriesResponse,
+} from '../contracts/onboarding'
+export {
+  financialOnboardingStatusSchema,
+  seedDefaultCategoriesResponseSchema,
+} from '../contracts/onboarding'
 export type {
   FinancialOnboardingProgress,
   FinancialOnboardingProgressRepository,

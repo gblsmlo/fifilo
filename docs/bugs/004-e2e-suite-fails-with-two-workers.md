@@ -51,6 +51,21 @@ $ bun run test:e2e -- --workers=1
 
 Failing specs differ between runs of the same command.
 
+## A second, separate failure mode
+
+After roughly twenty suite runs against the same database, the suite began
+failing at `--workers=1` too — `e2e/organizations` could not find a transaction
+it had just registered. Recreating the database (`docker compose down -v`,
+migrate, bootstrap roles, seed) returned it to 16/16 at one worker.
+
+That one is accumulated fixture data, not concurrency: it reproduced with the
+change under test stashed, and disappeared with the data. It is recorded here
+because the two are easy to confuse — the same suite, the same command, two
+unrelated causes.
+
+The concurrency failure survives a fresh database: 13 passed, 3 failed at the
+default worker count immediately after the reset.
+
 ## Hypothesis
 
 Two workers share one PostgreSQL database and one dev server. The suspected
@@ -67,7 +82,7 @@ timing evidence was collected.
 ## Closing condition
 
 `bun run test:e2e` passes on a machine with more than one worker, repeatedly,
-without retries — either because the contention is found and removed, or
+without retries, and on a database that has already carried many runs — either because the contention is found and removed, or
 because the suite declares the isolation it needs (a `workers` setting, a
 database per worker, or a serial project) and that declaration is written down
 with its reason.

@@ -23,11 +23,11 @@ export function OnboardingCompletion() {
     <Card>
       <CardHeader>
         <CardTitle>
-          {data ? `Seu saldo: ${formatMoney(data.consolidated)}` : 'Tudo pronto'}
+          {data ? `Seu saldo: ${formatMoney(data.consolidated)}` : 'Somando suas contas…'}
         </CardTitle>
-        <CardDescription>
-          Tudo pronto. Registre um lançamento para o painel ganhar vida.
-        </CardDescription>
+        {/* The shell above already says the setup is done; this says what to
+            do with it. */}
+        <CardDescription>Registre um lançamento para o painel ganhar vida.</CardDescription>
       </CardHeader>
       <CardFooter className='flex flex-wrap gap-3'>
         <Button render={<Link to='/transactions'>Registrar um lançamento</Link>} />

@@ -22,6 +22,10 @@ export function OrganizationOnboardingPage() {
   const [slug, setSlug] = useState('')
   const [error, setError] = useState<string>()
   const [isSubmitting, setIsSubmitting] = useState(false)
+  // The slug is an address, not a decision anyone opens the product to make.
+  // It stays derived from the name until the server says that one is taken,
+  // which is the only moment the person has something to answer.
+  const [slugVisible, setSlugVisible] = useState(false)
 
   const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -36,6 +40,8 @@ export function OrganizationOnboardingPage() {
 
     if (result.error) {
       setError(result.error.message ?? 'Não foi possível criar a organização.')
+      setSlug(normalizedSlug)
+      setSlugVisible(true)
       setIsSubmitting(false)
       return
     }
@@ -52,7 +58,7 @@ export function OrganizationOnboardingPage() {
     <section className='mx-auto flex min-h-full w-full max-w-xl items-center p-6'>
       <Card className='w-full'>
         <CardHeader>
-          <CardTitle>Crie sua organização</CardTitle>
+          <CardTitle>Como vamos chamar seu workspace?</CardTitle>
         </CardHeader>
         <CardContent>
           <Form className='flex flex-col gap-5' onSubmit={submit}>
@@ -62,28 +68,33 @@ export function OrganizationOnboardingPage() {
                 autoFocus
                 onChange={(event) => {
                   setName(event.target.value)
-                  if (!slug) setSlug(slugify(event.target.value))
+                  if (!slugVisible) setSlug(slugify(event.target.value))
                 }}
                 placeholder='Acme'
                 required
                 value={name}
               />
               <FieldDescription>O nome visível para os membros do workspace.</FieldDescription>
+              {slugVisible ? null : <FieldError>{error}</FieldError>}
             </Field>
-            <Field name='organization-slug'>
-              <FieldLabel>Slug</FieldLabel>
-              <Input
-                onChange={(event) => setSlug(slugify(event.target.value))}
-                pattern='[a-z0-9]+(?:-[a-z0-9]+)*'
-                placeholder='acme'
-                required
-                value={slug}
-              />
-              <FieldDescription>Identificador único usado em URLs e integrações.</FieldDescription>
-              <FieldError>{error}</FieldError>
-            </Field>
-            <Button disabled={!name.trim() || !slug} loading={isSubmitting} type='submit'>
-              Criar organização
+            {slugVisible ? (
+              <Field name='organization-slug'>
+                <FieldLabel>Endereço</FieldLabel>
+                <Input
+                  onChange={(event) => setSlug(slugify(event.target.value))}
+                  pattern='[a-z0-9]+(?:-[a-z0-9]+)*'
+                  placeholder='acme'
+                  required
+                  value={slug}
+                />
+                <FieldDescription>
+                  Identificador único usado em URLs e integrações.
+                </FieldDescription>
+                <FieldError>{error}</FieldError>
+              </Field>
+            ) : null}
+            <Button disabled={!name.trim()} loading={isSubmitting} type='submit'>
+              Continuar
             </Button>
           </Form>
         </CardContent>

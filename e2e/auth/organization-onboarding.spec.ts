@@ -30,10 +30,11 @@ async function signUpAndSignIn(page: Page, email: string) {
 async function createOrganization(page: Page, scenario: string) {
   await signUpAndSignIn(page, uniqueEmail(scenario))
   await expect(page).toHaveURL(/\/onboarding$/)
-  const slug = `e2e-onboarding-${crypto.randomUUID().slice(0, 8)}`
-  await page.getByRole('textbox', { exact: true, name: 'Nome' }).fill('Organização E2E')
-  await page.getByRole('textbox', { exact: true, name: 'Slug' }).fill(slug)
-  await page.getByRole('button', { name: 'Criar organização' }).click()
+  // The address is derived from the name and only surfaces on a conflict.
+  await page
+    .getByRole('textbox', { exact: true, name: 'Nome' })
+    .fill(`Organização E2E ${crypto.randomUUID().slice(0, 8)}`)
+  await page.getByRole('button', { name: 'Continuar' }).click()
   await expect(page).toHaveURL(/\/onboarding\/setup$/)
 }
 
@@ -44,7 +45,7 @@ test.describe('@auth first access and organization creation', () => {
     await signUpAndSignIn(page, uniqueEmail('first-access'))
 
     await expect(page).toHaveURL(/\/onboarding$/)
-    await expect(page.getByText('Crie sua organização')).toBeVisible()
+    await expect(page.getByText('Como vamos chamar seu workspace?')).toBeVisible()
     await expect(page.locator('[data-slot="sidebar"]')).toHaveCount(0)
     await expect(page.getByRole('button', { name: 'Alternar sidebar' })).toHaveCount(0)
   })
@@ -66,8 +67,16 @@ test.describe('@auth first access and organization creation', () => {
     await page.getByRole('combobox', { name: 'Tipo' }).click()
     await page.getByRole('option', { name: 'Conta corrente' }).click()
     await page.getByLabel('Instituição (opcional)').fill('Banco E2E')
+    // Cleared first: the field starts at 0,00 and typing lands at the cursor,
+    // so appending to it would build a different number.
+    await page.getByLabel('Saldo hoje').fill('')
+    await page.getByLabel('Saldo hoje').pressSequentially('428000')
     await page.getByRole('button', { name: 'Criar conta' }).click()
-    await expect(page.getByText('Tudo pronto')).toBeVisible()
+    // The setup ends on the person's own money, which is the whole point of
+    // asking for the opening balance a step earlier.
+    // The currency was switched to USD a few steps above, so the symbol is not
+    // what this asserts — the amount is.
+    await expect(page.getByText(/Seu saldo: .*4\.280,00/)).toBeVisible()
     await page.getByRole('link', { name: 'Ir para o painel' }).click()
     await expect(page).toHaveURL(/\/dashboard/)
     await expect(page.getByText(/painel de Organização E2E/)).toBeVisible()

@@ -26,6 +26,10 @@ Adopt option 2. Better Auth's `afterCreateOrganization` hook creates the
 ## Consequences
 
 - Onboarding is tenant-scoped and owner-specific.
+- The hook's write is best effort, not a guarantee (`BUG-003`): it runs after
+  the organization and member rows are committed, outside any transaction.
+  `POST /api/onboarding/start` writes the same row on entering the setup, which
+  is what actually guarantees it (Decision 036).
 - Role changes and missing progress rows make the actor ineligible without
   disabling the workspace's financial data.
 - The progress table follows the tenant RLS rules in Decision 020.

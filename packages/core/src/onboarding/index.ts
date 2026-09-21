@@ -1,10 +1,10 @@
 export type {
   FinancialOnboardingStatus,
-  SeedDefaultCategoriesResponse,
+  StartFinancialOnboardingResponse,
 } from '../contracts/onboarding'
 export {
   financialOnboardingStatusSchema,
-  seedDefaultCategoriesResponseSchema,
+  startFinancialOnboardingResponseSchema,
 } from '../contracts/onboarding'
 export type {
   FinancialOnboardingProgress,
@@ -14,5 +14,11 @@ export type {
   DismissFinancialOnboardingCommand,
   DismissFinancialOnboardingError,
   GetFinancialOnboardingStatusQuery,
+  StartFinancialOnboardingCommand,
+  StartFinancialOnboardingError,
 } from './use-cases'
-export { dismissFinancialOnboarding, getFinancialOnboardingStatus } from './use-cases'
+export {
+  dismissFinancialOnboarding,
+  getFinancialOnboardingStatus,
+  startFinancialOnboarding,
+} from './use-cases'

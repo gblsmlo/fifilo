@@ -6,7 +6,8 @@ import {
   dismissFinancialOnboarding,
   financialOnboardingStatusSchema,
   getFinancialOnboardingStatus,
-  seedDefaultCategoriesResponseSchema,
+  startFinancialOnboarding,
+  startFinancialOnboardingResponseSchema,
 } from '@fifilo/core/onboarding'
 import type { WorkspaceAccountsLookup, WorkspaceSettingsRepository } from '@fifilo/core/settings'
 import { getWorkspaceSettings } from '@fifilo/core/settings'
@@ -89,27 +90,44 @@ export const createOnboardingRoutes = ({
       },
       { response: { 204: z.undefined(), ...errorStatuses } },
     )
-    // 200, not 201: a repeat call creates nothing, and there is no single
-    // resource to point a `Location` at either way.
+    /**
+     * Everything a workspace needs before the setup journey can run, all of it
+     * idempotent: the owner's progress row, which the creation hook writes only
+     * on a best-effort basis (`BUG-003`), and the default category set
+     * (Decision 036).
+     *
+     * 200, not 201: a repeat call creates nothing, and there is no single
+     * resource to point a `Location` at either way.
+     */
     .post(
-      '/categories',
+      '/start',
       async ({ actorContext, set }) => {
         const context = requireActorContext(actorContext)
-        const result = await seedDefaultCategories(
-          {
-            organizationId: context.organizationId,
-            role: toWorkspaceRole(context.role),
-          },
-          categoryRepository,
+        const role = toWorkspaceRole(context.role)
+
+        const started = await startFinancialOnboarding(
+          { organizationId: context.organizationId, role, userId: context.userId },
+          onboardingRepository,
         )
 
-        if (!result.ok) {
-          const httpError = toHttpErrorResponse(result.error)
+        if (!started.ok) {
+          const httpError = toHttpErrorResponse(started.error)
           set.status = httpError.status
           return httpError.body
         }
 
-        return { seeded: result.value }
+        const seeded = await seedDefaultCategories(
+          { organizationId: context.organizationId, role },
+          categoryRepository,
+        )
+
+        if (!seeded.ok) {
+          const httpError = toHttpErrorResponse(seeded.error)
+          set.status = httpError.status
+          return httpError.body
+        }
+
+        return { seeded: seeded.value }
       },
-      { response: { 200: seedDefaultCategoriesResponseSchema, ...errorStatuses } },
+      { response: { 200: startFinancialOnboardingResponseSchema, ...errorStatuses } },
     )

@@ -2,7 +2,11 @@ import { describe, expect, test } from 'bun:test'
 
 import type { WorkspaceRole } from '../access-control'
 import type { FinancialOnboardingProgress, FinancialOnboardingProgressRepository } from './ports'
-import { dismissFinancialOnboarding, getFinancialOnboardingStatus } from './use-cases'
+import {
+  dismissFinancialOnboarding,
+  getFinancialOnboardingStatus,
+  startFinancialOnboarding,
+} from './use-cases'
 
 const progress = (dismissedAt: Date | null = null): FinancialOnboardingProgress => ({
   dismissedAt,
@@ -12,11 +16,14 @@ const progress = (dismissedAt: Date | null = null): FinancialOnboardingProgress 
 
 const repository = (
   current: FinancialOnboardingProgress | null = progress(),
-): FinancialOnboardingProgressRepository & { dismissed: number } => {
-  const state = { current, dismissed: 0 }
+): FinancialOnboardingProgressRepository & { dismissed: number; ensured: number } => {
+  const state = { current, dismissed: 0, ensured: 0 }
   return {
     get dismissed() {
       return state.dismissed
+    },
+    get ensured() {
+      return state.ensured
     },
     async findByUser() {
       return state.current
@@ -24,6 +31,10 @@ const repository = (
     async dismiss() {
       state.dismissed += 1
       if (state.current) state.current = { ...state.current, dismissedAt: new Date() }
+    },
+    async ensure(organizationId, userId) {
+      state.ensured += 1
+      state.current ??= { dismissedAt: null, organizationId, userId }
     },
   }
 }
@@ -119,5 +130,60 @@ describe('financial onboarding', () => {
         progressRepository,
       ),
     ).resolves.toMatchObject({ ok: false, error: { code: 'ineligible' } })
+  })
+})
+
+describe('startFinancialOnboarding', () => {
+  test('creates the progress row a failed creation hook never wrote', async () => {
+    const store = repository(null)
+
+    const result = await startFinancialOnboarding(
+      { organizationId: 'org_1', role: 'owner', userId: 'user_1' },
+      store,
+    )
+
+    expect(result.ok).toBe(true)
+    expect(store.ensured).toBe(1)
+    expect(await store.findByUser('org_1', 'user_1')).toMatchObject({ dismissedAt: null })
+  })
+
+  test('does not require the row it exists to repair', async () => {
+    // The status use case reads eligibility from the row; this one cannot, or
+    // a workspace whose hook failed would be permanently ineligible.
+    const store = repository(null)
+
+    expect(
+      (
+        await startFinancialOnboarding(
+          { organizationId: 'org_1', role: 'owner', userId: 'user_1' },
+          store,
+        )
+      ).ok,
+    ).toBe(true)
+  })
+
+  test('leaves an existing deferral alone', async () => {
+    const dismissedAt = new Date('2026-09-20T00:00:00.000Z')
+    const store = repository(progress(dismissedAt))
+
+    await startFinancialOnboarding(
+      { organizationId: 'org_1', role: 'owner', userId: 'user_1' },
+      store,
+    )
+
+    expect((await store.findByUser('org_1', 'user_1'))?.dismissedAt).toBe(dismissedAt)
+  })
+
+  test('refuses a role that is not the workspace owner', async () => {
+    const store = repository(null)
+
+    const result = await startFinancialOnboarding(
+      { organizationId: 'org_1', role: 'admin', userId: 'user_1' },
+      store,
+    )
+
+    expect(result.ok).toBe(false)
+    expect(result.ok ? null : result.error.code).toBe('insufficient_role')
+    expect(store.ensured).toBe(0)
   })
 })

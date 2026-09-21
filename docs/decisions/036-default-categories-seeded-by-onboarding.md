@@ -20,7 +20,7 @@ that exists, is not active, and whose slug now collides with the retry.
 1. Write the set in `afterCreateOrganization`, alongside the onboarding
    progress row.
 2. Seed lazily on the first `GET /categories` of a workspace with none.
-3. Expose an idempotent `POST /api/onboarding/categories` that the onboarding
+3. Expose an idempotent `POST /api/onboarding/start` that the onboarding
    setup calls on every entry.
 4. Ask the person to choose their categories as a fourth onboarding step.
 
@@ -44,6 +44,10 @@ completeness rule of Decision 034 into one with a declared step.
   window.
 - Completeness stays `settingsConfigured && accountCreated`. The seeding is not
   a step and is not visible.
+- The same endpoint became the repair for `BUG-003`: it now also writes the
+  owner's progress row, which the workspace-creation hook attempts only on a
+  best-effort basis. One idempotent call makes the workspace ready, whatever
+  the hook managed to do.
 
 ## Revisit when
 

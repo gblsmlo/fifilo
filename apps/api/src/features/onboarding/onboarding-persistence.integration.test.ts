@@ -50,6 +50,44 @@ describe('financial onboarding persistence', () => {
     expect(await repository.findByUser(ORGANIZATION_A, USER_B)).toBeNull()
   })
 
+  test('ensure creates a missing row and never revives a dismissal', async () => {
+    // BUG-003: the creation hook is best effort, so this is what actually
+    // guarantees the row — and it must not undo a deferral while doing it.
+    // Inside the actor context: without it the policy hides the row and the
+    // delete silently removes nothing.
+    await withActorWorkspaceTransactionOn(db, ORGANIZATION_A, USER_A, (tx) =>
+      tx.execute(
+        sql`delete from financial_onboarding_progress where organization_id = ${ORGANIZATION_A}`,
+      ),
+    )
+    expect(await repository.findByUser(ORGANIZATION_A, USER_A)).toBeNull()
+
+    await repository.ensure(ORGANIZATION_A, USER_A)
+    expect(await repository.findByUser(ORGANIZATION_A, USER_A)).toMatchObject({
+      dismissedAt: null,
+      organizationId: ORGANIZATION_A,
+    })
+
+    await repository.dismiss(ORGANIZATION_A, USER_A)
+    const dismissed = await repository.findByUser(ORGANIZATION_A, USER_A)
+    expect(dismissed?.dismissedAt).toBeInstanceOf(Date)
+
+    await repository.ensure(ORGANIZATION_A, USER_A)
+    expect((await repository.findByUser(ORGANIZATION_A, USER_A))?.dismissedAt).toEqual(
+      dismissed?.dismissedAt ?? null,
+    )
+  })
+
+  test('ensure cannot plant a row in another actor workspace', async () => {
+    const attempt = withActorWorkspaceTransactionOn(db, ORGANIZATION_B, USER_B, (tx) =>
+      tx
+        .insert(financialOnboardingProgress)
+        .values({ organizationId: ORGANIZATION_A, userId: USER_A }),
+    )
+
+    await expect(attempt).rejects.toThrow()
+  })
+
   test('dismissal writes only the scoped progress row', async () => {
     await repository.dismiss(ORGANIZATION_A, USER_A)
     expect((await repository.findByUser(ORGANIZATION_A, USER_A))?.dismissedAt).toBeInstanceOf(Date)

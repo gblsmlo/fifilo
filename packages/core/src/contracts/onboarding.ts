@@ -18,8 +18,10 @@ export type FinancialOnboardingStatus = z.infer<typeof financialOnboardingStatus
  * How many default categories the call wrote. Zero is the normal answer for
  * every call after the first, and the caller treats it the same as thirteen.
  */
-export const seedDefaultCategoriesResponseSchema = z.object({
+export const startFinancialOnboardingResponseSchema = z.object({
   seeded: z.int().min(0),
 })
 
-export type SeedDefaultCategoriesResponse = z.infer<typeof seedDefaultCategoriesResponseSchema>
+export type StartFinancialOnboardingResponse = z.infer<
+  typeof startFinancialOnboardingResponseSchema
+>

@@ -34,6 +34,34 @@ export const getFinancialOnboardingStatus = async (
   }
 }
 
+export type StartFinancialOnboardingCommand = {
+  organizationId: string
+  role: WorkspaceRole
+  userId: string
+}
+
+export type StartFinancialOnboardingError = ReturnType<typeof forbiddenError<'insufficient_role'>>
+
+/**
+ * Makes the workspace ready for the setup journey, idempotently. Eligibility
+ * here is the role alone, not the progress row: the row is exactly what this
+ * repairs, so requiring it would make a workspace whose creation hook failed
+ * permanently ineligible (`BUG-003`).
+ */
+export const startFinancialOnboarding = async (
+  command: StartFinancialOnboardingCommand,
+  repository: Pick<FinancialOnboardingProgressRepository, 'ensure'>,
+): Promise<Result<void, StartFinancialOnboardingError>> => {
+  if (!requireFinancialOnboardingAccess(command.role)) {
+    return err(
+      forbiddenError('insufficient_role', 'Only the workspace owner can start onboarding.'),
+    )
+  }
+
+  await repository.ensure(command.organizationId, command.userId)
+  return ok(undefined)
+}
+
 export type DismissFinancialOnboardingCommand = {
   organizationId: string
   role: WorkspaceRole

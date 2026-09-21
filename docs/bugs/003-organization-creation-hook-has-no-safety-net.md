@@ -2,7 +2,8 @@
 
 ## State
 
-Open. Tracked by [gblsmlo/fifilo#1](https://github.com/gblsmlo/fifilo/issues/1).
+Resolved in the commit that carries this record. Opened as
+[gblsmlo/fifilo#1](https://github.com/gblsmlo/fifilo/issues/1).
 
 ## Severity
 
@@ -85,6 +86,28 @@ One of:
 
 Either way, a fault injected into the hook must leave a workspace the creating
 owner can still reach, with the active organization set.
+
+## What landed
+
+The first option. The hook body is wrapped and logs
+`organization.onboarding_bootstrap_failed` instead of throwing, so organization
+creation finishes and the active organization is set whatever happens inside it.
+
+The repair is `POST /api/onboarding/start`, which the setup route's loader calls
+**before** it reads the status. Order matters: eligibility is derived from the
+progress row, so an owner whose row is missing would be redirected away from the
+only place that can put it back. `startFinancialOnboarding` therefore gates on
+the role alone — it cannot require the row it exists to repair.
+
+`ensure` uses `onConflictDoNothing`, never an upsert: an existing row carries
+the owner's `dismissedAt`, and repairing a missing row must not undo a deferral.
+
+Evidence:
+`apps/api/src/features/onboarding/onboarding.routes.test.ts` walks a workspace
+from `eligible: false` to `eligible: true` through one call, and
+`onboarding-persistence.integration.test.ts` proves the repair against real
+PostgreSQL, including that a second `ensure` leaves a dismissal intact and that
+the actor policy refuses a row planted into another workspace.
 
 ## Related
 

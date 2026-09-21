@@ -224,7 +224,9 @@ exatamente o que a 06a entregou.
 
 ## API — `apps/api`
 
-Uma rota nova, `POST /api/onboarding/categories`:
+Uma rota nova, `POST /api/onboarding/categories` — renomeada para
+`POST /api/onboarding/start` pelo conserto do `BUG-003`, que lhe acrescentou a
+linha de progresso:
 
 - Idempotente por construção — o curto-circuito está no caso de uso, então uma
   segunda chamada custa um `select` e devolve `{ seeded: 0 }`.

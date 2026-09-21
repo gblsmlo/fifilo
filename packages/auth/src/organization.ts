@@ -8,7 +8,7 @@ import {
 } from '@fifilo/infra-database/schema'
 import { withActorWorkspaceTransaction } from '@fifilo/infra-database/workspace'
 import { serverEnv } from '@fifilo/infra-env/server'
-import { auditEvent } from '@fifilo/observability/runtime'
+import { auditEvent, logEvent } from '@fifilo/observability/runtime'
 import { APIError } from 'better-auth'
 import type { OrganizationOptions } from 'better-auth/plugins'
 import type { AccessControl } from 'better-auth/plugins/access'
@@ -115,23 +115,42 @@ export const organizationOptions = {
     enabled: false,
   },
   organizationHooks: {
+    // Best effort, and it has to be (`BUG-003`): this hook runs after the
+    // organization and member rows are committed, outside any transaction and
+    // before the active organization is set, so anything thrown here would
+    // leave a workspace its own creator cannot reach. `POST
+    // /api/onboarding/start` writes the same row on entering the setup, which
+    // is what actually guarantees it.
     afterCreateOrganization: async ({ member, organization, user }) => {
-      await withActorWorkspaceTransaction(organization.id, user.id, async (tx) => {
-        await tx
-          .insert(financialOnboardingProgress)
-          .values({ organizationId: organization.id, userId: user.id })
-          .onConflictDoNothing({
-            target: [
-              financialOnboardingProgress.organizationId,
-              financialOnboardingProgress.userId,
-            ],
-          })
-      })
-      await auditOrganizationEvent('financial onboarding started', {
-        memberId: member.id,
-        organizationId: organization.id,
-        subjectUserId: user.id,
-      })
+      try {
+        await withActorWorkspaceTransaction(organization.id, user.id, async (tx) => {
+          await tx
+            .insert(financialOnboardingProgress)
+            .values({ organizationId: organization.id, userId: user.id })
+            .onConflictDoNothing({
+              target: [
+                financialOnboardingProgress.organizationId,
+                financialOnboardingProgress.userId,
+              ],
+            })
+        })
+        await auditOrganizationEvent('financial onboarding started', {
+          memberId: member.id,
+          organizationId: organization.id,
+          subjectUserId: user.id,
+        })
+      } catch (cause) {
+        logEvent({
+          context: {
+            error: cause instanceof Error ? cause.message : String(cause),
+            memberId: member.id,
+            organizationId: organization.id,
+            subjectUserId: user.id,
+          },
+          level: 'error',
+          message: 'organization.onboarding_bootstrap_failed',
+        })
+      }
     },
     afterAcceptInvitation: async ({ invitation, member, organization, user }) => {
       await auditOrganizationEvent('organization member joined', {

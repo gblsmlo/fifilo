@@ -6,7 +6,7 @@ export {
   type WorkspaceSetupInput,
   workspaceSettingsSetupSchema,
 } from './components/workspace-settings-setup'
-export { seedDefaultCategories } from './http/seed-default-categories'
+export { startOnboarding } from './http/start-onboarding'
 export { FinancialOnboardingPage } from './pages/financial-onboarding-page'
 export { resolveOnboardingProgress } from './progress'
 export { onboardingStatusQueryOptions } from './query-options'

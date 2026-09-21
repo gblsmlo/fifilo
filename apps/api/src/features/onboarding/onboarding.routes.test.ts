@@ -43,6 +43,9 @@ const progress = (
       dismissed += 1
       if (current) current = { ...current, dismissedAt: new Date() }
     },
+    async ensure(organizationId, userId) {
+      current ??= { dismissedAt: null, organizationId, userId }
+    },
   }
 }
 
@@ -159,6 +162,7 @@ describe('onboarding routes', () => {
         return userId === 'user_1' ? null : progress().findByUser('org_1', 'user_2')
       },
       async dismiss() {},
+      async ensure() {},
     }
     const routes = createOnboardingRoutes({
       onboardingRepository: repository,
@@ -191,16 +195,42 @@ describe('onboarding routes', () => {
       settingsRepository: settings(false),
     })
 
-    const first = await request(routes, '/api/onboarding/categories', { method: 'POST' })
+    const first = await request(routes, '/api/onboarding/start', { method: 'POST' })
     expect(first.status).toBe(200)
     expect(await first.json()).toEqual({ seeded: DEFAULT_CATEGORIES.length })
 
-    const second = await request(routes, '/api/onboarding/categories', { method: 'POST' })
+    const second = await request(routes, '/api/onboarding/start', { method: 'POST' })
     expect(second.status).toBe(200)
     expect(await second.json()).toEqual({ seeded: 0 })
     expect(await repository.list('org_1', { includeArchived: true })).toHaveLength(
       DEFAULT_CATEGORIES.length,
     )
+  })
+
+  test('repairs the eligibility of a workspace whose creation hook never wrote the row', async () => {
+    // BUG-003: the hook is best effort, so the owner of a workspace it failed
+    // on reads as ineligible until this call puts the row back.
+    const repository = progress(null)
+    const routes = createOnboardingRoutes({
+      accountsLookup: {
+        async hasAny() {
+          return false
+        },
+      },
+      categoryRepository: createFakeCategoryRepository(),
+      onboardingRepository: repository,
+      resolveActor: async () => actorWith('owner'),
+      settingsRepository: settings(false),
+    })
+
+    const before = await request(routes, '/api/onboarding')
+    expect(await before.json()).toMatchObject({ eligible: false })
+
+    const started = await request(routes, '/api/onboarding/start', { method: 'POST' })
+    expect(started.status).toBe(200)
+
+    const after = await request(routes, '/api/onboarding')
+    expect(await after.json()).toMatchObject({ eligible: true })
   })
 
   test('denies seeding to a role that is not the workspace owner', async () => {
@@ -217,7 +247,7 @@ describe('onboarding routes', () => {
       settingsRepository: settings(false),
     })
 
-    const response = await request(routes, '/api/onboarding/categories', { method: 'POST' })
+    const response = await request(routes, '/api/onboarding/start', { method: 'POST' })
 
     expect(response.status).toBe(403)
     expect(await repository.list('org_1', { includeArchived: true })).toHaveLength(0)

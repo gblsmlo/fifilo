@@ -45,8 +45,25 @@ const dismiss = async (organizationId: string, userId: string): Promise<void> =>
   })
 }
 
+/**
+ * `onConflictDoNothing` rather than an upsert: an existing row carries the
+ * owner's `dismissedAt`, and repairing a missing row must never undo a
+ * deferral the person made.
+ */
+const ensure = async (organizationId: string, userId: string): Promise<void> => {
+  await withActorWorkspaceTransaction(organizationId, userId, async (tx) => {
+    await tx
+      .insert(financialOnboardingProgress)
+      .values({ organizationId, userId })
+      .onConflictDoNothing({
+        target: [financialOnboardingProgress.organizationId, financialOnboardingProgress.userId],
+      })
+  })
+}
+
 export const createFinancialOnboardingProgressRepository =
   (): FinancialOnboardingProgressRepository => ({
     dismiss,
+    ensure,
     findByUser,
   })

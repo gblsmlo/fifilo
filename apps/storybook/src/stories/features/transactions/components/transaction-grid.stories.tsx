@@ -62,9 +62,20 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 export const Empty: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'O saldo de abertura é um lançamento datado e deliberadamente não é uma transação (Decision 021): ele conta no total e nunca aparece aqui. O estado vazio diz isso, para uma conta com saldo e sem histórico não parecer defeito.',
+      },
+    },
+  },
   play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    await expect(await canvas.findByText('Nenhuma transação no período')).toBeTruthy()
     await expect(
-      await within(canvasElement).findByText('Nenhuma transação no período'),
+      await canvas.findByText(/O saldo inicial das suas contas já está no total/),
     ).toBeTruthy()
   },
 }

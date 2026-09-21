@@ -144,7 +144,12 @@ export function TransactionGrid({
     : isPending
       ? { description: 'Buscando os lançamentos do período.', title: 'Carregando transações' }
       : {
-          description: 'Registre uma despesa, receita ou transferência para começar.',
+          // The opening balance is a dated entry, deliberately not a
+          // transaction (Decision 021), so it counts in the total and never
+          // shows up in this list. Saying so here is what keeps a funded
+          // account with an empty history from reading as a bug.
+          description:
+            'O saldo inicial das suas contas já está no total. Registre uma despesa, receita ou transferência para o histórico começar.',
           title: 'Nenhuma transação no período',
         }
 

@@ -1,5 +1,7 @@
 export type { Category, CategoryKind } from './category'
 export { categoryNameKey, categoryScopeKey, normalizeCategoryName } from './category'
+export type { DefaultCategory } from './default-set'
+export { DEFAULT_CATEGORIES, buildDefaultCategories } from './default-set'
 export type {
   CategoryRepository,
   CategoryUpdatePatch,
@@ -30,5 +32,10 @@ export type { ListCategoriesQuery } from './use-cases/list-categories'
 export { listCategories } from './use-cases/list-categories'
 export type { ReassignCategoryCommand, ReassignCategoryError } from './use-cases/reassign-category'
 export { reassignCategory } from './use-cases/reassign-category'
+export type {
+  SeedDefaultCategoriesCommand,
+  SeedDefaultCategoriesError,
+} from './use-cases/seed-default-categories'
+export { seedDefaultCategories } from './use-cases/seed-default-categories'
 export type { UpdateCategoryCommand, UpdateCategoryError } from './use-cases/update-category'
 export { updateCategory } from './use-cases/update-category'

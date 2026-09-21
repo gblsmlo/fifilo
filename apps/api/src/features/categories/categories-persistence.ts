@@ -106,6 +106,38 @@ const createCategoryRow = async (record: NewCategoryRecord): Promise<Category | 
   }
 }
 
+/**
+ * One transaction for the whole batch, so a workspace never ends up with part
+ * of the default set. `onConflictDoNothing` on the composite key makes a
+ * concurrent second call a no-op rather than a unique violation.
+ */
+const createCategoryRows = async (records: readonly NewCategoryRecord[]): Promise<number> => {
+  const [first] = records
+  if (!first) return 0
+
+  return withWorkspaceTransaction(first.organizationId, async (tx) => {
+    const inserted = await tx
+      .insert(categories)
+      .values(
+        records.map((record) => ({
+          color: record.color,
+          createdAt: record.createdAt,
+          icon: record.icon,
+          id: record.id,
+          kind: record.kind,
+          name: record.name,
+          organizationId: record.organizationId,
+          parentId: record.parentId,
+          updatedAt: record.createdAt,
+        })),
+      )
+      .onConflictDoNothing({ target: [categories.organizationId, categories.id] })
+      .returning({ id: categories.id })
+
+    return inserted.length
+  })
+}
+
 const updateCategoryRow = async (
   organizationId: string,
   id: EntityId,
@@ -204,6 +236,7 @@ export const createCategoriesRepository = (): CategoryRepository => ({
   archive: archiveCategoryRow,
   countTransactions: countCategoryTransactions,
   create: createCategoryRow,
+  createMany: createCategoryRows,
   findByName: findCategoryByName,
   findById: findCategoryById,
   list: listCategoryRows,

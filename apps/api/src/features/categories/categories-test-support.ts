@@ -69,6 +69,25 @@ export const createFakeCategoryRepository = (
       return category
     },
 
+    async createMany(records) {
+      for (const record of records) {
+        categories.set(record.id, {
+          archivedAt: null,
+          color: record.color,
+          createdAt: record.createdAt,
+          icon: record.icon,
+          id: record.id,
+          kind: record.kind,
+          name: record.name,
+          organizationId: record.organizationId,
+          parentId: record.parentId,
+          updatedAt: record.createdAt,
+          version: 1,
+        })
+      }
+      return records.length
+    },
+
     async findByName(organizationId, parentId, kind, nameKey) {
       const scopeKey = categoryScopeKey(parentId)
       return (

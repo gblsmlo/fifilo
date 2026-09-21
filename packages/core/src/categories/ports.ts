@@ -28,6 +28,13 @@ export type CategoryRepository = {
   archive: (organizationId: string, id: EntityId) => Promise<Category | null>
   countTransactions: (organizationId: string, id: EntityId) => Promise<number>
   create: (record: NewCategoryRecord) => Promise<Category | null>
+  /**
+   * The whole batch in one transaction, returning how many rows it wrote.
+   * Never a loop over `create`: a workspace left with four of the thirteen
+   * default categories is worse than one left with none, because the
+   * idempotence check then reads it as already set up.
+   */
+  createMany: (records: readonly NewCategoryRecord[]) => Promise<number>
   findByName: (
     organizationId: string,
     parentId: EntityId | null,

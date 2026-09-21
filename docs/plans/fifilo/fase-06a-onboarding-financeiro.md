@@ -128,10 +128,9 @@ O contrato é `financialOnboardingStatusSchema` em
       dashboard, e o adiamento persiste e retoma no passo pendente —
       `e2e/auth/organization-onboarding.spec.ts`, 3 jornadas.
 - [x] Decisões 034 e 035 registradas e indexadas.
-- [ ] **Aberto.** Nada disto está commitado. Os gates
-      (`lint:ci`, `typecheck`, `test`, `storybook:test`, `test:e2e`) não
-      rodaram contra esta árvore. A fase não fecha enquanto a entrega existir
-      só na área de trabalho.
+- [x] Commitada em `db0425a`, numa fatia só em vez das cinco planejadas, e os
+      gates (`lint:ci`, `typecheck`, `test`, `storybook:test`, `test:e2e`)
+      rodaram contra uma árvore limpa que a contém em `60bf185`.
 
 ## Fatias de commit
 
@@ -150,3 +149,15 @@ sem arquivo de plano. O conteúdo acima é o que a árvore de trabalho e as
 Decisões 034 e 035 provam, não uma intenção anterior. O único item aberto do
 critério de conclusão é a própria entrega — código não commitado e gates não
 executados.
+
+### 2026-09-21 — fase fechada na entrega da 06b
+
+O último item do critério ficou aberto por um mal-entendido de registro, não
+por trabalho faltando: a entrega foi commitada em `db0425a`, como uma fatia só
+em vez das cinco planejadas, e nem este arquivo nem o quadro foram atualizados.
+O quadro chegou a afirmar as cinco fatias entregues e, uma linha acima, que
+nenhuma tinha sido commitada.
+
+Os gates rodaram contra uma árvore limpa que contém esta fase durante a entrega
+da [Fase 06b](fase-06b-ativacao-do-onboarding.md), em `60bf185`. `test:e2e`
+passou com um worker; com dois, `BUG-004`.

@@ -333,8 +333,9 @@ saem daqui. O que sobra:
 - **Data do saldo anterior ao mês corrente** muda o saldo consolidado sem mudar
   o fluxo do mês. É o comportamento certo e vai parecer errado; a ajuda do campo
   é o que desarma isso.
-- **O achado 12 continua aberto fora desta fase.** A linha de progresso e a
-  auditoria da 06a seguem expostas a ele. Esta fase não piora nem conserta.
+- **O achado 12 continua aberto fora desta fase**, como `BUG-003`. A linha de
+  progresso e a auditoria da 06a seguem expostas a ele. Esta fase não piora
+  nem conserta.
 
 ## Critério de conclusão
 
@@ -363,8 +364,8 @@ saem daqui. O que sobra:
       lembrete
 - [x] E2E: conta de cartão criada no onboarding chega configurada
 - [x] Decisão do seeding registrada e indexada
-- [ ] `lint:ci`, `typecheck`, `test`, `storybook:test` e `test:e2e` verdes contra
-      uma árvore limpa
+- [x] `lint:ci`, `typecheck`, `test`, `storybook:test` e `test:e2e` verdes contra
+      uma árvore limpa — `60bf185`, com `test:e2e` em `--workers=1` (BUG-004)
 
 ## Fatias de commit
 
@@ -456,7 +457,11 @@ Três desvios do plano, todos em aberto no texto acima:
   atrás de "Alterar", porque `Intl.supportedValuesOf('timeZone')` devolve
   centenas de zonas e nenhuma delas precisa estar na frente de quem só vai
   concordar.
-- **`test:e2e` falha com dois workers e passa com um.** Reproduzido antes e
-  depois desta fase, em specs que ela não toca: a falha é o login que não
-  submete sob carga, com banco compartilhado. Não é achado desta entrega e não
-  foi investigado além disso.
+- **`test:e2e` falha com dois workers e passa com um**, registrado como
+  `BUG-004`. Reproduzido antes e depois desta fase, em specs que ela não toca.
+  Não é achado desta entrega.
+
+Os dois achados que sobraram saíram deste arquivo e viraram registro próprio em
+[`docs/bugs/README.md`](../../bugs/README.md): `BUG-003` para a falta de rede do
+hook de criação de workspace, `BUG-004` para a suíte E2E sob dois workers. Uma
+fase não é backlog.

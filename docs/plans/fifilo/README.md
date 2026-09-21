@@ -59,8 +59,8 @@ produto inteiro sem IA.
 - [x] **04** [Workspace compartilhado](fase-04-workspace-compartilhado.md)
 - [x] **05** [Analytics e gráficos](fase-05-analytics-e-graficos.md)
 - [x] **06** [Settings, aceitação e entrega](fase-06-settings-e-aceitacao.md)
-- [~] **06a** [Onboarding financeiro](fase-06a-onboarding-financeiro.md)
-- [~] **06b** [Ativação do onboarding](fase-06b-ativacao-do-onboarding.md)
+- [x] **06a** [Onboarding financeiro](fase-06a-onboarding-financeiro.md)
+- [x] **06b** [Ativação do onboarding](fase-06b-ativacao-do-onboarding.md)
 
 A Fase 06a é Marco 1 pelo conteúdo e foi entregue depois da auditoria de
 aceitação que fechou o marco, já com a Fase 07 em execução. O sufixo registra
@@ -68,16 +68,18 @@ os dois fatos; a fase explica por que a sequência 07–12 não foi renumerada. 
 Fase 06b é a continuação direta dela: a 06a garante que o workspace tem moeda,
 fuso e conta; a 06b garante que há algo para ler quando o setup termina.
 
-#### 06a — o que falta
+#### 06a — como foi entregue
 
-Toda fatia de commit existe na árvore de trabalho; nenhuma foi commitada.
+A fase planejou cinco fatias de commit e foi entregue em uma só,
+`db0425a feat: add financial onboarding flow`. Este quadro afirmou por um tempo
+as duas coisas ao mesmo tempo — as cinco marcadas e "nenhuma foi commitada" —
+e a segunda era a desatualizada.
 
-- [x] `feat(core): add financial onboarding status and dismissal`
-- [x] `feat(database): persist financial onboarding progress with an actor-scoped policy`
-- [x] `feat(api): expose the financial onboarding endpoints`
-- [x] `feat(web): add the onboarding route group and its dedicated layout`
-- [x] `docs: record decisions 034-035`
-- [ ] Commitada, com `lint:ci`, `typecheck`, `test`, `storybook:test` e `test:e2e` rodados contra uma árvore limpa
+- [x] Commitada em `db0425a`, fatia única
+- [x] `lint:ci`, `typecheck`, `test`, `storybook:test` e `test:e2e` rodados
+      contra uma árvore limpa que a contém — `60bf185`, na entrega da
+      [Fase 06b](fase-06b-ativacao-do-onboarding.md), com `test:e2e` em
+      `--workers=1` (`BUG-004`)
 
 ### Marco 2 — Inteligência
 
@@ -153,7 +155,7 @@ Critério aberto além das fatias não entregues:
 - [x] **FR-16** Configurar moeda, fuso, locale e dia de início do mês do workspace — 06
 - [x] **FR-17** Preferências do usuário (tema, notificação) — 06
 - [x] **FR-18** Trilha de auditoria de convite, mudança de papel e remoção — base + 04
-- [~] **FR-19** Conduzir o dono que criou o workspace até moeda, fuso e primeira conta, com adiamento e retomada — 06a, construída e não commitada
+- [x] **FR-19** Conduzir o dono que criou o workspace até moeda, fuso e primeira conta, com adiamento e retomada — 06a; a 06b fecha o setup no saldo real e semeia as categorias padrão
 
 ## Requisitos não funcionais — Marco 1
 

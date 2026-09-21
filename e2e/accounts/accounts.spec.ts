@@ -14,11 +14,14 @@ test.describe('@accounts financial accounts', () => {
 
     const accountName = `E2E Checking ${Date.now()}`
 
-    await createAccount(page, { name: accountName })
+    await createAccount(page, { name: accountName, openingBalanceDigits: '428000' })
 
     const row = accountRow(page, accountName)
     await expect(row).toBeVisible()
-    await expect(row.getByText('R$')).toBeVisible()
+    // The opening balance reaches the row, not just the request: the API
+    // filters balances by the workspace's own civil today, so an entry dated
+    // a day ahead of that filter would show here as a zero.
+    await expect(row.getByText('R$ 4.280,00')).toBeVisible()
     await expect(page.getByTestId('consolidated-balance')).toContainText('R$')
 
     // Everything the row can do lives behind its actions menu.

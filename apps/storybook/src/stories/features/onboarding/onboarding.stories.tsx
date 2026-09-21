@@ -16,7 +16,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import type { ReactNode } from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
-import { expect, within } from 'storybook/test'
+import { expect, userEvent, within } from 'storybook/test'
 
 const settings = {
   currency: 'BRL',
@@ -87,9 +87,35 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 export const WorkspaceSettings: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'A região chega detectada e o passo pede confirmação. Os três campos existem, atrás de "Alterar", para quem está configurando o workspace de outro lugar.',
+      },
+    },
+  },
   render: () => <WorkspaceSettingsSetupFrame />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
+
+    await expect(await canvas.findByText('Detectamos sua região')).toBeTruthy()
+    await expect(await canvas.findByRole('button', { name: 'Está certo' })).toBeTruthy()
+  },
+}
+
+export const WorkspaceSettingsEdited: Story = {
+  parameters: {
+    docs: {
+      description: { story: '"Alterar" abre as três escolhas que a detecção preencheu.' },
+    },
+  },
+  render: () => <WorkspaceSettingsSetupFrame />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    await userEvent.click(await canvas.findByRole('button', { name: 'Alterar' }))
+
     await expect(await canvas.findByLabelText('Moeda')).toBeTruthy()
     await expect(await canvas.findByLabelText('Idioma e formato')).toBeTruthy()
     await expect(await canvas.findByLabelText('Fuso horário')).toBeTruthy()

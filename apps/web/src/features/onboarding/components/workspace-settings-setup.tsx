@@ -4,7 +4,6 @@ import { updateWorkspaceSettingsRequestSchema } from '@fifilo/core/settings'
 import { Button } from '@fifilo/ui/components/button'
 import { Field, FieldDescription, FieldError, FieldLabel } from '@fifilo/ui/components/field'
 import { Form } from '@fifilo/ui/components/form'
-import { Input } from '@fifilo/ui/components/input'
 import {
   Select,
   SelectItem,
@@ -15,22 +14,25 @@ import {
 import { Text } from '@fifilo/ui/components/text'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import type { FormEventHandler } from 'react'
+import { type FormEventHandler, useState } from 'react'
 import { Controller, FormProvider, useForm, useFormContext } from 'react-hook-form'
 import type { z } from 'zod'
 import { onboardingStatusQueryOptions } from '../query-options'
+import {
+  CURRENCY_OPTIONS,
+  LOCALE_OPTIONS,
+  currencyLabel,
+  detectLocale,
+  detectTimezone,
+  localeLabel,
+  timezoneOptions,
+} from '../region'
 
 export const workspaceSettingsSetupSchema = updateWorkspaceSettingsRequestSchema
   .pick({ currency: true, locale: true, timezone: true, version: true })
   .required()
 
 export type WorkspaceSetupInput = z.input<typeof workspaceSettingsSetupSchema>
-
-const currencyOptions = [
-  ['BRL', 'Real brasileiro (BRL)'],
-  ['USD', 'Dólar americano (USD)'],
-  ['EUR', 'Euro (EUR)'],
-] as const
 
 interface WorkspaceSettingsSetupProps {
   onSaved: () => void
@@ -41,11 +43,14 @@ export function WorkspaceSettingsSetup({ onSaved }: Readonly<WorkspaceSettingsSe
   const query = useQuery(workspaceSettingsQueryOptions())
   const form = useForm<WorkspaceSetupInput>({
     resolver: zodResolver(workspaceSettingsSetupSchema),
+    // The stored row is the workspace's default, never a choice anyone made:
+    // this step only runs before the settings have ever been saved. What the
+    // browser knows about the person doing the setup is the better guess.
     values: query.data
       ? {
           currency: query.data.currency,
-          locale: query.data.locale,
-          timezone: query.data.timezone,
+          locale: detectLocale(),
+          timezone: detectTimezone(),
           version: query.data.version,
         }
       : undefined,
@@ -89,57 +94,118 @@ interface WorkspaceSettingsSetupFieldsProps {
 export function WorkspaceSettingsSetupFields({
   onSubmit,
 }: Readonly<WorkspaceSettingsSetupFieldsProps>) {
+  const [editing, setEditing] = useState(false)
   const {
     control,
     formState: { errors, isSubmitting },
-    register,
+    watch,
   } = useFormContext<WorkspaceSetupInput>()
+
+  const zones = timezoneOptions(watch('timezone'))
 
   return (
     <Form className='flex flex-col gap-5' noValidate onSubmit={onSubmit}>
-      <Field name='currency'>
-        <FieldLabel>Moeda</FieldLabel>
-        <FieldDescription>Usada nas contas e lançamentos do workspace.</FieldDescription>
-        <Controller
-          control={control}
-          name='currency'
-          render={({ field }) => (
-            <Select onValueChange={field.onChange} value={field.value}>
-              <SelectTrigger aria-label='Moeda'>
-                <SelectValue placeholder='Selecione a moeda'>
-                  {(value) => currencyOptions.find(([code]) => code === value)?.[1] ?? value}
-                </SelectValue>
-              </SelectTrigger>
-              <SelectPopup>
-                {currencyOptions.map(([value, label]) => (
-                  <SelectItem key={value} value={value}>
-                    {label}
-                  </SelectItem>
-                ))}
-              </SelectPopup>
-            </Select>
-          )}
-        />
-        <FieldError>{errors.currency?.message}</FieldError>
-      </Field>
-      <Field name='locale'>
-        <FieldLabel>Idioma e formato</FieldLabel>
-        <Input {...register('locale')} placeholder='pt-BR' />
-        <FieldError>{errors.locale?.message}</FieldError>
-      </Field>
-      <Field name='timezone'>
-        <FieldLabel>Fuso horário</FieldLabel>
-        <Input {...register('timezone')} placeholder='America/Sao_Paulo' />
-        <FieldError>{errors.timezone?.message}</FieldError>
-      </Field>
+      {editing ? (
+        <>
+          <Field name='currency'>
+            <FieldLabel>Moeda</FieldLabel>
+            <FieldDescription>Usada nas contas e lançamentos do workspace.</FieldDescription>
+            <Controller
+              control={control}
+              name='currency'
+              render={({ field }) => (
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <SelectTrigger aria-label='Moeda'>
+                    <SelectValue placeholder='Selecione a moeda'>
+                      {(value) => currencyLabel(String(value))}
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectPopup>
+                    {CURRENCY_OPTIONS.map(([value, label]) => (
+                      <SelectItem key={value} value={value}>
+                        {label}
+                      </SelectItem>
+                    ))}
+                  </SelectPopup>
+                </Select>
+              )}
+            />
+            <FieldError>{errors.currency?.message}</FieldError>
+          </Field>
+
+          <Field name='locale'>
+            <FieldLabel>Idioma e formato</FieldLabel>
+            <Controller
+              control={control}
+              name='locale'
+              render={({ field }) => (
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <SelectTrigger aria-label='Idioma e formato'>
+                    <SelectValue placeholder='Selecione o idioma'>
+                      {(value) => localeLabel(String(value))}
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectPopup>
+                    {LOCALE_OPTIONS.map(([value, label]) => (
+                      <SelectItem key={value} value={value}>
+                        {label}
+                      </SelectItem>
+                    ))}
+                  </SelectPopup>
+                </Select>
+              )}
+            />
+            <FieldError>{errors.locale?.message}</FieldError>
+          </Field>
+
+          <Field name='timezone'>
+            <FieldLabel>Fuso horário</FieldLabel>
+            <Controller
+              control={control}
+              name='timezone'
+              render={({ field }) => (
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <SelectTrigger aria-label='Fuso horário'>
+                    <SelectValue placeholder='Selecione o fuso' />
+                  </SelectTrigger>
+                  <SelectPopup>
+                    {zones.map((zone) => (
+                      <SelectItem key={zone} value={zone}>
+                        {zone}
+                      </SelectItem>
+                    ))}
+                  </SelectPopup>
+                </Select>
+              )}
+            />
+            <FieldError>{errors.timezone?.message}</FieldError>
+          </Field>
+        </>
+      ) : (
+        <Field name='region'>
+          <FieldLabel>Detectamos sua região</FieldLabel>
+          <FieldDescription>
+            {`${currencyLabel(watch('currency'))} · ${watch('timezone')} · ${localeLabel(watch('locale'))}`}
+          </FieldDescription>
+        </Field>
+      )}
+
       {errors.root?.message ? (
         <Text foreground='destructive' render={<p role='alert' />} size='sm'>
           {errors.root.message}
         </Text>
       ) : null}
-      <Button loading={isSubmitting} type='submit'>
-        Continuar
-      </Button>
+
+      <div className='flex flex-wrap gap-3'>
+        <Button loading={isSubmitting} type='submit'>
+          {editing ? 'Continuar' : 'Está certo'}
+        </Button>
+        {editing ? null : (
+          <Button onClick={() => setEditing(true)} type='button' variant='outline'>
+            Alterar
+          </Button>
+        )}
+      </div>
     </Form>
   )
 }

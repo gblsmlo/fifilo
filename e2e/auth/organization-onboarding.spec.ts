@@ -53,10 +53,13 @@ test.describe('@auth first access and organization creation', () => {
     page,
   }) => {
     await createOrganization(page, 'complete-setup')
+    // The region arrives detected; this journey takes the long way to prove
+    // the three fields still exist behind it.
+    await page.getByRole('button', { name: 'Alterar' }).click()
     await page.getByRole('combobox', { name: 'Moeda' }).click()
     await page.getByRole('option', { name: 'Dólar americano (USD)' }).click()
-    await page.getByLabel('Idioma e formato').fill('pt-BR')
-    await page.getByLabel('Fuso horário').fill('America/Sao_Paulo')
+    await page.getByRole('combobox', { name: 'Idioma e formato' }).click()
+    await page.getByRole('option', { name: 'Português (Brasil)' }).click()
     await page.getByRole('button', { name: 'Continuar' }).click()
     await expect(page.getByText('Crie sua primeira conta')).toBeVisible()
     await page.getByLabel('Nome').fill('Conta principal')

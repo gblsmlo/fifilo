@@ -80,8 +80,7 @@ três das quatro camadas já estão prontas.
 - Passo de região pré-preenchido por `Intl`, com moeda, fuso e formato
   confirmados em vez de digitados.
 - Conclusão que mostra o saldo consolidado real e leva ao primeiro lançamento.
-- Configuração do cartão encadeada à criação de uma conta `credit_card`, e
-  badge na linha da conta enquanto ela não estiver configurada.
+- Configuração do cartão encadeada à criação de uma conta `credit_card`.
 - Progresso real no shell, slug derivado do nome, instituição por combobox,
   lembrete por `<Link>`.
 
@@ -98,6 +97,12 @@ três das quatro camadas já estão prontas.
 - **Consertar a falta de rede do hook `afterCreateOrganization`.** O achado 12
   é anterior a esta fase e atinge a linha de progresso e a auditoria da 06a.
   Esta fase deixa de alargá-lo e registra o achado; o conserto tem dono próprio.
+- **Badge "Cartão não configurado" na linha da conta.** Não há endpoint que
+  diga em lote quais cartões estão configurados: hoje só `GET
+  /credit-cards/:accountId/available-limit` responde isso, uma conta por vez.
+  Com o encadeamento acima, o estado que o badge avisaria deixa de nascer;
+  ele volta a fazer sentido quando a listagem de contas carregar a
+  configuração do cartão, que é contrato novo.
 - **Sincronização bancária e importação de extrato.** É o teto de retenção do
   produto e não é o problema desta fase; nenhuma delas foi pedida no Marco 1.
 - **Passo novo na régua de completude.** `complete` continua
@@ -153,7 +158,6 @@ do banco — isto é regra de cópia, não de identificador.
 | Passo 4, ações | Ir para o painel · Convidar alguém | Registrar um lançamento · Ir para o painel |
 | Adiar | Pular por agora | Faço isso depois |
 | Lembrete, título | Finalize sua configuração financeira | Falta pouco para o painel fazer sentido |
-| Badge de cartão | — | Cartão não configurado |
 | Lista de transações vazia | Registre uma despesa, receita ou transferência para começar. | O saldo inicial das suas contas já está no total. Registre uma despesa, receita ou transferência para o histórico começar. |
 | Progresso do shell | Configuração inicial | Passo 2 de 3 |
 
@@ -283,7 +287,7 @@ repassa ao caso de uso
 
 | # | Decisão |
 | ---: | --- |
-| — | o conjunto padrão de categorias é semeado por chamada idempotente do onboarding, nunca pelo hook de criação do workspace nem por uma leitura |
+| 036 | [o conjunto padrão de categorias é semeado pelo onboarding, nunca pelo hook de criação do workspace](../../decisions/README.md) |
 
 Três alternativas foram consideradas e recusadas:
 
@@ -336,50 +340,51 @@ saem daqui. O que sobra:
 
 - [x] Achado 12 verificado: o hook roda fora de transação e sem `try/catch`
 - [x] Achado 13 verificado: a abertura conta no saldo e não aparece na listagem
-- [ ] `seedDefaultCategories` com teste de papel insuficiente, de curto-circuito
+- [x] `seedDefaultCategories` com teste de papel insuficiente, de curto-circuito
       (workspace com categoria arquivada não semeia) e de contagem devolvida
-- [ ] `buildDefaultCategories` com teste de pureza e de `kind` fixo por
+- [x] `buildDefaultCategories` com teste de pureza e de `kind` fixo por
       categoria (Decision 022)
-- [ ] `createMany` prova que treze linhas entram numa transação só: falha no
+- [x] `createMany` prova que treze linhas entram numa transação só: falha no
       meio não deixa categoria parcial
-- [ ] Cinco provas negativas de RLS na escrita em lote — duas organizações,
+- [x] Cinco provas negativas de RLS na escrita em lote — duas organizações,
       `WITH CHECK` cross-tenant, ausência de contexto e rollback
-- [ ] Segunda chamada a `POST /api/onboarding/categories` devolve `seeded: 0` e
+- [x] Segunda chamada a `POST /api/onboarding/categories` devolve `seeded: 0` e
       não escreve — teste de rota
-- [ ] Conta criada com saldo de abertura produz saldo consolidado igual ao
+- [x] Conta criada com saldo de abertura produz saldo consolidado igual ao
       informado — teste de caso de uso e teste de rota
-- [ ] Formulário de conta com saldo e data: story com `play` cobrindo entrada
+- [x] Formulário de conta com saldo e data: story com `play` cobrindo entrada
       monetária, e `bun test` para a regra "valor exige data"
-- [ ] Story dos quatro estados do onboarding atualizada, com a conclusão
+- [x] Story dos quatro estados do onboarding atualizada, com a conclusão
       exibindo saldo
-- [ ] Story da linha de conta com `Cartão não configurado`
-- [ ] Story do estado vazio da listagem com a cópia que nomeia o saldo inicial
-- [ ] E2E: primeiro acesso termina com saldo diferente de zero no painel e com
+- [x] Story do estado vazio da listagem com a cópia que nomeia o saldo inicial
+- [x] E2E: primeiro acesso termina com saldo diferente de zero no painel e com
       categorias disponíveis no formulário de lançamento
-- [ ] E2E: workspace que adiou o setup recebe as categorias ao voltar pelo
+- [x] E2E: workspace que adiou o setup recebe as categorias ao voltar pelo
       lembrete
-- [ ] E2E: conta de cartão criada no onboarding chega configurada
-- [ ] Decisão do seeding registrada e indexada
+- [x] E2E: conta de cartão criada no onboarding chega configurada
+- [x] Decisão do seeding registrada e indexada
 - [ ] `lint:ci`, `typecheck`, `test`, `storybook:test` e `test:e2e` verdes contra
       uma árvore limpa
 
 ## Fatias de commit
 
-1. `feat(web): capture the opening balance when an account is created`
-2. `feat(web): name the starting balance on the empty transaction list`
-3. `feat(core): add the default category set and its seeding use case`
-4. `feat(api): expose the idempotent default category seeding endpoint`
-5. `feat(web): seed the default categories on entering the setup step`
-6. `feat(web): confirm the detected region instead of typing it`
-7. `feat(web): finish onboarding on the real balance and the first entry`
-8. `feat(web): configure a credit card as part of creating one`
-9. `feat(web): derive the workspace slug and show the onboarding progress`
-10. `docs: record the default category set decision`
+| # | Fatia | Commit |
+| ---: | --- | --- |
+| 1 | `feat(web): capture the opening balance when an account is created` | `647b4f3` |
+| 2 | `feat(web): name the starting balance on the empty transaction list` | `983a5f2` |
+| — | `fix(web): resolve workspace settings before the account dialog can open` | `bff5918` |
+| 3 | `feat(core): add the default category set and its seeding use case` | `2f5088f` |
+| 4 | `feat(api): expose the idempotent default category seeding endpoint` | `bfd56af` |
+| 5 | `feat(web): seed the default categories on entering the setup step` | `b692a51` |
+| 6 | `feat(web): confirm the detected region instead of typing it` | `673a4d3` |
+| 7 | `feat(web): finish onboarding on the real balance and the first entry` | `7bc01f4` |
+| 8 | `feat(web): configure a credit card as part of creating one` | `7ee394a` |
+| 9 | `feat(web): derive the workspace slug and show the onboarding progress` | `0bce5d9` |
+| 10 | `docs: record decision 036` | este |
 
-As fatias 1 e 2 são a entrega inteira do momento de valor e podem ir sozinhas —
-elas já mudam o número que o usuário vê no fim do onboarding, sem depender de
-nada abaixo. As fatias 7 e 9 tocam a mesma página e podem ir num diff só. A
-fatia 4 é a única com prova negativa de tenant.
+A fatia sem número saiu de dentro da 1: o formulário passou a recusar renderizar
+sobre um fuso adivinhado, e sem resolver a configuração antes o diálogo montava
+vazio e remontava, perdendo o que já tinha sido digitado.
 
 ## Métricas
 
@@ -433,3 +438,25 @@ dois lugares.
 Custo da verificação: uma sessão de leitura. Custo de não ter verificado: duas
 fatias construídas sobre premissa falsa, uma delas alargando uma exposição
 existente.
+
+### 2026-09-21 — fase implementada
+
+Dez fatias entregues na ordem planejada, com um commit a mais que o plano não
+previa e que a tabela acima registra.
+
+Três desvios do plano, todos em aberto no texto acima:
+
+- **O badge "Cartão não configurado" saiu do escopo.** Ele exigiria uma
+  requisição por cartão, porque nenhum endpoint responde em lote quais estão
+  configurados. Com a configuração encadeada à criação, o estado que ele
+  avisaria deixa de nascer; o badge volta quando a listagem de contas carregar
+  a configuração do cartão, que é contrato novo.
+- **O passo de região virou confirmação com escape.** O plano dizia "confirmar
+  numa linha"; a implementação mostra a linha detectada e guarda os três campos
+  atrás de "Alterar", porque `Intl.supportedValuesOf('timeZone')` devolve
+  centenas de zonas e nenhuma delas precisa estar na frente de quem só vai
+  concordar.
+- **`test:e2e` falha com dois workers e passa com um.** Reproduzido antes e
+  depois desta fase, em specs que ela não toca: a falha é o login que não
+  submete sob carga, com banco compartilhado. Não é achado desta entrega e não
+  foi investigado além disso.

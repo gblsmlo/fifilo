@@ -58,6 +58,7 @@ the successor exists; the successor adds its own row here.
 | 033 | [every AI execution carries a budget check, a kill-switch check and an audit trail](033-every-ai-run-has-budget-kill-switch-and-audit.md) | active |
 | 034 | [financial onboarding belongs to the creating owner](034-financial-onboarding-belongs-to-creating-owner.md) | active |
 | 035 | [onboarding uses a dedicated layout](035-onboarding-uses-dedicated-layout.md) | active |
+| 036 | [the default category set is seeded by the onboarding, never by the workspace-creation hook](036-default-categories-seeded-by-onboarding.md) | active |
 
 ## Historical
 

@@ -60,7 +60,7 @@ produto inteiro sem IA.
 - [x] **05** [Analytics e gráficos](fase-05-analytics-e-graficos.md)
 - [x] **06** [Settings, aceitação e entrega](fase-06-settings-e-aceitacao.md)
 - [~] **06a** [Onboarding financeiro](fase-06a-onboarding-financeiro.md)
-- [ ] **06b** [Ativação do onboarding](fase-06b-ativacao-do-onboarding.md)
+- [~] **06b** [Ativação do onboarding](fase-06b-ativacao-do-onboarding.md)
 
 A Fase 06a é Marco 1 pelo conteúdo e foi entregue depois da auditoria de
 aceitação que fechou o marco, já com a Fase 07 em execução. O sufixo registra

@@ -2,6 +2,7 @@
 // into `@features/accounts`, and going through both barrels would close a
 // cycle. `resolve-this-month` imports nothing from here.
 import { civilDateToday } from '@features/transactions/resolve-this-month'
+import type { AccountResponse } from '@fifilo/core/accounts'
 import { toastManager } from '@fifilo/ui/components/toast'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useQueryClient } from '@tanstack/react-query'
@@ -19,7 +20,8 @@ import {
 export type { AccountFormInput, AccountFormValues } from '../schemas/account-form'
 
 export interface UseCreateAccountFormParams {
-  onCreated?: () => void
+  /** Receives the created account, so the caller can chain on its `kind`. */
+  onCreated?: (account: AccountResponse) => void
   /**
    * `workspace_settings.timezone`, resolved by the caller. Required, not
    * defaulted: the API filters balances by the workspace's own civil today
@@ -46,12 +48,12 @@ export function useCreateAccountForm({ onCreated, timezone }: UseCreateAccountFo
 
   const onSubmit = form.handleSubmit(async (values) => {
     try {
-      await createAccount(values)
+      const account = await createAccount(values)
 
       toastManager.add(accountFeedback.create.success)
       form.reset()
       await queryClient.invalidateQueries({ queryKey: ['accounts'] })
-      onCreated?.()
+      onCreated?.(account)
     } catch (error) {
       const message =
         error instanceof AccountRequestError ? error.message : 'Não foi possível criar a conta.'

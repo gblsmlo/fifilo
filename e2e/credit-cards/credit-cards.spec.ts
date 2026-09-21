@@ -22,7 +22,11 @@ test.describe('@credit-cards credit card and invoice', () => {
     await createAccount(page, { name: checkingName })
     await expect(accountRow(page, checkingName)).toBeVisible()
 
-    await createAccount(page, { kind: 'Cartão de crédito', name: cardName })
+    await createAccount(page, {
+      card: { closingDay: '28', dueDay: '10', limitDigits: '500000' },
+      kind: 'Cartão de crédito',
+      name: cardName,
+    })
     await expect(accountRow(page, cardName)).toBeVisible()
 
     await page.goto('/categories')
@@ -30,16 +34,13 @@ test.describe('@credit-cards credit card and invoice', () => {
     await page.getByRole('button', { name: 'Criar categoria' }).click()
     await expect(page.getByRole('row', { name: categoryName })).toBeVisible()
 
+    // The card was configured as part of creating it; the row menu is how an
+    // already-configured card is reached afterwards.
     await page.goto('/accounts')
     await accountRow(page, cardName)
       .getByRole('button', { name: `Ações da conta ${cardName}` })
       .click()
     await page.getByRole('menuitem', { name: 'Gerenciar cartão' }).click()
-
-    await page.getByLabel('Dia de fechamento').fill('28')
-    await page.getByLabel('Dia de vencimento').fill('10')
-    await page.getByLabel('Limite').fill('500000')
-    await page.getByRole('button', { name: 'Cadastrar cartão' }).click()
 
     await expect(page.getByTestId('available-limit')).toBeVisible()
 

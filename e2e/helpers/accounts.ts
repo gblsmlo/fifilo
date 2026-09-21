@@ -6,7 +6,12 @@ import type { Page } from '@playwright/test'
  */
 export const createAccount = async (
   page: Page,
-  account: { kind?: string; name: string; openingBalanceDigits?: string },
+  account: {
+    card?: { closingDay: string; dueDay: string; limitDigits: string }
+    kind?: string
+    name: string
+    openingBalanceDigits?: string
+  },
 ): Promise<void> => {
   await page.getByRole('button', { name: 'Nova conta' }).click()
 
@@ -27,6 +32,16 @@ export const createAccount = async (
   }
 
   await dialog.getByRole('button', { name: 'Criar conta' }).click()
+
+  // A card's closing day, due day and limit come from their own endpoint, so
+  // the dialog chains straight into them instead of leaving an account that
+  // cannot hold an invoice.
+  if (account.card) {
+    await dialog.getByLabel('Dia de fechamento').fill(account.card.closingDay)
+    await dialog.getByLabel('Dia de vencimento').fill(account.card.dueDay)
+    await dialog.getByLabel('Limite').fill(account.card.limitDigits)
+    await dialog.getByRole('button', { name: 'Cadastrar cartão' }).click()
+  }
 }
 
 /** The account's row in the collection list, named by the account itself. */

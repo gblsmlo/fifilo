@@ -1,3 +1,7 @@
+// Deep import, not the feature barrel: `@features/credit-cards` reaches back
+// into `@features/accounts`, and going through both barrels would close a
+// cycle. This module imports nothing from here.
+import { AttachCreditCardForm } from '@features/credit-cards/components/forms/attach-credit-card-form'
 import { workspaceSettingsQueryOptions } from '@features/settings'
 import { Button } from '@fifilo/ui/components/button'
 import { Field, FieldDescription, FieldError, FieldLabel } from '@fifilo/ui/components/field'
@@ -11,7 +15,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@fifilo/ui/components/select'
+import { Text } from '@fifilo/ui/components/text'
 import { useQuery } from '@tanstack/react-query'
+import { useState } from 'react'
 import { Controller, FormProvider, useFormContext } from 'react-hook-form'
 
 import { type AccountFormInput, useCreateAccountForm } from '../../hooks/use-create-account-form'
@@ -41,7 +47,35 @@ interface AccountFormWithSettingsProps extends AccountFormProps {
 }
 
 function AccountFormWithSettings({ onCreated, timezone }: Readonly<AccountFormWithSettingsProps>) {
-  const { form, onSubmit } = useCreateAccountForm({ onCreated, timezone })
+  // A card's closing day, due day and limit come from their own endpoint, so
+  // creating the account alone leaves one that cannot hold an invoice. The
+  // second step runs here rather than being discovered later in a row menu.
+  const [cardToConfigure, setCardToConfigure] = useState<string | null>(null)
+  const { form, onSubmit } = useCreateAccountForm({
+    onCreated: (account) => {
+      if (account.kind === 'credit_card') {
+        setCardToConfigure(account.id)
+        return
+      }
+      onCreated?.()
+    },
+    timezone,
+  })
+
+  if (cardToConfigure) {
+    return (
+      <div className='flex flex-col gap-5'>
+        <Text size='sm'>Falta o fechamento, o vencimento e o limite para o cartão funcionar.</Text>
+        <AttachCreditCardForm
+          accountId={cardToConfigure}
+          onAttached={() => {
+            setCardToConfigure(null)
+            onCreated?.()
+          }}
+        />
+      </div>
+    )
+  }
 
   return (
     <FormProvider {...form}>

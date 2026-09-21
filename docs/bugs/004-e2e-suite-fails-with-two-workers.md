@@ -2,7 +2,8 @@
 
 ## State
 
-Open.
+Open. Tracked by [gblsmlo/fifilo#2](https://github.com/gblsmlo/fifilo/issues/2),
+whose first half is finding the cause — the fix cannot be specified before that.
 
 ## Severity
 

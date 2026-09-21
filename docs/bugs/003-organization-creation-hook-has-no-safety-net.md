@@ -2,7 +2,7 @@
 
 ## State
 
-Open.
+Open. Tracked by [gblsmlo/fifilo#1](https://github.com/gblsmlo/fifilo/issues/1).
 
 ## Severity
 

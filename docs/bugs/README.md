@@ -15,6 +15,7 @@ bug stays when its cause and prevention are useful knowledge. Cite a record as
 | 002 | Resolved | [creating a transaction or an installment purchase carried no idempotency guarantee](002-idempotency-not-enforced-for-transaction-and-installment-creation.md) | `POST /api/transactions` treated `Idempotency-Key` as optional and `POST /api/transactions/installments` never read it at all, unlike `pay` |
 | 003 | Resolved | [a failure in `afterCreateOrganization` strands the workspace it just created](003-organization-creation-hook-has-no-safety-net.md) | the hook runs after both rows are committed, outside any transaction, with no `try/catch`, and before `setActiveOrganization` |
 | 004 | Partial | [the E2E suite fails with two workers and passes with one](004-e2e-suite-fails-with-two-workers.md) | 16/16 with `--workers=1`, two failures with the default 2, in specs the change under test did not touch |
+| 005 | Open | [the production web build does not render, and cannot serve the API path](005-production-web-build-does-not-render.md) | `jsxDEV is not a function` on every server render unless `NODE_ENV` is set at build time, and `/api` is not proxied by the standalone server |
 
 ## Recording a new bug
 

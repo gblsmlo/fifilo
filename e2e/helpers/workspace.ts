@@ -1,4 +1,4 @@
-import { type Browser, expect } from '@playwright/test'
+import { type APIRequestContext, type Browser, expect } from '@playwright/test'
 
 export type Workspace = {
   email: string
@@ -7,7 +7,52 @@ export type Workspace = {
   storageStatePath: string
 }
 
+export type WorkspaceIdentity = Omit<Workspace, 'storageStatePath'>
+
 const PASSWORD = 'workspace-fixture-2026'
+
+/**
+ * Signs a new owner up, signs them in and gives them an active organization,
+ * leaving the session on `request`. Shared by the per-worker fixture and by the
+ * warm-up in `global-setup.ts`, which needs a real session to reach the
+ * authenticated routes at all.
+ */
+export const provisionWorkspace = async (
+  request: APIRequestContext,
+  label: string,
+): Promise<WorkspaceIdentity> => {
+  const stamp = `${Date.now()}-${label.replace(/\W+/g, '-').toLowerCase()}`
+  const email = `e2e-${stamp}@fifilo.test`
+  const ownerName = `E2E ${label}`
+  const organizationName = `E2E Workspace ${stamp}`
+
+  // The product's own route, not Better Auth's `/sign-up/email`: this one
+  // provisions the credential already verified, and sign-in refuses an
+  // unverified address.
+  const signUp = await request.post('/api/auth/sign-up', {
+    data: { email, name: ownerName, password: PASSWORD },
+  })
+  expect(signUp.ok(), `sign-up failed: ${await signUp.text()}`).toBe(true)
+
+  const signIn = await request.post('/api/auth/sign-in/email', {
+    data: { email, password: PASSWORD, rememberMe: true },
+  })
+  expect(signIn.ok(), `sign-in failed: ${await signIn.text()}`).toBe(true)
+
+  const created = await request.post('/api/auth/organization/create', {
+    data: { name: organizationName, slug: `e2e-workspace-${stamp}` },
+  })
+  expect(created.ok(), `organization create failed: ${await created.text()}`).toBe(true)
+
+  // Without this the session has no active organization and every authenticated
+  // route bounces back to the onboarding.
+  const active = await request.post('/api/auth/organization/set-active', {
+    data: { organizationId: (await created.json()).id as string },
+  })
+  expect(active.ok(), `set-active failed: ${await active.text()}`).toBe(true)
+
+  return { email, organizationName, ownerName }
+}
 
 /**
  * A workspace of its own for each Playwright worker, signed in and active.
@@ -28,11 +73,6 @@ export const createWorkerWorkspace = async (
   workerIndex: number,
   baseURL: string,
 ): Promise<Workspace> => {
-  const stamp = `${Date.now()}-${workerIndex}`
-  const email = `e2e-worker-${stamp}@fifilo.test`
-  const ownerName = `E2E Worker ${workerIndex}`
-  const organizationName = `E2E Workspace ${stamp}`
-  const slug = `e2e-workspace-${stamp}`
   const storageStatePath = `e2e/.auth/worker-${workerIndex}.json`
 
   // `browser.newContext()` inherits nothing from the project's `use`, so the
@@ -40,37 +80,10 @@ export const createWorkerWorkspace = async (
   const context = await browser.newContext({ baseURL })
 
   try {
-    // The product's own route, not Better Auth's `/sign-up/email`: this one
-    // provisions the credential already verified, and sign-in refuses an
-    // unverified address.
-    const signUp = await context.request.post('/api/auth/sign-up', {
-      data: { email, name: ownerName, password: PASSWORD },
-    })
-    expect(signUp.ok(), `sign-up failed: ${await signUp.text()}`).toBe(true)
-
-    const signIn = await context.request.post('/api/auth/sign-in/email', {
-      data: { email, password: PASSWORD, rememberMe: true },
-    })
-    expect(signIn.ok(), `sign-in failed: ${await signIn.text()}`).toBe(true)
-
-    const created = await context.request.post('/api/auth/organization/create', {
-      data: { name: organizationName, slug },
-    })
-    expect(created.ok(), `organization create failed: ${await created.text()}`).toBe(true)
-
-    const organizationId = (await created.json()).id as string
-
-    // Without this the session has no active organization and every
-    // authenticated route bounces back to the onboarding.
-    const active = await context.request.post('/api/auth/organization/set-active', {
-      data: { organizationId },
-    })
-    expect(active.ok(), `set-active failed: ${await active.text()}`).toBe(true)
-
+    const identity = await provisionWorkspace(context.request, `Worker ${workerIndex}`)
     await context.storageState({ path: storageStatePath })
+    return { ...identity, storageStatePath }
   } finally {
     await context.close()
   }
-
-  return { email, organizationName, ownerName, storageStatePath }
 }

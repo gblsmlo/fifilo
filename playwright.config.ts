@@ -18,6 +18,7 @@ export default defineConfig({
     timeout: 20_000,
   },
   forbidOnly: Boolean(process.env.CI),
+  globalSetup: './e2e/global-setup.ts',
   fullyParallel: false,
   outputDir: 'test-results/e2e',
   // No `storageState` here and no setup project: each worker bootstraps its own
@@ -34,11 +35,13 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 0,
   testDir: './e2e',
   timeout: 60_000,
-  // One worker, and the reason is written down (`BUG-004`): the workspace
-  // isolation that used to force this is fixed, but one Vite dev server and one
-  // API process still serve every worker, and at two the suite runs three to
-  // five times slower — far enough to pass the timeouts above on work that was
-  // only slow. Raise this once that is addressed, not before.
+  // One worker, and the reason is written down (`BUG-004`). The workspace
+  // isolation that first forced this is fixed, and `globalSetup` now compiles
+  // the app before any test runs, which took two workers from four failures in
+  // 2.8 minutes to mostly green in 35 seconds — but only mostly: three of four
+  // runs still lost a spec to the dev server compiling something the warm-up
+  // did not reach. Raise this when the suite stops racing a compiler, not
+  // before.
   workers: 1,
   use: {
     baseURL,

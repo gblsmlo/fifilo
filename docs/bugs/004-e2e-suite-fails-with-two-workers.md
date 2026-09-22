@@ -97,14 +97,30 @@ shared; what it did not anticipate was a concurrent writer.
 This is a correctness defect in the suite, not slowness: no timeout would fix
 it.
 
-### 2. Everything is three to five times slower, and some of it passes a timeout
+### 2. The suite races the compiler, and it is cold, not overloaded
 
-One Vite dev server and one API process serve both workers. Specs that take 2
-to 8 seconds at one worker take 18 to 30 at two, and `credit-cards` exceeded
-the 60s test timeout while clicking an option Playwright had already resolved
-as "visible, enabled and stable". The 20s `expect` timeout in
-`playwright.config.ts` carries a comment from an earlier encounter with the
-same wall.
+One Vite dev server and one API process serve both workers, and specs that take
+2 to 8 seconds at one worker took 18 to 30 at two. The first reading was
+capacity. It is not:
+
+| Scenario | Result | Wall clock |
+| --- | --- | --- |
+| Two workers, servers started by Playwright (cold) | 4 failed | 2.8 min |
+| Two workers, servers already warm, three runs | 15 of 15 each | ~30 s |
+
+`webServer.url` marks the dev server ready as soon as it answers, and Vite
+compiles on demand: the first visitor to each route pays for it, and with two
+workers several tests pay at once and lose the race against their own timeouts.
+
+A `globalSetup` that signs in and walks the routes once before any test moved
+two workers from four failures in 2.8 minutes to mostly green in ~35 seconds —
+**mostly**: three of four runs still lost a spec to something the walk did not
+reach. Anonymous warm-up alone was worse still, because an unauthenticated
+request to an authenticated route redirects before the route it is meant to
+compile is ever rendered.
+
+Removing the dev server from the equation is the obvious next move and is
+blocked: see `BUG-005`.
 
 ### Ruled out
 
@@ -117,6 +133,15 @@ noise from a connection being reclaimed, not a failed request.
 
 Separately recorded and already known: running `storybook:test` and `test:e2e`
 concurrently produces the same class of false failure.
+
+## What landed for cause 2
+
+`e2e/global-setup.ts` provisions a throwaway workspace and walks the app's
+routes once, sequentially, before any test starts. It is a real improvement at
+one worker too — the suite it warms is the same suite.
+
+`workers: 1` stays pinned, with the reason in the config. The suite is green
+there, twice in a row at 51 and 53 seconds.
 
 ## What landed for cause 1
 

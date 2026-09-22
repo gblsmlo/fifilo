@@ -102,6 +102,9 @@ jobs:
       - name: Build API and Web
         run: bun run build
 
+      - name: Verify Web Build
+        run: sh scripts/check-web-build.sh
+
   storybook:
     name: Storybook Component Tests
     runs-on: ubuntu-latest

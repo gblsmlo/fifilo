@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "vite build",
+    "build": "NODE_ENV=production vite build",
     "dev": "vite dev",
     "start": "srvx --prod -s ../client dist/server/server.js",
     "test": "bun test --isolate --timeout 20000",

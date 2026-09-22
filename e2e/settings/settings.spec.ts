@@ -1,5 +1,5 @@
 import type { Page } from '@playwright/test'
-import { expect, test } from '../helpers/app-test'
+import { expect, anonymousTest as test } from '../helpers/app-test'
 
 /**
  * Fase 06 § Modelagem: settings a workspace already depends on implicitly
@@ -13,7 +13,6 @@ import { expect, test } from '../helpers/app-test'
  * from under them while they run concurrently (Playwright's default worker
  * pool runs spec files in parallel even with `fullyParallel: false`).
  */
-test.use({ storageState: { cookies: [], origins: [] } })
 
 const uniqueEmail = (scenario: string) => `${scenario}-${crypto.randomUUID()}@fifilo.test`
 const PASSWORD = 'settings-e2e-2026'

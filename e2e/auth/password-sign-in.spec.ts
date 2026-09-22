@@ -1,4 +1,4 @@
-import { expect, test } from '../helpers/app-test'
+import { expect, anonymousTest as test } from '../helpers/app-test'
 import { seedOwner } from '../helpers/auth'
 
 /**
@@ -7,7 +7,6 @@ import { seedOwner } from '../helpers/auth'
  * authentication itself, so the context starts empty: otherwise the login screen
  * redirects to the dashboard before the test touches the form.
  */
-test.use({ storageState: { cookies: [], origins: [] } })
 
 test.describe('@auth password provider', () => {
   test('authenticates with a valid credential and opens the dashboard', async ({ page }) => {

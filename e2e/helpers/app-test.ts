@@ -1,6 +1,8 @@
 import type { Page } from '@playwright/test'
 import { test as base } from '@playwright/test'
 
+import { type Workspace, createWorkerWorkspace } from './workspace'
+
 const HYDRATION_TIMEOUT = 15_000
 
 /**
@@ -50,10 +52,37 @@ export const wrapPageWithHydrationWait = (page: Page): Page => {
   return page
 }
 
-export const test = base.extend({
+/** The hydration wait and nothing else: no session, for the journeys that sign up their own. */
+export const anonymousTest = base.extend<{ page: Page }>({
   page: async ({ page }, use) => {
     await use(wrapPageWithHydrationWait(page))
   },
 })
 
+/**
+ * The default: an authenticated owner in a workspace belonging to this worker
+ * alone.
+ *
+ * `storageState` is overridden as a fixture rather than set in the config,
+ * because the path depends on the worker. That also means `test.use` can no
+ * longer clear it — a spec that wants no session uses `anonymousTest`.
+ */
+export const test = anonymousTest.extend<object, { workspace: Workspace }>({
+  workspace: [
+    async ({ browser }, use, workerInfo) => {
+      const baseURL = workerInfo.project.use.baseURL
+      if (!baseURL) throw new Error('The project must define a baseURL.')
+      await use(await createWorkerWorkspace(browser, workerInfo.workerIndex, baseURL))
+    },
+    { scope: 'worker' },
+  ],
+
+  // Read when the context is built, so the workspace has to exist before the
+  // first page does (`BUG-004`).
+  storageState: async ({ workspace }, use) => {
+    await use(workspace.storageStatePath)
+  },
+})
+
 export { expect } from '@playwright/test'
+export type { Workspace } from './workspace'

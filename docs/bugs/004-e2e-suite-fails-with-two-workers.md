@@ -2,8 +2,8 @@
 
 ## State
 
-Open. Tracked by [gblsmlo/fifilo#2](https://github.com/gblsmlo/fifilo/issues/2),
-whose first half is finding the cause — the fix cannot be specified before that.
+Partial. Tracked by [gblsmlo/fifilo#2](https://github.com/gblsmlo/fifilo/issues/2).
+Cause 1 is fixed; cause 2 is open and is what keeps `workers: 1` pinned.
 
 ## Severity
 
@@ -117,6 +117,31 @@ noise from a connection being reclaimed, not a failed request.
 
 Separately recorded and already known: running `storybook:test` and `test:e2e`
 concurrently produces the same class of false failure.
+
+## What landed for cause 1
+
+Each Playwright worker now bootstraps its own workspace — a fresh owner and
+organization through the product's own sign-up route, with the session written
+to `e2e/.auth/worker-<n>.json` — and `storageState` is a fixture reading that
+path rather than a single file named in the config. Row-level security already
+scopes every read and write by workspace, so two workers can no longer see each
+other's rows at all.
+
+Per worker rather than per spec: specs sharing a worker run serially and cannot
+interleave, and one bootstrap per worker keeps the cost flat as the suite grows.
+
+The seeded owner stays for what it is actually good for — `password-sign-in` and
+`password-recovery` exercise the login form against a known credential without
+writing anything. The `setup` project and `e2e/auth.setup.ts` are gone; nothing
+depends on a shared session any more.
+
+Because `storageState` became a fixture, `test.use` can no longer clear it. The
+journeys that sign up their own account import `anonymousTest` instead, which
+carries the hydration wait and no session.
+
+Evidence: at two workers the wrong-value failure is gone — `analytics` no longer
+reports a delta polluted by another spec. What remains at two workers is cause 2
+alone, as three plain 60s timeouts waiting for a button to render.
 
 ## Closing condition
 

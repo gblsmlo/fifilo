@@ -1,7 +1,5 @@
-import { expect, test } from '../helpers/app-test'
+import { expect, anonymousTest as test } from '../helpers/app-test'
 import { seedOwner } from '../helpers/auth'
-
-test.use({ storageState: { cookies: [], origins: [] } })
 
 /**
  * The full recovery journey, request a link, receive the token, change the

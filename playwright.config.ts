@@ -20,25 +20,26 @@ export default defineConfig({
   forbidOnly: Boolean(process.env.CI),
   fullyParallel: false,
   outputDir: 'test-results/e2e',
+  // No `storageState` here and no setup project: each worker bootstraps its own
+  // workspace through the `workspace` fixture in `e2e/helpers/app-test.ts`, so
+  // two workers can never write to the same organization (`BUG-004`).
   projects: [
     {
-      name: 'setup',
-      testMatch: /.*\.setup\.ts/,
-    },
-    {
-      dependencies: ['setup'],
       name: 'chromium',
       testMatch: /.*\.spec\.ts/,
-      use: {
-        ...devices['Desktop Chrome'],
-        storageState: 'e2e/.auth/seed-owner.json',
-      },
+      use: devices['Desktop Chrome'],
     },
   ],
   reporter: process.env.CI ? [['list'], ['html', { open: 'never' }]] : [['list']],
   retries: process.env.CI ? 2 : 0,
   testDir: './e2e',
   timeout: 60_000,
+  // One worker, and the reason is written down (`BUG-004`): the workspace
+  // isolation that used to force this is fixed, but one Vite dev server and one
+  // API process still serve every worker, and at two the suite runs three to
+  // five times slower — far enough to pass the timeouts above on work that was
+  // only slow. Raise this once that is addressed, not before.
+  workers: 1,
   use: {
     baseURL,
     screenshot: 'only-on-failure',

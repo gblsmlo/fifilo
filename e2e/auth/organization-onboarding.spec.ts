@@ -1,13 +1,12 @@
 import type { Page } from '@playwright/test'
 
-import { expect, test } from '../helpers/app-test'
+import { expect, anonymousTest as test } from '../helpers/app-test'
 
 /**
  * First-access journey. The `chromium` project injects the seeded owner, who
  * already belongs to an organization, the opposite of what this suite needs.
  * Every test starts from a new, empty account.
  */
-test.use({ storageState: { cookies: [], origins: [] } })
 
 const uniqueEmail = (scenario: string) => `${scenario}-${crypto.randomUUID()}@fifilo.test`
 const PASSWORD = 'onboarding-e2e-2026'

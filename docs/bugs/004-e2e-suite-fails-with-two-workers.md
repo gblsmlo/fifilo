@@ -66,18 +66,57 @@ unrelated causes.
 The concurrency failure survives a fresh database: 13 passed, 3 failed at the
 default worker count immediately after the reset.
 
-## Hypothesis
+## What the investigation found
 
-Two workers share one PostgreSQL database and one dev server. The suspected
-cause is contention rather than data collision: every spec already makes its
-fixtures unique per run (`Date.now()`, `crypto.randomUUID()`), and the observed
-failures are things not happening in time, not wrong values.
+The original hypothesis — contention rather than data collision — was wrong on
+its first half. There are at least two independent causes.
+
+### 1. The specs share one workspace, and one of them asserts totals over it
+
+The `chromium` project injects the seeded owner's session, so `accounts`,
+`analytics`, `credit-cards`, `organizations` and `transactions` all act inside
+the **same organization**. Their own fixtures are unique per run, which is why
+this never looked like collision — but `analytics` does not assert its own
+rows. It asserts a workspace-wide aggregate as a delta:
+
+```ts
+expect(final.availableCashMinor - baseline.availableCashMinor).toBe(210_000)
+```
+
+```
+Expected: 210000
+Received: 205000
+```
+
+The 5.000 difference is R$ 50,00 — exactly the expense `transactions` and
+`organizations` each register. A delta is only safe while nothing else writes
+between the two reads, and at two workers something does. The comment above
+that assertion already explains it is a delta *because* the workspace is
+shared; what it did not anticipate was a concurrent writer.
+
+This is a correctness defect in the suite, not slowness: no timeout would fix
+it.
+
+### 2. Everything is three to five times slower, and some of it passes a timeout
+
+One Vite dev server and one API process serve both workers. Specs that take 2
+to 8 seconds at one worker take 18 to 30 at two, and `credit-cards` exceeded
+the 60s test timeout while clicking an option Playwright had already resolved
+as "visible, enabled and stable". The 20s `expect` timeout in
+`playwright.config.ts` carries a comment from an earlier encounter with the
+same wall.
+
+### Ruled out
+
+`PostgresError: Idle timeout reached after 30s` appears in the API log during
+failing runs, from `packages/infra/database/src/client.ts`'s `idleTimeout: 30`.
+It is **not** a cause: setting `idleTimeout: 0` removed the log line and the
+suite still failed three specs, and a probe that bursts queries across the idle
+boundary at `idleTimeout: 1` completed 95 queries with zero failures. It is
+noise from a connection being reclaimed, not a failed request.
 
 Separately recorded and already known: running `storybook:test` and `test:e2e`
 concurrently produces the same class of false failure.
-
-Unverified. Nothing here isolates the dev server from the database, and no
-timing evidence was collected.
 
 ## Closing condition
 

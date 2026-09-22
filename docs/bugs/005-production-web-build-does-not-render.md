@@ -2,7 +2,9 @@
 
 ## State
 
-Open.
+Open. Tracked by [gblsmlo/fifilo#3](https://github.com/gblsmlo/fifilo/issues/3),
+which counts the two problems below as one delivery under Decision 016: they
+share one acceptance, and fixing either alone leaves the path broken.
 
 ## Severity
 
@@ -85,3 +87,5 @@ cannot rot again.
 - [`docs/bugs/README.md`](README.md) resolves `BUG-NNN` → file → state.
 - `BUG-004`: this was found while trying to remove the dev server from the E2E
   suite, which remains blocked on both problems above.
+- Decision 016: the decomposition gate, and why this is one issue rather than
+  a parent with two children.
